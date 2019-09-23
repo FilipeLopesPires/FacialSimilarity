@@ -1,12 +1,36 @@
-#include <iostream>
 
+#include <iostream>
+#include <fstream>
+
+#include "argsParsing.h"
 #include "model.h"
 
-int main(){
+using namespace std;
+
+int main(int argc, char **argv) {
+    const string HELP =
+            "USAGE:\n"
+            "   ./fcm.cpp [-h] k alpha fileName\n"
+            "OPTIONS:\n"
+            "   h - shows this help\n"
+            "   p - don't ignore punctuation\n"
+            "   u - case sensitive\n"
+            "ARGUMENTS:\n"
+            "   k - order  of  the  model\n"
+            "   alpha - smoothing  parameter\n"
+            "   trainFile - TODO";
+
+    argsParsing::ParsingResult result = argsParsing::parseArguments(argc, argv, HELP, 3);
+
+    fstream trainFile;
+    argsParsing::checkAccess(argv[optind + 2], fstream::ios_base::in, trainFile);
+
     Model m;
     m.fileParser();
     auto aux = m.getOccurTable();
-    std::cout << m.getModelEntropy() << std::endl;
-    return 0;
+    cout << "Model Entropy: " << m.getModelEntropy() << endl;
 
+    trainFile.close();
+
+    return 0;
 }
