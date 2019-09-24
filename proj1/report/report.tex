@@ -1,0 +1,567 @@
+% Use only LaTeX2e, calling the article.cls class and 12-point type.
+
+\documentclass[12pt]{article}
+
+% Users of the {thebibliography} environment or BibTeX should use the
+% scicite.sty package, downloadable from *Science* at
+% www.sciencemag.org/about/authors/prep/TeX_help/ .
+% This package should properly format in-text
+% reference calls and reference-list numbers.
+
+\usepackage{scicite}
+
+% Use times if you have the font installed; otherwise, comment out the
+% following line.
+
+\usepackage{times}
+
+% The preamble here sets up a lot of new/revised commands and
+% environments.  It's annoying, but please do *not* try to strip these
+% out into a separate .sty file (which could lead to the loss of some
+% information when we convert the file to other formats).  Instead, keep
+% them in the preamble of your main LaTeX source file.
+
+
+% The following parameters seem to provide a reasonable page setup.
+
+\topmargin -1.0cm
+\oddsidemargin 0.0cm
+\textwidth 16cm 
+\textheight 25cm
+\footskip 1.0cm
+
+%The next command sets up an environment for the abstract to your paper.
+
+\newenvironment{sciabstract}{%
+\begin{quote} \bf}
+{\end{quote}}
+
+% If your reference list includes text notes as well as references,
+% include the following line; otherwise, comment it out.
+
+%\renewcommand\refname{References and Notes}
+
+% The following lines set up an environment for the last note in the
+% reference list, which commonly includes acknowledgments of funding,
+% help, etc.  It's intended for users of BibTeX or the {thebibliography}
+% environment.  Users who are hand-coding their references at the end
+% using a list environment such as {enumerate} can simply add another
+% item at the end, and it will be numbered automatically.
+
+\newcounter{lastnote}
+\newenvironment{scilastnote}{%
+  \setcounter{lastnote}{\value{enumiv}}%
+  \addtocounter{lastnote}{+1}%
+  \begin{list}%
+  {\arabic{lastnote}.}
+  {\setlength{\leftmargin}{.22in}}
+  {\setlength{\labelsep}{.5em}}
+}
+{\end{list}}
+
+\title{Lab Work 1} 
+
+\author
+{André Pedrosa [85098], Filipe Pires [85122], João Alegria [85048]\\
+\\
+Algorithmic Information Theory\\
+\normalsize{Department of Electronics, Telecommunications and Informatics}\\
+\normalsize{University of Aveiro}\\
+} 
+
+\date{\today{}}
+
+%%%%%%%%%%%%%%%%% END OF PREAMBLE %%%%%%%%%%%%%%%%
+
+\begin{document} 
+
+% Double-space the manuscript.
+
+\baselineskip18pt
+
+% Make the title.
+
+\maketitle 
+
+% Place your abstract within the special {sciabstract} environment.
+
+%\begin{sciabstract}
+  
+%\end{sciabstract}
+
+% In setting up this template for *Science* papers, we've used both
+% the \section* command and the \paragraph* command for topical
+% divisions.  Which you use will of course depend on the type of paper
+% you're writing.  Review Articles tend to have displayed headings, for
+% which \section* is more appropriate; Research Articles, when they have
+% formal topical divisions at all, tend to signal them with bold text
+% that runs into the paragraph, for which \paragraph* is the right
+% choice.  Either way, use the asterisk (*) modifier, as shown, to
+% suppress numbering.
+
+\section*{Introduction}
+
+This report aims to describe the work developed for the first assignment
+of the discipline of 'Algorithmic Information Theory', explaining all the 
+steps and decisions taken by us, and presenting the results we considered 
+most relevant.
+
+The programs implemented in C++ have the purpose of collecting statistical
+information about texts using Markov (finite-context) models, and of 
+automatically producing texts that follows the models built.
+
+Along with the description of the solution, we also discuss the effects
+of the variation of the programs' parameters and attempt to compare 
+different types of texts by the amount of information they hold on average.
+\newpage
+
+\section*{1. Information Model}
+
+Our first goal was to be able to predict the next outcome of a text source.
+To do this, we needed to take in consideration the dependencies between 
+the characters of a text.
+The use of Markov models for the extraction of the statistical properties of a
+text was due to its value as an approach to represent these data dependencies.
+
+The specific type of model that most interests us is called discrete time
+Markov chain or finite-context model.
+This model assigns a probability estimate to the symbols of the alphabet, 
+according to a conditioning context computed over a finite and fixed number
+of past outcomes. 
+More about this is explained in the description of this work assignment 
+\cite{trab1}, containing the mathematical equations that served as the basis 
+for our implementation.
+
+\subsection*{1.1. Architecture}
+
+The file \texttt{fcm.cpp} serves as the command to be executed in order to 
+generate a finite-context model, given one information source.
+It is the {\it main()\/} function.
+We decided to organize the program by several files, for readability purposes 
+and to allow future modifications without the need of much refactoring by 
+following a modular architecture.
+So, by executing the \texttt{fcm} command, it calls a set of functions from 
+the remaining files and creates an instance of the Markov model.
+It then provides the entropy of the information source, as estimated by
+the instance.
+
+First, the command executed is pre-processed and its arguments are collected
+and validated by the function {\it parseArguments()\/}, implemented in 
+\texttt{argsParsing.cpp} and defined in \texttt{argsParsing.h}.
+The use of a header file is to establish an interface for the possibility of
+creating different implementations of the parsing functions.
+This is also visible in the implementation of the Model class in files 
+\texttt{model.cpp} and \texttt{model.h}.
+The \texttt{fcm} command has the following format:
+
+\begin{quote}
+\begin{verbatim}
+$ ./fcm.cpp [-h] k alpha fileName
+\end{verbatim}
+\end{quote}
+
+Here, \texttt{-h} is the option that presents the manual for the command usage.
+Argument \texttt{k} is the value given for the size of the context.
+\texttt{alpha} stands for the value of the 'smoothing' parameter for estimating
+the probabilities of events.
+And \texttt{fileName} is, as the name indicates, the name of the file to be
+processed by the model.
+
+Once the arguments are validated, the program attempts open the file for reading
+through function {\it checkAccess()\/} and, in case of success, reads and parses
+its content.
+The program supports any file format as long as its content is plaintext.
+\newpage 
+
+Below we present the actual implementation in C++ of the function responsible 
+for parsing the information source file. \\
+... explain the steps and decisions taken ...
+
+\begingroup
+\addtolength\leftmargini{-0.4in}
+\addtolength\baselineskip{-0.05in}
+\begin{quote}
+\begin{verbatim}
+void Model::fileParser(){
+  map<string, map<char, int>> relFreq;
+  char letter;
+  string context;
+
+  while(reader.get(letter)){
+    if(abc.find(letter) == abc.end()){
+      abc.insert(letter);
+    }
+    if(context.length()>=ctxLen){
+      if(relFreq.find(context) != relFreq.end()){
+        map<char,int> nextChar = {{letter,1}};
+        relFreq.insert(pair<string,map<char,int>>(context,nextChar));
+      }else{
+        if(relFreq[context].find(letter) == relFreq[context].end()){
+          relFreq[context].insert(pair<char,int>(letter,1));
+        } else{
+          relFreq[context][letter]=relFreq[context][letter]+1;
+        }
+      }
+      context=context.substr(1,2);
+      context+=letter;
+    }else{
+      context+=letter;
+    }
+  }
+  for(auto &pair: relFreq){
+    if(pair.second.empty()){
+      relFreq.erase(pair.first);
+    }
+  }
+  occurTable=relFreq;
+}
+\end{verbatim}
+\end{quote}
+\endgroup
+\newpage
+
+\subsection*{1.2. Entropy}
+
+Finally, as the file is parsed and the data is structured in a table,
+\texttt{fcm} then calculates the estimated value for the entropy.
+The mathematical equations required for this calculation are also 
+available in the document that describes the assignment. 
+The actual work was to implement these formulas and apply them.
+Our solution was an iterative function that would calculate the probabilities
+of each context and of each event and applying the equations on them and 
+summing the results. 
+This function is presented below for further analysis.
+
+\begingroup
+\addtolength\leftmargini{-0.4in}
+\addtolength\baselineskip{-0.05in}
+\begin{quote}
+\begin{verbatim}
+double Model::getModelEntropy() const{
+  string context;
+  map<char, int> occurMap;
+  int curOccur;
+  int contextCountTotal = 0;
+  map<string, int> contextCount;
+  double conditionalProb;
+  double H = 0.0;
+  double Hc = 0.0;
+
+  for (auto &it : occurTable) {
+    context = it.first;
+    occurMap = it.second;
+    for (auto &it2 : occurMap) {
+      contextCount[context] += it2.second;
+      contextCountTotal += it2.second;
+    }
+  }
+
+  for (auto &it : occurTable) {
+    context = it.first;
+    occurMap = it.second;
+    for (auto &it2 : occurMap) {
+      curOccur = it2.second;
+      conditionalProb = (curOccur + alpha) /
+                        (contextCount[context] + alpha * abc.size());
+      Hc += (conditionalProb * log2(conditionalProb));
+    }
+    H += -(((double)contextCount[context] / contextCountTotal) * Hc);
+    Hc = 0.0;
+  }
+
+  return H;
+}
+\end{verbatim}
+\end{quote}
+\endgroup
+\newpage
+
+\section*{2. Generator}
+
+Lorem ipsum ...
+
+\section*{3. Results}
+
+Lorem ipsum ...
+
+\subsection*{3.1. Parameter Variation}
+
+Lorem ipsum ...
+
+\subsection*{3.2. Text Comparison}
+
+Lorem ipsum ...
+
+\section*{Conclusions}
+
+Lorem ipsum ...
+
+\begin{thebibliography}{9}
+  \bibliographystyle{Science}
+
+  \bibitem{trab1}
+    Armando,
+    \textit{AIT: Lab Work no.1},
+    University of Aveiro,
+    2019/20.
+  
+\end{thebibliography}
+
+
+% In this file, we present some tips and sample mark-up to assure your
+% \LaTeX\ file of the smoothest possible journey from review manuscript
+% to published {\it Science\/} paper.  We focus here particularly on
+% issues related to style files, citation, and math, tables, and
+% figures, as those tend to be the biggest sticking points.  Please use
+% the source file for this document, \texttt{scifile.tex}, as a template
+% for your manuscript, cutting and pasting your content into the file at
+% the appropriate places.
+
+% {\it Science\/}'s publication workflow relies on Microsoft Word.  To
+% translate \LaTeX\ files into Word, we use an intermediate MS-DOS
+% routine \cite{tth} that converts the \TeX\ source into HTML\@.  The
+% routine is generally robust, but it works best if the source document
+% is clean \LaTeX\ without a significant freight of local macros or
+% \texttt{.sty} files.  Use of the source file \texttt{scifile.tex} as a
+% template, and calling {\it only\/} the \texttt{.sty} and \texttt{.bst}
+% files specifically mentioned here, will generate a manuscript that
+% should be eminently reviewable, and yet will allow your paper to
+% proceed quickly into our production flow upon acceptance \cite{use2e}.
+
+
+% \section*{Formatting Citations}
+
+% Citations can be handled in one of three ways.  The most
+% straightforward (albeit labor-intensive) would be to hardwire your
+% citations into your \LaTeX\ source, as you would if you were using an
+% ordinary word processor.  Thus, your code might look something like
+% this:
+
+
+% \begin{quote}
+% \begin{verbatim}
+% However, this record of the solar nebula may have been
+% partly erased by the complex history of the meteorite
+% parent bodies, which includes collision-induced shock,
+% thermal metamorphism, and aqueous alteration
+% ({\it 1, 2, 5--7\/}).
+% \end{verbatim}
+% \end{quote}
+
+
+% \noindent Compiled, the last two lines of the code above, of course, would give notecalls in {\it Science\/} style:
+
+% \begin{quote}
+% \ldots thermal metamorphism, and aqueous alteration ({\it 1, 2, 5--7\/}).
+% \end{quote}
+
+% Under the same logic, the author could set up his or her reference list as a simple enumeration,
+
+% \begin{quote}
+% \begin{verbatim}
+% {\bf References and Notes}
+
+% \begin{enumerate}
+% \item G. Gamow, {\it The Constitution of Atomic Nuclei
+% and Radioactivity\/} (Oxford Univ. Press, New York, 1931).
+% \item W. Heisenberg and W. Pauli, {\it Zeitschr.\ f.\ 
+% Physik\/} {\bf 56}, 1 (1929).
+% \end{enumerate}
+% \end{verbatim}
+% \end{quote}
+
+% \noindent yielding
+
+% \begin{quote}
+% {\bf References and Notes}
+
+% \begin{enumerate}
+% \item G. Gamow, {\it The Constitution of Atomic Nuclei and
+% Radioactivity\/} (Oxford Univ. Press, New York, 1931).
+% \item W. Heisenberg and W. Pauli, {\it Zeitschr.\ f.\ Physik} {\bf 56},
+% 1 (1929).
+% \end{enumerate}
+% \end{quote}
+
+% That's not a solution that's likely to appeal to everyone, however ---
+% especially not to users of B{\small{IB}}\TeX\ \cite{inclme}.  If you
+% are a B{\small{IB}}\TeX\ user, we suggest that you use the
+% \texttt{Science.bst} bibliography style file and the
+% \texttt{scicite.sty} package, both of which we are downloadable from our author help site
+% (http://www.sciencemag.org/about/authors/prep/TeX\_help/).  You can also
+% generate your reference lists by using the list environment
+% \texttt{\{thebibliography\}} at the end of your source document; here
+% again, you may find the \texttt{scicite.sty} file useful.
+
+% Whether you use B{\small{IB}}\TeX\ or \texttt{\{thebibliography\}}, be
+% very careful about how you set up your in-text reference calls and
+% notecalls.  In particular, observe the following requirements:
+
+% \begin{enumerate}
+% \item Please follow the style for references outlined at our author
+%   help site and embodied in recent issues of {\it Science}.  Each
+%   citation number should refer to a single reference; please do not
+%   concatenate several references under a single number.
+% \item Please cite your references and notes in text {\it only\/} using
+%   the standard \LaTeX\ \verb+\cite+ command, not another command
+%   driven by outside macros.
+% \item Please separate multiple citations within a single \verb+\cite+
+%   command using commas only; there should be {\it no space\/}
+%   between reference keynames.  That is, if you are citing two
+%   papers whose bibliography keys are \texttt{keyname1} and
+%   \texttt{keyname2}, the in-text cite should read
+%   \verb+\cite{keyname1,keyname2}+, {\it not\/}
+%   \verb+\cite{keyname1, keyname2}+.
+% \end{enumerate}
+
+% \noindent Failure to follow these guidelines could lead
+% to the omission of the references in an accepted paper when the source
+% file is translated to Word via HTML.
+
+% \section*{Handling Math, Tables, and Figures}
+
+% Following are a few things to keep in mind in coding equations,
+% tables, and figures for submission to {\it Science}.
+
+% \paragraph*{In-line math.}  The utility that we use for converting
+% from \LaTeX\ to HTML handles in-line math relatively well.  It is best
+% to avoid using built-up fractions in in-line equations, and going for
+% the more boring ``slash'' presentation whenever possible --- that is,
+% for \verb+$a/b$+ (which comes out as $a/b$) rather than
+% \verb+$\frac{a}{b}$+ (which compiles as $\frac{a}{b}$).  Likewise,
+% HTML isn't tooled to handle certain overaccented special characters
+% in-line; for $\hat{\alpha}$ (coded \verb+$\hat{\alpha}$+), for
+% example, the HTML translation code will return [\^{}$(\alpha)$].
+% Don't drive yourself crazy --- but if it's possible to avoid such
+% constructs, please do so.  Please do not code arrays or matrices as
+% in-line math; display them instead.  And please keep your coding as
+% \TeX-y as possible --- avoid using specialized math macro packages
+% like \texttt{amstex.sty}.
+
+% \paragraph*{Displayed math.} Our HTML converter sets up \TeX\
+% displayed equations using nested HTML tables.  That works well for an
+% HTML presentation, but Word chokes when it comes across a nested
+% table in an HTML file.  We surmount that problem by simply cutting the
+% displayed equations out of the HTML before it's imported into Word,
+% and then replacing them in the Word document using either images or
+% equations generated by a Word equation editor.  Strictly speaking,
+% this procedure doesn't bear on how you should prepare your manuscript
+% --- although, for reasons best consigned to a note \cite{nattex}, we'd
+% prefer that you use native \TeX\ commands within displayed-math
+% environments, rather than \LaTeX\ sub-environments.
+
+% \paragraph*{Tables.}  The HTML converter that we use seems to handle
+% reasonably well simple tables generated using the \LaTeX\
+% \texttt{\{tabular\}} environment.  For very complicated tables, you
+% may want to consider generating them in a word processing program and
+% including them as a separate file.
+
+% \paragraph*{Figures.}  Figure callouts within the text should not be
+% in the form of \LaTeX\ references, but should simply be typed in ---
+% that is, \verb+(Fig. 1)+ rather than \verb+\ref{fig1}+.  For the
+% figures themselves, treatment can differ depending on whether the
+% manuscript is an initial submission or a final revision for acceptance
+% and publication.  For an initial submission and review copy, you can
+% use the \LaTeX\ \verb+{figure}+ environment and the
+% \verb+\includegraphics+ command to include your PostScript figures at
+% the end of the compiled PostScript file.  For the final revision,
+% however, the \verb+{figure}+ environment should {\it not\/} be used;
+% instead, the figure captions themselves should be typed in as regular
+% text at the end of the source file (an example is included here), and
+% the figures should be uploaded separately according to the Art
+% Department's instructions.
+
+
+% \section*{What to Send In}
+
+% What you should send to {\it Science\/} will depend on the stage your manuscript is in:
+
+% \begin{itemize}
+% \item {\bf Important:} If you're sending in the initial submission of
+%   your manuscript (that is, the copy for evaluation and peer review),
+%   please send in {\it only\/} a PostScript or PDF version of the
+%   compiled file (including figures).  Please do not send in the \TeX\ 
+%   source, \texttt{.sty}, \texttt{.bbl}, or other associated files with
+%   your initial submission.  (For more information, please see the
+%   instructions at our Web submission site,
+%   http://www.submit2science.org/ .)
+% \item When the time comes for you to send in your revised final
+%   manuscript (i.e., after peer review), we require that you include
+%   all source files and generated files in your upload.  Thus, if the
+%   name of your main source document is \texttt{ltxfile.tex}, you
+%   need to include:
+% \begin{itemize}
+% \item \texttt{ltxfile.tex}.
+% \item \texttt{ltxfile.aux}, the auxilliary file generated by the
+%   compilation.
+% \item A PostScript file (compiled using \texttt{dvips} or some other
+%   driver) of the \texttt{.dvi} file generated from
+%   \texttt{ltxfile.tex}, or a PDF file distilled from that
+%   PostScript.  You do not need to include the actual \texttt{.dvi}
+%   file in your upload.
+% \item From B{\small{IB}}\TeX\ users, your bibliography (\texttt{.bib})
+%   file, {\it and\/} the generated file \texttt{ltxfile.bbl} created
+%   when you run B{\small{IB}}\TeX.
+% \item Any additional \texttt{.sty} and \texttt{.bst} files called by
+%   the source code (though, for reasons noted earlier, we {\it
+%     strongly\/} discourage the use of such files beyond those
+%   mentioned in this document).
+% \end{itemize}
+% \end{itemize}
+
+% Your references go at the end of the main text, and before the
+% figures.  For this document we've used BibTeX, the .bib file
+% scibib.bib, and the .bst file Science.bst.  The package scicite.sty
+% was included to format the reference numbers according to *Science*
+% style.
+
+% \bibliography{scibib}
+
+% Following is a new environment, {scilastnote}, that's defined in the
+% preamble and that allows authors to add a reference at the end of the
+% list that's not signaled in the text; such references are used in
+% *Science* for acknowledgments of funding, help, etc.
+
+% \begin{scilastnote}
+% \item We've included in the template file \texttt{scifile.tex} a new
+% environment, \texttt{\{scilastnote\}}, that generates a numbered final
+% citation without a corresponding signal in the text.  This environment
+% can be used to generate a final numbered reference containing
+% acknowledgments, sources of funding, and the like, per {\it Science\/}
+% style.
+% \end{scilastnote}
+
+% For your review copy (i.e., the file you initially send in for
+% evaluation), you can use the {figure} environment and the
+% \includegraphics command to stream your figures into the text, placing
+% all figures at the end.  For the final, revised manuscript for
+% acceptance and production, however, PostScript or other graphics
+% should not be streamed into your compliled file.  Instead, set
+% captions as simple paragraphs (with a \noindent tag), setting them
+% off from the rest of the text with a \clearpage as shown  below, and
+% submit figures as separate files according to the Art Department's
+% instructions.
+
+\clearpage
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
