@@ -3,8 +3,9 @@
 
 using namespace std;
 
-void argsParsing::checkAccess(const char *fileName, fstream::ios_base::openmode mode, fstream &file) {
-    file.open(fileName);
+void argsParsing::checkAccess(const char *fileName,
+                              fstream::ios_base::openmode mode, fstream &file) {
+    file.open(fileName, mode);
 
     if (!file.is_open()) {
         cerr << "Couldn't open file " << fileName << endl;
@@ -12,10 +13,12 @@ void argsParsing::checkAccess(const char *fileName, fstream::ios_base::openmode 
     }
 }
 
-argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv, const string &HELP, int numOfArgs) {
+argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
+                                                       const string &HELP,
+                                                       int numOfArgs) {
     ParsingResult result;
 
-    //parse options
+    // parse options
     int c = 0;
     while ((c = getopt(argc, argv, "h")) != -1) {
         switch (c) {
@@ -34,10 +37,9 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv, co
         }
     }
 
-    //parse arguments
+    // parse arguments
     if (argc - optind != numOfArgs) {
-        cerr << "ERROR: Missing parameters" << endl
-             << HELP << endl;
+        cerr << "ERROR: Missing parameters" << endl << HELP << endl;
         exit(2);
     }
 
@@ -60,6 +62,3 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv, co
 
     return result;
 }
-
-
-
