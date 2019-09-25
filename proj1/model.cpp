@@ -1,16 +1,20 @@
 
 #include "model.h"
 
+#include <algorithm>
+
 using namespace std;
 
 void Model::parseFile(fstream &reader) {
-    int totalContextsCount = 0;
-
     char letter;
     string context;
 
+    set<char> oldAbc(abc);
+    set<char> newAbc;
+
     while (reader.get(letter)) {
         abc.insert(letter);
+        newAbc.insert(letter);
 
         if (context.length() >= ctxLen) {
             statsTable[context].nextCharStats[letter].count++;
@@ -25,10 +29,22 @@ void Model::parseFile(fstream &reader) {
         context += letter;
     }
 
-    calcProbabilitiesAndEntropy(totalContextsCount);
+    set<char> lettersNotChanged;
+    set_difference(
+            oldAbc.begin(), oldAbc.end(),
+            newAbc.begin(), newAbc.end(),
+            inserter(lettersNotChanged, lettersNotChanged.begin())
+    );
+    //This difference give us the letters that were present on the
+    // previous/old alphabet and were not seen on the new file
+    //This is calculated to know which letters, in all contexts,
+    // we need to update the conditional probabilities, since the number
+    // of times a context appear can change
+
+    calcProbabilitiesAndEntropy(lettersNotChanged);
 }
 
-void Model::calcProbabilitiesAndEntropy(int totalContextsCount) {
+void Model::calcProbabilitiesAndEntropy(set<char> &lettersNotChanged) {
     int contextCount;
     int charCount;
 
@@ -39,6 +55,8 @@ void Model::calcProbabilitiesAndEntropy(int totalContextsCount) {
     double conditionalProb;
 
     double Hc = 0.0;
+
+    entropy = 0;
 
     for (auto &it : statsTable) {
         contextStats = &it.second;
@@ -71,6 +89,12 @@ void Model::calcProbabilitiesAndEntropy(int totalContextsCount) {
                     0,
                     alpha / (contextCount + alpha * abc.size())
             };
+        }
+
+        for (char l : lettersNotChanged) {
+            stats = &contextStats->nextCharStats[l];
+            charCount = stats->count;
+            stats->probability = (charCount + alpha) / (contextCount + alpha * abc.size());
         }
     }
 }

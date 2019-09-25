@@ -34,6 +34,8 @@ private:
      */
     std::set<char> abc;
 
+    int totalContextsCount;
+
     /**
      * table with number of occurrences of each letter after
      * each context present on the test data
@@ -43,7 +45,7 @@ private:
 
     double entropy;
 
-    void calcProbabilitiesAndEntropy(int totalContextsCount);
+    void calcProbabilitiesAndEntropy(std::set<char> &lettersNotChanged);
 
    public:
     Model(int ctxLen, double alpha) {
