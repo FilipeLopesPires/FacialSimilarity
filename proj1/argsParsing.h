@@ -22,7 +22,7 @@ void checkAccess(const char *fileName, std::fstream::ios_base::openmode mode,
                  std::fstream &file);
 
 typedef struct {
-    unsigned int k;
+    int k;
     double alpha;
     std::string initCtx;
     int numChars;

@@ -7,39 +7,60 @@
 #include <map>
 #include <set>
 
+typedef struct {
+    int count;
+    double probability;
+} Statistics;
+
+typedef struct {
+    std::map<char, Statistics> nextCharStats;
+    Statistics stats;
+} ContextStatistics;
+
 class Model {
-   private:
-    int ctxLen;    // context length
-    double alpha;  // smoothing paramenter
-    std::fstream *reader;
-    std::set<char> abc;  // alphabet of the test data
-    std::map<std::string, std::map<char, int>>
-        occurTable;  // table with number of occurrences of each letter after
-                     // each context present on the test data
-                     // {context:{letter:num_occur}}
-    void fileParser();
+private:
+    /**
+     * context length
+     */
+    int ctxLen;
+
+    /**
+     * smoothing paramenter
+     */
+    double alpha;
+
+    /**
+     * alphabet of the test data
+     */
+    std::set<char> abc;
+
+    /**
+     * table with number of occurrences of each letter after
+     * each context present on the test data
+     * {context:{letter:num_occur}}
+     */
+    std::map<std::string, ContextStatistics> statsTable;
+
+    double entropy;
+
+    void calcProbabilitiesAndEntropy(int totalContextsCount);
 
    public:
-    Model(int ctxLen, double alpha, std::fstream *input) {
+    Model(int ctxLen, double alpha) {
         this->ctxLen = ctxLen;
         this->alpha = alpha;
-        this->reader = input;
-        this->fileParser();
     }
 
-    int getCtxLen() { return ctxLen; }
+    auto& getABC() const { return abc; }
 
-    double getAlpha() { return alpha; }
-
-    std::set<char> getABC() { return abc; }
-
-    std::map<std::string, std::map<char, int>> getOccurTable() {
-        return occurTable;
+    auto& getStatsTable() const {
+        return statsTable;
     }
 
-    double getModelEntropy() const;
+    auto getModelEntropy() { return entropy; };
 
-    std::map<std::string, std::map<char, double>> getProbs();
+    void parseFile(std::fstream &input);
+
 };
 
 #endif

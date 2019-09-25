@@ -1,12 +1,10 @@
 
 #include <cstring>
 #include <fstream>
+#include <random>
 
 #include "argsParsing.h"
 #include "model.h"
-
-#include <cstdlib>
-#include <ctime>
 
 using namespace std;
 
@@ -30,17 +28,20 @@ int main(int argc, char **argv) {
     argsParsing::ParsingResult result =
         argsParsing::parseArguments(argc, argv, HELP, 6);
 
-    if (strlen(argv[optind + 4]) != result.k) {
-        cerr << "ERROR: beginSequence length must be equal to k" << endl;
-        exit(4);
-    }
     string initCtx = argv[optind + 4];
-
-    if (argc - 1 != optind + 5) {
-        cerr << "ERROR: numChars must be defined" << endl;
-        exit(5);
+    if (initCtx.length() != result.k) {
+        cerr << "ERROR: beginSequence length must be equal to k" << endl;
+        exit(3);
     }
-    int numChars = stoi(argv[optind + 5]);
+
+    int numChars;
+    try {
+        numChars = stoi(argv[optind + 5]);
+    }
+    catch (...) {
+        cerr << "numChars must be a positive integer" << endl;
+        exit(3);
+    }
 
     fstream trainFile;
     argsParsing::checkAccess(argv[optind + 2], fstream::ios_base::in,
@@ -49,44 +50,39 @@ int main(int argc, char **argv) {
     argsParsing::checkAccess(argv[optind + 3], fstream::ios_base::out,
                              outputFile);
 
-    Model m(result.k, result.alpha, &trainFile);
+    Model m(result.k, result.alpha);
+
+    m.parseFile(trainFile);
 
     trainFile.close();
 
-    map<string, map<char, double>> probs = m.getProbs();
-
-    // for (auto &i : probs) {
-    //     cout << i.first << endl;
-    //     for (auto &f : i.second) {
-    //         cout << f.first << ":" << f.second << ",";
-    //     }
-    //     cout << endl;
-    // }
+    auto probs = m.getStatsTable();
 
     bool wrote = false;
     char newChar;
     string context = initCtx;
     outputFile << context;
-    srand(time(0));
+
+    default_random_engine eng((random_device())());
+    uniform_real_distribution<double> prob_rand(0, 1);
+    uniform_int_distribution<int> idx_rand(0, m.getABC().size() - 1);
+
     for (int i = 0; i < numChars; i++) {
-        for (auto &tokens : probs) {
-            if (!((string)tokens.first).compare(context)) {
-                double randNum = ((double)rand() / (RAND_MAX));
-                double cumulativeSum = 0.0;
-                for (auto &c : tokens.second) {
-                    cumulativeSum += c.second;
-                    if (cumulativeSum >= randNum) {
-                        outputFile << c.first;
-                        wrote = true;
-                        newChar = c.first;
-                        break;
-                    }
+        if (probs.count(context)) {
+            double randNum = prob_rand(eng);
+            double cumulativeSum = 0.0;
+            for (auto &c : probs.at(context).nextCharStats) {
+                cumulativeSum += c.second.probability;
+                if (cumulativeSum >= randNum) {
+                    outputFile << c.first;
+                    wrote = true;
+                    newChar = c.first;
+                    break;
                 }
             }
         }
         if (!wrote) {
-            int charIndex =
-                (int)(((double)rand() / (RAND_MAX)) * m.getABC().size());
+            int charIndex = idx_rand(eng);
             char c = *std::next(m.getABC().begin(), charIndex);
             outputFile << c;
             newChar = c;
