@@ -10,7 +10,7 @@ using namespace std;
 int main(int argc, char **argv) {
     const string HELP =
         "USAGE:\n"
-        "   ./fcm.cpp [-h] k alpha fileName\n"
+        "   ./fcm.cpp [-h] k alpha trainFile\n"
         "OPTIONS:\n"
         "   h - shows this help\n"
         "   p - don't ignore punctuation\n"
@@ -27,12 +27,11 @@ int main(int argc, char **argv) {
     argsParsing::checkAccess(argv[optind + 2], fstream::ios_base::in,
                              trainFile);
 
-    Model m(result.k, result.alpha, &trainFile);
-    auto aux = m.getOccurTable();
+    Model m(result.k, result.alpha);
+    m.parseFile(trainFile);
+    trainFile.close();
 
     cout << "Model Entropy: " << m.getModelEntropy() << endl;
-
-    trainFile.close();
 
     return 0;
 }

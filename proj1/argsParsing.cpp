@@ -20,7 +20,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
 
     // parse options
     int c = 0;
-    while ((c = getopt(argc, argv, "h")) != -1) {
+    while ((c = getopt(argc, argv, "hpc")) != -1) {
         switch (c) {
             case 'h':
                 cout << HELP << endl;
@@ -32,7 +32,6 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
                 result.caseSensitive = true;
                 break;
             default:
-                cerr << "ERROR: Unknown " << c << " option" << endl;
                 exit(1);
         }
     }
@@ -45,17 +44,23 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
 
     int argIdx = optind;
 
-    errno = 0;
-    result.k = strtoul(argv[argIdx], nullptr, 0);
-    if (errno) {
+    try {
+        result.k = stoi(argv[argIdx]);
+    }
+    catch (...) {
         cerr << "k should be a positive integer" << endl;
+        exit(3);
+    }
+    if (result.k <= 0) {
+        cerr << "k should be greater than 0" << endl;
         exit(3);
     }
     argIdx++;
 
-    errno = 0;
-    result.alpha = strtod(argv[argIdx], nullptr);
-    if (errno) {
+    try {
+        result.alpha = stod(argv[argIdx], nullptr);
+    }
+    catch (...) {
         cerr << "alpha should be an floating point number" << endl;
         exit(3);
     }
