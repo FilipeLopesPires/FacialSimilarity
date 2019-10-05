@@ -3,30 +3,32 @@
 
 #include <algorithm>
 #include <iostream>
+#include <list>
 
 using namespace std;
 
-void Model::parseFile(fstream &reader) {
+void Model::parseFile(list<fstream> &input) {
     char letter;
     string context;
 
     // set<char> oldAbc(abc);
     // set<char> newAbc;
+    for (auto &reader : input) {
+        while (reader.get(letter)) {
+            abc.insert(letter);
+            // newAbc.insert(letter);
 
-    while (reader.get(letter)) {
-        abc.insert(letter);
-        // newAbc.insert(letter);
+            if (context.length() >= ctxLen) {
+                statsTable[context].nextCharStats[letter].count++;
 
-        if (context.length() >= ctxLen) {
-            statsTable[context].nextCharStats[letter].count++;
+                statsTable[context].stats.count++;
 
-            statsTable[context].stats.count++;
+                totalContextsCount++;
 
-            totalContextsCount++;
-
-            context = context.substr(1);
+                context = context.substr(1);
+            }
+            context += letter;
         }
-        context += letter;
     }
 
     // set<char> lettersNotChanged;

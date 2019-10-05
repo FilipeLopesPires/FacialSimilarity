@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, char **argv) {
     const string HELP =
         "USAGE:\n"
-        "   ./generator.cpp [-h] k alpha trainFile outputFile beginSequence "
+        "   ./generator.cpp [-h] k alpha beginSequence outputFile trainFile"
         "numChars\n"
         "OPTIONS:\n"
         "   h - shows this help\n"
@@ -28,27 +28,26 @@ int main(int argc, char **argv) {
     argsParsing::ParsingResult result =
         argsParsing::parseArguments(argc, argv, HELP, 6);
 
-    string initCtx = argv[optind + 4];
-    if (initCtx.length() != result.k) {
-        cerr << "ERROR: beginSequence length must be equal to k" << endl;
-        exit(3);
-    }
+    // string initCtx = argv[optind + 4];
+    // if (initCtx.length() != result.k) {
+    //     cerr << "ERROR: beginSequence length must be equal to k" << endl;
+    //     exit(3);
+    // }
 
     int numChars;
     try {
         numChars = stoi(argv[optind + 5]);
-    }
-    catch (...) {
+    } catch (...) {
         cerr << "numChars must be a positive integer" << endl;
         exit(3);
     }
 
-    fstream trainFile;
-    argsParsing::checkAccess(argv[optind + 2], fstream::ios_base::in,
-                             trainFile);
-    fstream outputFile;
-    argsParsing::checkAccess(argv[optind + 3], fstream::ios_base::out,
-                             outputFile);
+    // fstream trainFile;
+    // argsParsing::checkAccess(argv[optind + 2], fstream::ios_base::in,
+    //                          trainFile);
+    // fstream outputFile;
+    // argsParsing::checkAccess(argv[optind + 3], fstream::ios_base::out,
+    //                          outputFile);
 
     Model m(result.k, result.alpha);
 

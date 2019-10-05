@@ -37,7 +37,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
     }
 
     // parse arguments
-    if (argc - optind != numOfArgs) {
+    if (argc - optind < numOfArgs) {
         cerr << "ERROR: Missing parameters" << endl << HELP << endl;
         exit(2);
     }
@@ -46,8 +46,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
 
     try {
         result.k = stoi(argv[argIdx]);
-    }
-    catch (...) {
+    } catch (...) {
         cerr << "k should be a positive integer" << endl;
         exit(3);
     }
@@ -59,10 +58,15 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
 
     try {
         result.alpha = stod(argv[argIdx], nullptr);
-    }
-    catch (...) {
+    } catch (...) {
         cerr << "alpha should be an floating point number" << endl;
         exit(3);
+    }
+
+    for (int idx = ++argIdx; idx < argc; idx++) {
+        fstream trainFile;
+        checkAccess(argv[optind + 2], fstream::ios_base::in, trainFile);
+        result.inputFiles.push_back(trainFile);
     }
 
     return result;

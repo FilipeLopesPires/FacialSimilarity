@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <fstream>
 #include <iostream>
+#include <list>
 #include <string>
 
 namespace argsParsing {
@@ -24,6 +25,8 @@ void checkAccess(const char *fileName, std::fstream::ios_base::openmode mode,
 typedef struct {
     int k;
     double alpha;
+    std::list<std::fstream> inputFiles;
+    std::fstream outputFile;
     std::string initCtx;
     int numChars;
     bool ignorePunctuation = true;

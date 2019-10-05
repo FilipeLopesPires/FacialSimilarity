@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <fstream>
+#include <list>
 #include <map>
 #include <set>
 
@@ -18,7 +19,7 @@ typedef struct {
 } ContextStatistics;
 
 class Model {
-private:
+   private:
     /**
      * context length
      */
@@ -45,7 +46,7 @@ private:
 
     double entropy;
 
-    void calcProbabilitiesAndEntropy(std::set<char> &lettersNotChanged);
+    void calcProbabilitiesAndEntropy(std::set<char>& lettersNotChanged);
 
    public:
     Model(int ctxLen, double alpha) {
@@ -55,14 +56,11 @@ private:
 
     auto& getABC() const { return abc; }
 
-    auto& getStatsTable() const {
-        return statsTable;
-    }
+    auto& getStatsTable() const { return statsTable; }
 
     auto getModelEntropy() { return entropy; };
 
-    void parseFile(std::fstream &input);
-
+    void parseFile(std::list<std::fstream>& input);
 };
 
 #endif
