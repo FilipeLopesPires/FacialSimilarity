@@ -1,5 +1,6 @@
 clear;clc;
-file = fileread("test.txt");       % collect file contents into string
+warning('off', 'all');
+file = fileread("graphInput.txt");       % collect file contents into string
 lines = strsplit(file, "\n")';
 numbers=[];
 for i=2:rows(lines)
@@ -12,7 +13,9 @@ for i=1:rows(k)
   alpha=numbers(idx,2);
   entropy=numbers(idx,3);
   plot(alpha, entropy);
-  lgnd=[lgnd;strcat("k equals to ",num2str(k(i)))];
+  lgnd=[lgnd;["k equals to ", int2str(k(i))]];
   hold on;
 endfor
 legend(lgnd);
+xlabel("alpha");
+ylabel("entropy");  
