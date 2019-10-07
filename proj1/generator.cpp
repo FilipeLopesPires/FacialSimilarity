@@ -10,7 +10,8 @@ using namespace std;
 int main(int argc, char **argv) {
     const string HELP =
         "USAGE:\n"
-        "   ./generator.cpp [-h] k alpha beginSequence numChars outputFile trainFile"
+        "   ./generator.cpp [-h] k alpha beginSequence numChars outputFile "
+        "trainFile [trainFile ...]"
         "numChars\n"
         "OPTIONS:\n"
         "   h - shows this help\n"

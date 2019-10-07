@@ -171,7 +171,7 @@ creating different implementations of the parsing functions.
 This is also visible in the implementation of the Model class in files 
 \texttt{model.cpp} and \texttt{model.h}.
 
-Once the arguments are validated, the program attempts open the file for reading
+Once the arguments are validated, the program attempts to open the file(s) for reading
 through function {\it checkAccess()\/} and, in case of success, reads and parses
 its content.
 The program supports any file format as long as its content is plaintext.
@@ -196,35 +196,28 @@ Once the end of file (EOF) is reached, the function calls
 \addtolength\baselineskip{-0.05in}
 \begin{quote}
 \begin{verbatim}
-  void Model::parseFile(fstream &reader) {
+  void Model::parseFile(list<fstream*> &input) {
     char letter;
     string context;
 
-    set<char> oldAbc(abc);
-    set<char> newAbc;
+    for (auto reader : input) {
+        while (reader->get(letter)) {
+            abc.insert(letter);
 
-    while (reader.get(letter)) {
-        abc.insert(letter);
-        newAbc.insert(letter);
+            if (context.length() >= ctxLen) {
+                statsTable[context].nextCharStats[letter].count++;
 
-        if (context.length() >= ctxLen) {
-            statsTable[context].nextCharStats[letter].count++;
-            statsTable[context].stats.count++;
-            totalContextsCount++;
-            context = context.substr(1);
+                statsTable[context].stats.count++;
+
+                totalContextsCount++;
+
+                context = context.substr(1);
+            }
+            context += letter;
         }
-
-        context += letter;
     }
 
-    set<char> lettersNotChanged;
-    set_difference(
-        oldAbc.begin(), oldAbc.end(),
-        newAbc.begin(), newAbc.end(),
-        inserter(lettersNotChanged, lettersNotChanged.begin())
-    );
-
-    calcProbabilitiesAndEntropy(lettersNotChanged);
+    calcProbabilitiesAndEntropy();
   }
 \end{verbatim}
 \end{quote}
@@ -262,40 +255,41 @@ analysis.
 \addtolength\baselineskip{-0.05in}
 \begin{quote}
 \begin{verbatim}
-double Model::getModelEntropy() const{
-  string context;
-  map<char, int> occurMap;
-  int curOccur;
-  int contextCountTotal = 0;
-  map<string, int> contextCount;
-  double conditionalProb;
-  double H = 0.0;
-  double Hc = 0.0;
-
-  for (auto &it : occurTable) {
-    context = it.first;
-    occurMap = it.second;
-    for (auto &it2 : occurMap) {
-      contextCount[context] += it2.second;
-      contextCountTotal += it2.second;
+  void Model::calcProbabilitiesAndEntropy() {
+    int contextCount;
+    int charCount;
+    ContextStatistics *contextStats;
+    char letter;
+    Statistics *stats;
+    double conditionalProb;
+    double Hc = 0.0;
+    entropy = 0;
+    for (auto &it : statsTable) {
+        contextStats = &it.second;
+        contextCount = contextStats->stats.count;
+        contextStats->stats.probability = (double)contextCount / totalContextsCount;
+        set<char> abcCopy(abc);
+        for (auto &it2 : contextStats->nextCharStats) {
+            letter = it2.first;
+            stats = &it2.second;
+            charCount = stats->count;
+            conditionalProb = (charCount + alpha) / (contextCount + alpha * abc.size());
+            stats->probability = conditionalProb;
+            Hc += conditionalProb * log2(conditionalProb);
+            abcCopy.erase(letter);
+        }
+        for (char l : abcCopy) {
+            conditionalProb = alpha / (contextCount + (alpha * abc.size()));
+            contextStats->nextCharStats[l] = {0, conditionalProb};
+            if (conditionalProb > 0) {
+                Hc += conditionalProb * log2(conditionalProb);
+            }
+        }
+        Hc = -Hc; 
+        entropy += contextStats->stats.probability * Hc;
+        Hc = 0.0;
     }
   }
-
-  for (auto &it : occurTable) {
-    context = it.first;
-    occurMap = it.second; 
-    for (auto &it2 : occurMap) {
-      curOccur = it2.second;
-      conditionalProb = (curOccur + alpha) /
-                        (contextCount[context] + alpha * abc.size());
-      Hc += (conditionalProb * log2(conditionalProb));
-    }
-    H += -(((double)contextCount[context] / contextCountTotal) * Hc);
-    Hc = 0.0;
-  }
-
-  return H; 
-}
 \end{verbatim}
 \end{quote}
 \endgroup
@@ -311,14 +305,16 @@ To do this, we use \texttt{model.cpp} as a starting point and developed
 This program, similarly to \texttt{fcm}, works as a command when executed.
 \texttt{generator} similarly to fcm starts by passing the information source(s) to the model, that
 internally will construct the model by calculating the probabilities of each character of the alphabet
-knowing that a context appened. After the model and the calculations are complete, the program begins to generate text,
+knowing that a context appened, with the same dataflow as the fcm program when processing the file. 
+After the model and the calculations are complete, the program begins to generate text,
 starting with the text passed by the user and generating as much characters as the user intended.
 
 The \texttt{generator} command has the following format: 
 
 \begin{quote}
 \begin{verbatim}
-$ ./generator.cpp [-h] 
+$ ./generator.cpp [-h] k alpha beginSequence numChars \\
+outputFile trainFile [trainFile ...]
 \end{verbatim}
 \end{quote}
 
@@ -326,14 +322,15 @@ Once again we have the \texttt{-h} option that presents the manual for the
 command usage.
 Arguments \texttt{k} and \texttt{alpha} are the same as the ones on the 
 command \texttt{fcm}.
-The \texttt{trainFile} is, as the name suggests, the name of the file to be
-processed by the model and used as training.
+The \texttt{beginSequence} is the 
 The \texttt{outputFile} is where the generated text will be written to.
 The \texttt{startSequence} argument asks the user to give a word or character
 sequence for the program to start off from; this is a need instrinsic to the
-way the solution works.
+way the solution works and must be the same length as the context lenght.
 Finally we have the \texttt{numChars} argument, that tells the program how 
-many characters are to be output.
+many characters are to be outputed.
+The \texttt{trainFile} is, as the name suggests, the name of the file(s) to be
+processed by the model and used as training.
 
 \section*{3. Results}
 
