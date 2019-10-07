@@ -132,18 +132,36 @@ More about this is explained in the description of this work assignment
 \cite{trab1}, containing the mathematical equations that served as the basis 
 for our implementation.
 
-\subsection*{1.1. Architecture}
+\subsection*{1.1. Collecting Data}
 
-The file \texttt{fcm.cpp} serves as the command to be executed in order to 
-generate a finite-context model, given one information source.
-It is the {\it main()\/} function.
-We decided to organize the program by several files, for readability purposes 
-and to allow future modifications without the need of much refactoring by 
-following a modular architecture.
-So, by executing the \texttt{fcm} command, it calls a set of functions from 
-the remaining files and creates an instance of the Markov model.
-It then provides the entropy of the information source, as estimated by
-the instance.
+We decided to organize the program by several files, each with a different
+purpose, for good readability and to allow future modifications without the 
+need of much refactoring - so we adopted a modular architecture strategy.
+
+The file \texttt{fcm.cpp} serves as the base code for the command to be executed in order to 
+generate a finite-context model, given one or several information source(s).
+By executing this command, the program is started and begins to
+call a set of functions that return an instance of our 
+implementation of the Markov's model trained from the information source(s), 
+and calculate the text entropy, as estimated by this instance.
+The \texttt{fcm} command has the following format:
+
+\begin{quote}
+\begin{verbatim}
+$ ./fcm.cpp [-h] k alpha trainFile [trainFile ...]
+\end{verbatim}
+\end{quote}
+
+Here, \texttt{-h} is the option that presents the manual for the command usage.
+Argument \texttt{k} is the value given for the size of the context.
+This context corresponds to a string with \texttt{k} characters, it is based on
+the several contexts produced and on the single characters that follow each one
+of them that the model is able to calculate the text's entropy.
+\texttt{alpha} stands for the value of the 'smoothing' parameter for estimating
+the probabilities of events. 
+These events correspond to the occurrences of a character after a given context.
+And \texttt{trainFile} is, as the name indicates, the name of the file(s) that
+contain the text to be processed by the model.
 
 First, the command executed is pre-processed and its arguments are collected
 and validated by the function {\it parseArguments()\/}, implemented in 
@@ -152,85 +170,92 @@ The use of a header file is to establish an interface for the possibility of
 creating different implementations of the parsing functions.
 This is also visible in the implementation of the Model class in files 
 \texttt{model.cpp} and \texttt{model.h}.
-The \texttt{fcm} command has the following format:
-
-\begin{quote}
-\begin{verbatim}
-$ ./fcm.cpp [-h] k alpha fileName
-\end{verbatim}
-\end{quote}
-
-Here, \texttt{-h} is the option that presents the manual for the command usage.
-Argument \texttt{k} is the value given for the size of the context.
-\texttt{alpha} stands for the value of the 'smoothing' parameter for estimating
-the probabilities of events.
-And \texttt{fileName} is, as the name indicates, the name of the file to be
-processed by the model.
 
 Once the arguments are validated, the program attempts open the file for reading
 through function {\it checkAccess()\/} and, in case of success, reads and parses
 its content.
 The program supports any file format as long as its content is plaintext.
-\newpage 
 
+\newpage 
 Below we present the actual implementation in C++ of the function responsible 
-for parsing the information source file. \\
-... explain the steps and decisions taken ...
+for parsing the information source file.
+
+Variable \texttt{abc} contains the alphabet of the input file, updated everytime
+a new character is found.
+The function {\it parseFile()\/} creates a copy of this alphabet and a new
+alphabet that will contain the new found characters (if any).
+It then iterates over the file's content letter by letter, inserts each on both
+alphabets (if not already in them), updates the number of occurrences of each 
+letter after the corresponding context and updates total number of contexts in 
+each iteration.
+Once the end of file (EOF) is reached, the function calls 
+{\it calcProbabilitiesAndEntropy()\/}.
 
 \begingroup
 \addtolength\leftmargini{-0.4in}
 \addtolength\baselineskip{-0.05in}
 \begin{quote}
 \begin{verbatim}
-void Model::fileParser(){
-  map<string, map<char, int>> relFreq;
-  char letter;
-  string context;
+  void Model::parseFile(fstream &reader) {
+    char letter;
+    string context;
 
-  while(reader.get(letter)){
-    if(abc.find(letter) == abc.end()){
-      abc.insert(letter);
-    }
-    if(context.length()>=ctxLen){
-      if(relFreq.find(context) != relFreq.end()){
-        map<char,int> nextChar = {{letter,1}};
-        relFreq.insert(pair<string,map<char,int>>(context,nextChar));
-      }else{
-        if(relFreq[context].find(letter) == relFreq[context].end()){
-          relFreq[context].insert(pair<char,int>(letter,1));
-        } else{
-          relFreq[context][letter]=relFreq[context][letter]+1;
+    set<char> oldAbc(abc);
+    set<char> newAbc;
+
+    while (reader.get(letter)) {
+        abc.insert(letter);
+        newAbc.insert(letter);
+
+        if (context.length() >= ctxLen) {
+            statsTable[context].nextCharStats[letter].count++;
+            statsTable[context].stats.count++;
+            totalContextsCount++;
+            context = context.substr(1);
         }
-      }
-      context=context.substr(1,2);
-      context+=letter;
-    }else{
-      context+=letter;
+
+        context += letter;
     }
+
+    set<char> lettersNotChanged;
+    set_difference(
+        oldAbc.begin(), oldAbc.end(),
+        newAbc.begin(), newAbc.end(),
+        inserter(lettersNotChanged, lettersNotChanged.begin())
+    );
+
+    calcProbabilitiesAndEntropy(lettersNotChanged);
   }
-  for(auto &pair: relFreq){
-    if(pair.second.empty()){
-      relFreq.erase(pair.first);
-    }
-  }
-  occurTable=relFreq;
-}
 \end{verbatim}
 \end{quote}
 \endgroup
+
+This solutions makes our model prepared to accept more than one information
+source (i.e. several input files).
+Although this was not a requirement, we knew this would make the program more
+robust and scalable.
+
 \newpage
 
-\subsection*{1.2. Entropy}
+\subsection*{1.2. Training the Model and Returning Text Entropy}
 
-Finally, as the file is parsed and the data is structured in a table,
-\texttt{fcm} then calculates the estimated value for the entropy.
-The mathematical equations required for this calculation are also 
+Finally, as the file is parsed and the alphabet is built, \texttt{fcm} then 
+builds the information table containing the statistics of the input text and
+calculates the estimated value for the entropy through the function
+{\it calcProbabilitiesAndEntropy()\/}.
+
+............... explain Stats, nextCharStats and contextStats ................
+
+The mathematical equations required for the calculation of the entropy are also 
 available in the document that describes the assignment. 
 The actual work was to implement these formulas and apply them.
-Our solution was an iterative function that would calculate the probabilities
-of each context and of each event and applying the equations on them and 
-summing the results. 
-This function is presented below for further analysis.
+
+........................ explain entropy calculation ..........................
+... how do we retrieve the probabilities to apply the formulas ?
+... how do we iterate over the tables ?
+
+The function {\it calcProbabilitiesAndEntropy()\/} is presented next for further
+analysis.
 
 \begingroup
 \addtolength\leftmargini{-0.4in}
@@ -258,7 +283,7 @@ double Model::getModelEntropy() const{
 
   for (auto &it : occurTable) {
     context = it.first;
-    occurMap = it.second;
+    occurMap = it.second; 
     for (auto &it2 : occurMap) {
       curOccur = it2.second;
       conditionalProb = (curOccur + alpha) /
@@ -269,24 +294,87 @@ double Model::getModelEntropy() const{
     Hc = 0.0;
   }
 
-  return H;
+  return H; 
 }
 \end{verbatim}
 \end{quote}
 \endgroup
 \newpage
 
-\section*{2. Generator}
+\section*{2. Text Generator}
 
-Lorem ipsum ...
+The second part of the assignment was to developed a program for automatic
+text generation that follows the statistical model learned beforehand using 
+a training text.
+To do this, we use \texttt{model.cpp} as a starting point and developed 
+\texttt{generator.cpp}. 
+This program, similarly to \texttt{fcm}, works as a command when executed.
+\texttt{generator} similarly to fcm starts by passing the information source(s) to the model, that
+internally will construct the model by calculating the probabilities of each character of the alphabet
+knowing that a context appened. After the model and the calculations are complete, the program begins to generate text,
+starting with the text passed by the user and generating as much characters as the user intended.
+
+The \texttt{generator} command has the following format: 
+
+\begin{quote}
+\begin{verbatim}
+$ ./generator.cpp [-h] 
+\end{verbatim}
+\end{quote}
+
+Once again we have the \texttt{-h} option that presents the manual for the 
+command usage.
+Arguments \texttt{k} and \texttt{alpha} are the same as the ones on the 
+command \texttt{fcm}.
+The \texttt{trainFile} is, as the name suggests, the name of the file to be
+processed by the model and used as training.
+The \texttt{outputFile} is where the generated text will be written to.
+The \texttt{startSequence} argument asks the user to give a word or character
+sequence for the program to start off from; this is a need instrinsic to the
+way the solution works.
+Finally we have the \texttt{numChars} argument, that tells the program how 
+many characters are to be output.
 
 \section*{3. Results}
 
-Lorem ipsum ...
+In this chapter we discuss the results achieved from the final version of 
+both tasks solutions. 
+During development, we used randomly generated texts to test our code.
+However, for the analysis described here, we used two text files
+containing {\it The Bible\/} in plaintext, one written in English 
+(\texttt{bible\_en\_v1.txt}) and the other in Portuguese 
+(\texttt{bible\_pt.txt}).
+The reason we chose the same text source translated in different languages
+was to evaluate the entropy of each language and compare them in terms of 
+average quantity of information per character of the alphabet.
+These files suffered a minor pre-processing in order to make their formats 
+as similar as possible.
 
 \subsection*{3.1. Parameter Variation}
 
-Lorem ipsum ...
+We defined a few assumptions after considering the problem of determining
+the entropy of an information source and aimed to test them out once the 
+program was completed.
+In this section we explain these hipothesis and analyse their truthfulness
+with the aid of a graphic plotting the evolution of the text entropy with
+parameters k and alpha as variables.
+It is important to state that our assumptions are based on the interpretation
+of the mathematical formulas around the model implemented and that they 
+are supposed to apply to texts of any size.
+
+..............
+
+
+Estas hipóteses aplicam-se a textos suficientemente grandes
+(para pequenos também mas estão sujeitos a variações elevadas e a um maior fator de erro/aleatoriedade)
+
++k = -conhecimento (-entropia)
++alpha = +entropia
+
+grafico confirma, mas, para ks baixos, a segunda condicao nao se confirma
+pq, como o texto é tao grande, 
+
+..........
 
 \subsection*{3.2. Text Comparison}
 

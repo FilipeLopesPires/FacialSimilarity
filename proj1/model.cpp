@@ -75,7 +75,8 @@ void Model::calcProbabilitiesAndEntropy() {
             }
         }
 
-        entropy += contextStats->stats.probability * -Hc;
+        Hc = -Hc; 
+        entropy += contextStats->stats.probability * Hc;
 
         Hc = 0.0;
     }
