@@ -353,7 +353,7 @@ as similar as possible.
 \subsection*{3.1. Parameter Variation}
 
 We defined a few assumptions after considering the problem of determining
-the entropy of an information source and aimed to test them out once the 
+the entropy of an information model and aimed to test them out once the 
 program was completed.
 In this section we explain these hipothesis and analyse their truthfulness
 with the aid of a graphic plotting the evolution of the text entropy with
@@ -362,21 +362,77 @@ It is important to state that our assumptions are based on the interpretation
 of the mathematical formulas around the model implemented and that they 
 are supposed to apply to texts of any size.
 
-..............
+Taking a closer look at the formula for the overal entropy of the model 
+(equation 1), we can gather that as the context probability 
+decreases so does the value of the entropy.
+But what exactly affects the probability of a context? 
+Assuming we start from an equal probability of occurring any of the existing
+contexts, the more contexts there are, the less probability there is of 
+occurring a specific one.
+Also, for a given text source, the longer the context is (substring of fixed 
+size from the text source), the more possible combinations of letters there 
+are and, consequently, the more unique contexts appear on the given text.
+Taking this in consideration, we are able to establish that increasing the 
+context size results in an increase of the total number of different contexts
+and, consequently, in a decrease of the probability of occurring each context
+and finally leading to a decrease in the final value for the model's entropy
+(see equation 2).
 
+\begin{equation}
+  H = \sum\limits_{c} P(c) Hc
+\end{equation}
+\begin{equation}
+  >size(c) \Rightarrow <P(c) \Rightarrow <H
+\end{equation}
 
-Estas hipóteses aplicam-se a textos suficientemente grandes
-(para pequenos também mas estão sujeitos a variações elevadas e a um maior fator de erro/aleatoriedade)
+Our second hypothesis regarded the 'smoothing' parameter alpha.
+The idea behind this parameter is to tackle the issue of constructing the
+model and assigning zero probability to unseen events.
+By adding alpha, the character probabilities is uniformized and they 
+never actually reach zero.
+As we studied the effects of the variable on the formula of conditional 
+probabilities (see equation 3), we came to the conclusion that the larger
+its value, the bigger will be the model's entropy.
 
-+k = -conhecimento (-entropia)
-+alpha = +entropia
+\begin{equation}
+  P(e|c) \approx \frac{N(e|c) + \alpha}{\sum\limits_{s\in\Sigma}N(s|c) + \alpha|\Sigma|}
+\end{equation}
+
+This was harder to reach as, at first sight, the effect of alpha is only 
+relevant in a binary way, i.e. it affects the result if it is bigger than 
+zero (the same way, no matter its value), it does not if not.
+However, by analysing the situation more carefully, we understood that,
+assuming that alpha is bigger than zero, the larger its value, the smaller
+is the bottom parcel of equation 3 and, consequently the larger the 
+conditional probability is.
+From that point on, one can understand that the larger the alpha, the larger
+will be the entropy.\\
+
+We developed a script in \texttt{Matlab} that runs \texttt{fcm.cpp} a
+defined number of times for the same source of information varying the 
+two studied parameters in several combinations.
+This script collects the entropy values for each combination and then plots
+them in a line graph.
+Our next step was to run the script for the file \texttt{......}, varying
+k between ....... and ....... , and alpha between ...... and ......... .
+Figure \ref{fig:plot} shows the resulting plot.
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{}
+  \caption{............}
+  \label{fig:plot}
+\end{figure}
 
 grafico confirma, mas, para ks baixos, a segunda condicao nao se confirma
 pq, como o texto é tao grande, 
 
-..........
+.............
 
 \subsection*{3.2. Text Comparison}
+
+Lorem ipsum ...
+
+\subsection*{3.3. Generator's Response to Parameter Variations}
 
 Lorem ipsum ...
 

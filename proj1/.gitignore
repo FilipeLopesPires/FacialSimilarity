@@ -1,2 +1,5 @@
 generator
 fcm
+*.log
+*.pdf
+*.gz

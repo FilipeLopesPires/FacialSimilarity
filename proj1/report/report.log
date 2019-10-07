@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Arch Linux) (preloaded format=pdflatex 2019.9.24)  7 OCT 2019 15:33
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Arch Linux) (preloaded format=pdflatex 2019.9.24)  7 OCT 2019 17:37
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -58,10 +58,16 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+LaTeX Font Info:    Font shape `OT1/ptm/bx/it' in size <12> not available
+(Font)              Font shape `OT1/ptm/b/it' tried instead on input line 132.
+
+
+LaTeX Warning: Citation `trab1' on page 2 undefined on input line 132.
+
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 135.
 LaTeX Font Info:    Try loading font information for OT1+pcr on input line 141.
- (/usr/share/texmf-dist/tex/latex/psnfss/ot1pcr.fd
+(/usr/share/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 ) [2] [3]
 Overfull \hbox (42.02286pt too wide) in paragraph at lines 299--299
@@ -73,20 +79,74 @@ Overfull \hbox (42.02286pt too wide) in paragraph at lines 299--299
  []    \OT1/pcr/m/n/12 H += -(((double)contextCount[context] / contextCountTotal) * Hc);[] 
  []
 
-[4] [5] [6] (/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.aux) ) 
+[4] [5]
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <12> on input line 381.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <8> on input line 381.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <6> on input line 381.
+
+Underfull \hbox (badness 10000) in paragraph at lines 401--410
+
+ []
+
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 418.
+
+LaTeX Warning: Reference `fig:plot' on page 6 undefined on input line 418.
+
+/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.tex:421: Undefined control sequence.
+l.421   \includegraphics
+                        [width=\linewidth]{}
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.tex:421: Missing number, treated as zero.
+<to be read again> 
+                   ]
+l.421   \includegraphics[width=\linewidth]
+                                          {}
+A number should have been here; I inserted `0'.
+(If you can't figure out why I needed to see a number,
+look up `weird error' in the index to The TeXbook.)
+
+/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.tex:421: Illegal unit of measure (pt inserted).
+<to be read again> 
+                   ]
+l.421   \includegraphics[width=\linewidth]
+                                          {}
+Dimensions can be in units of em, ex, in, pt, pc,
+cm, mm, dd, cc, nd, nc, bp, or sp; but yours is a new one!
+I'll assume that you meant to say pt, for printer's points.
+To recover gracefully from this error, it's best to
+delete the erroneous units; e.g., type `2' to delete
+two letters. (See Chapter 27 of The TeXbook.)
+
+[6] [7] (/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 384 strings out of 492623
- 4855 string characters out of 6135669
+ 407 strings out of 492623
+ 5112 string characters out of 6135669
  65547 words of memory out of 5000000
- 4356 multiletter control sequences out of 15000+600000
- 15564 words of font info for 33 fonts, out of 8000000 for 9000
+ 4370 multiletter control sequences out of 15000+600000
+ 21257 words of font info for 45 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 22i,7n,19p,207b,231s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.pdf (6 pages, 68238 bytes).
+ 22i,7n,20p,207b,231s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.pdf (7 pages, 128259 bytes).
 PDF statistics:
- 40 PDF objects out of 1000 (max. 8388607)
- 27 compressed objects within 1 object stream
+ 77 PDF objects out of 1000 (max. 8388607)
+ 55 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
