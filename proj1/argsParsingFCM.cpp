@@ -64,8 +64,8 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
     }
 
     for (int idx = ++argIdx; idx < argc; idx++) {
-        fstream trainFile;
-        checkAccess(argv[optind + 2], fstream::ios_base::in, trainFile);
+        fstream *trainFile = new fstream();
+        checkAccess(argv[idx], fstream::ios_base::in, *trainFile);
         result.inputFiles.push_back(trainFile);
     }
 

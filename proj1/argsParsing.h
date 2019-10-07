@@ -25,7 +25,7 @@ void checkAccess(const char *fileName, std::fstream::ios_base::openmode mode,
 typedef struct {
     int k;
     double alpha;
-    std::list<std::fstream> inputFiles;
+    std::list<std::fstream*> inputFiles;
     std::fstream outputFile;
     std::string initCtx;
     int numChars;

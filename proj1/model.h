@@ -60,7 +60,7 @@ class Model {
 
     auto getModelEntropy() { return entropy; };
 
-    void parseFile(std::list<std::fstream>& input);
+    void parseFile(std::list<std::fstream*>& input);
 };
 
 #endif

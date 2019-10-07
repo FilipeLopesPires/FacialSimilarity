@@ -7,14 +7,14 @@
 
 using namespace std;
 
-void Model::parseFile(list<fstream> &input) {
+void Model::parseFile(list<fstream*> &input) {
     char letter;
     string context;
 
     // set<char> oldAbc(abc);
     // set<char> newAbc;
-    for (auto &reader : input) {
-        while (reader.get(letter)) {
+    for (auto reader : input) {
+        while (reader->get(letter)) {
             abc.insert(letter);
             // newAbc.insert(letter);
 

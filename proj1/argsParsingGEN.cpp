@@ -71,11 +71,20 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
     }
     argIdx++;
 
-    checkAccess(argv[argIdx], fstream::ios_base::in, result.outputFile);
+    try {
+        result.numChars = stoi(argv[argIdx]);
+    } catch (...) {
+        cerr << "numChars must be a positive integer" << endl;
+        exit(3);
+    }
+    argIdx++;
 
-    for (int idx = ++argIdx; idx < argc; idx++) {
-        fstream trainFile;
-        checkAccess(argv[optind + 2], fstream::ios_base::in, trainFile);
+    checkAccess(argv[argIdx], fstream::ios_base::out, result.outputFile);
+    argIdx++;
+
+    for (int idx = argIdx; idx < argc; idx++) {
+        fstream *trainFile = new fstream();
+        checkAccess(argv[idx], fstream::ios_base::in, *trainFile);
         result.inputFiles.push_back(trainFile);
     }
 
