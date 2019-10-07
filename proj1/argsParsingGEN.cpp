@@ -37,7 +37,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
     }
 
     // parse arguments
-    if (argc - optind != numOfArgs) {
+    if (argc - optind < numOfArgs) {
         cerr << "ERROR: Missing parameters" << endl << HELP << endl;
         exit(2);
     }
@@ -46,8 +46,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
 
     try {
         result.k = stoi(argv[argIdx]);
-    }
-    catch (...) {
+    } catch (...) {
         cerr << "k should be a positive integer" << endl;
         exit(3);
     }
@@ -59,10 +58,34 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
 
     try {
         result.alpha = stod(argv[argIdx], nullptr);
-    }
-    catch (...) {
+    } catch (...) {
         cerr << "alpha should be an floating point number" << endl;
         exit(3);
+    }
+    argIdx++;
+
+    result.initCtx = argv[argIdx];
+    if (result.initCtx.length() != result.k) {
+        cerr << "ERROR: beginSequence length must be equal to k" << endl;
+        exit(3);
+    }
+    argIdx++;
+
+    try {
+        result.numChars = stoi(argv[argIdx]);
+    } catch (...) {
+        cerr << "numChars must be a positive integer" << endl;
+        exit(3);
+    }
+    argIdx++;
+
+    checkAccess(argv[argIdx], fstream::ios_base::out, result.outputFile);
+    argIdx++;
+
+    for (int idx = argIdx; idx < argc; idx++) {
+        fstream *trainFile = new fstream();
+        checkAccess(argv[idx], fstream::ios_base::in, *trainFile);
+        result.inputFiles.push_back(trainFile);
     }
 
     return result;
