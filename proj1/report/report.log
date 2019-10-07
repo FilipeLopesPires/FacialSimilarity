@@ -1,36 +1,37 @@
 This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Arch Linux) (preloaded format=pdflatex 2019.9.24)  7 OCT 2019 17:37
 entering extended mode
  restricted \write18 enabled.
- file:line:error style messages enabled.
  %&-line parsing enabled.
-**/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.tex
-(/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.tex
-LaTeX2e <2018-12-01>
-(/usr/share/texmf-dist/tex/latex/base/article.cls
-Document Class: article 2018/09/03 v1.4i Standard LaTeX document class
-(/usr/share/texmf-dist/tex/latex/base/size12.clo
-File: size12.clo 2018/09/03 v1.4i Standard LaTeX file (size option)
+**report.tex
+(./report.tex
+LaTeX2e <2017-04-15>
+Babel <3.18> and hyphenation patterns for 3 language(s) loaded.
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size12.clo
+File: size12.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 )
-\c@part=\count80
-\c@section=\count81
-\c@subsection=\count82
-\c@subsubsection=\count83
-\c@paragraph=\count84
-\c@subparagraph=\count85
-\c@figure=\count86
-\c@table=\count87
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
 \abovecaptionskip=\skip41
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
-) (/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/scicite.sty
+) (./scicite.sty
 LaTeX Info: Redefining \cite on input line 160.
 LaTeX Info: Redefining \nocite on input line 227.
 Package: scicite 2003/11/04  v 4.01
-) (/usr/share/texmf-dist/tex/latex/psnfss/times.sty
+)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/times.sty
 Package: times 2005/04/12 PSNFSS-v9.2a (SPQR) 
 )
-\c@lastnote=\count88
- (/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.aux)
+\c@lastnote=\count87
+ (./report.aux)
 \openout1 = `report.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 76.
@@ -46,13 +47,18 @@ LaTeX Font Info:    ... okay on input line 76.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 76.
 LaTeX Font Info:    ... okay on input line 76.
 LaTeX Font Info:    Try loading font information for OT1+ptm on input line 76.
- (/usr/share/texmf-dist/tex/latex/psnfss/ot1ptm.fd
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <14.4> on input line 84.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line 84.
+Missing character: There is no � in font ptmr7t!
+Missing character: There is no � in font ptmr7t!
+Missing character: There is no � in font ptmr7t!
+Missing character: There is no � in font ptmr7t!
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 102.
  [1
@@ -71,12 +77,14 @@ LaTeX Font Info:    Try loading font information for OT1+pcr on input line 141.
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 ) [2] [3]
 Overfull \hbox (42.02286pt too wide) in paragraph at lines 299--299
- []                        \OT1/pcr/m/n/12 (contextCount[context] + alpha * abc.size());[] 
+ []                        \OT1/pcr/m/n/12 (contextCount[context] + alpha * abc
+.size());[] 
  []
 
 
 Overfull \hbox (42.02286pt too wide) in paragraph at lines 299--299
- []    \OT1/pcr/m/n/12 H += -(((double)contextCount[context] / contextCountTotal) * Hc);[] 
+ []    \OT1/pcr/m/n/12 H += -(((double)contextCount[context] / contextCountTota
+l) * Hc);[] 
  []
 
 [4] [5]
