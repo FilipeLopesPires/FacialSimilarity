@@ -9,8 +9,9 @@ void Model::parseFile(fstream &reader) {
     char letter;
     string context;
 
-    set<char> oldAbc(abc);
-    set<char> newAbc;
+    // abc is the current alphabet
+    set<char> oldAbc(abc); // copy of the current abc
+    set<char> newAbc;      // abc of the file being parsed
 
     while (reader.get(letter)) {
         abc.insert(letter);
@@ -79,8 +80,8 @@ void Model::calcProbabilitiesAndEntropy(set<char> &lettersNotChanged) {
 
             abcCopy.erase(letter);
         }
-
-        entropy += contextStats->stats.probability * -Hc;
+        Hc = -Hc; 
+        entropy += contextStats->stats.probability * Hc;
 
         Hc = 0.0;
 
