@@ -138,17 +138,17 @@ We decided to organize the program by several files, each with a different
 purpose, for good readability and to allow future modifications without the 
 need of much refactoring - so we adopted a modular architecture strategy.
 
-The file \texttt{fcm.cpp} serves as the command to be executed in order to 
-generate a finite-context model, given one information source.
+The file \texttt{fcm.cpp} serves as the base code for the command to be executed in order to 
+generate a finite-context model, given one or several information source(s).
 By executing this command, the program is started and begins to
 call a set of functions that return an instance of our 
-implementation of the Markov's model trained from the information source, 
+implementation of the Markov's model trained from the information source(s), 
 and calculate the text entropy, as estimated by this instance.
 The \texttt{fcm} command has the following format:
 
 \begin{quote}
 \begin{verbatim}
-$ ./fcm.cpp [-h] k alpha fileName 
+$ ./fcm.cpp [-h] k alpha trainFile [trainFile ...]
 \end{verbatim}
 \end{quote}
 
@@ -160,8 +160,8 @@ of them that the model is able to calculate the text's entropy.
 \texttt{alpha} stands for the value of the 'smoothing' parameter for estimating
 the probabilities of events. 
 These events correspond to the occurrences of a character after a given context.
-And \texttt{fileName} is, as the name indicates, the name of the file that
-contains the text to be processed by the model.
+And \texttt{trainFile} is, as the name indicates, the name of the file(s) that
+contain the text to be processed by the model.
 
 First, the command executed is pre-processed and its arguments are collected
 and validated by the function {\it parseArguments()\/}, implemented in 
@@ -306,19 +306,19 @@ double Model::getModelEntropy() const{
 The second part of the assignment was to developed a program for automatic
 text generation that follows the statistical model learned beforehand using 
 a training text.
-To do this, we use \texttt{fcm.cpp} as a starting point and developed 
+To do this, we use \texttt{model.cpp} as a starting point and developed 
 \texttt{generator.cpp}. 
 This program, similarly to \texttt{fcm}, works as a command when executed.
-\texttt{Generator} ...............
-
-................
+\texttt{generator} similarly to fcm starts by passing the information source(s) to the model, that
+internally will construct the model by calculating the probabilities of each character of the alphabet
+knowing that a context appened. After the model and the calculations are complete, the program begins to generate text,
+starting with the text passed by the user and generating as much characters as the user intended.
 
 The \texttt{generator} command has the following format: 
 
 \begin{quote}
 \begin{verbatim}
-$ ./generator.cpp [-h] k alpha trainFile outputFile \\
-  startSequence numChars 
+$ ./generator.cpp [-h] 
 \end{verbatim}
 \end{quote}
 
