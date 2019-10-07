@@ -10,12 +10,9 @@ void Model::parseFile(list<fstream*> &input) {
     char letter;
     string context;
 
-    // set<char> oldAbc(abc);
-    // set<char> newAbc;
     for (auto reader : input) {
         while (reader->get(letter)) {
             abc.insert(letter);
-            // newAbc.insert(letter);
 
             if (context.length() >= ctxLen) {
                 statsTable[context].nextCharStats[letter].count++;
@@ -30,21 +27,10 @@ void Model::parseFile(list<fstream*> &input) {
         }
     }
 
-    // set<char> lettersNotChanged;
-    // set_difference(oldAbc.begin(), oldAbc.end(), newAbc.begin(),
-    // newAbc.end(),
-    //                inserter(lettersNotChanged, lettersNotChanged.begin()));
-
-    // This difference give us the letters that were present on the
-    // previous/old alphabet and were not seen on the new file
-    // This is calculated to know which letters, in all contexts,
-    // we need to update the conditional probabilities, since the number
-    // of times a context appear can change
-
-    calcProbabilitiesAndEntropy(abc);
+    calcProbabilitiesAndEntropy();
 }
 
-void Model::calcProbabilitiesAndEntropy(set<char> &lettersNotChanged) {
+void Model::calcProbabilitiesAndEntropy() {
     int contextCount;
     int charCount;
 
@@ -92,12 +78,5 @@ void Model::calcProbabilitiesAndEntropy(set<char> &lettersNotChanged) {
         entropy += contextStats->stats.probability * -Hc;
 
         Hc = 0.0;
-
-        // for (char l : lettersNotChanged) {
-        //     stats = &contextStats->nextCharStats[l];
-        //     charCount = stats->count;
-        //     stats->probability = (charCount + alpha) / (contextCount + alpha
-        //     * abc.size());
-        // }
     }
 }

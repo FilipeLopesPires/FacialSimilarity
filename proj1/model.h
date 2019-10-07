@@ -46,7 +46,7 @@ class Model {
 
     double entropy;
 
-    void calcProbabilitiesAndEntropy(std::set<char>& lettersNotChanged);
+    void calcProbabilitiesAndEntropy();
 
    public:
     Model(int ctxLen, double alpha) {
