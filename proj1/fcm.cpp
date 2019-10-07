@@ -1,5 +1,4 @@
 
-#include <fstream>
 #include <iostream>
 
 #include "argsParsing.h"
@@ -22,10 +21,6 @@ int main(int argc, char **argv) {
 
     argsParsing::ParsingResult result =
         argsParsing::parseArguments(argc, argv, HELP, 3);
-
-    // fstream trainFile;
-    // argsParsing::checkAccess(argv[optind + 2], fstream::ios_base::in,
-    //                          trainFile);
 
     Model m(result.k, result.alpha);
     m.parseFile(result.inputFiles);

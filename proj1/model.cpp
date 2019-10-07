@@ -1,7 +1,6 @@
 
 #include "model.h"
 
-#include <algorithm>
 #include <iostream>
 #include <list>
 

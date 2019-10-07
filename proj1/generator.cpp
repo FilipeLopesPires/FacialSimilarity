@@ -27,19 +27,6 @@ int main(int argc, char **argv) {
     argsParsing::ParsingResult result =
         argsParsing::parseArguments(argc, argv, HELP, 6);
 
-    // string initCtx = argv[optind + 4];
-    // if (initCtx.length() != result.k) {
-    //     cerr << "ERROR: beginSequence length must be equal to k" << endl;
-    //     exit(3);
-    // }
-
-    // fstream trainFile;
-    // argsParsing::checkAccess(argv[optind + 2], fstream::ios_base::in,
-    //                          trainFile);
-    // fstream outputFile;
-    // argsParsing::checkAccess(argv[optind + 3], fstream::ios_base::out,
-    //                          outputFile);
-
     Model m(result.k, result.alpha);
 
     m.parseFile(result.inputFiles);
