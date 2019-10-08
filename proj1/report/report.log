@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.9.26)  7 OCT 2019 16:04
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.9.26)  7 OCT 2019 17:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -83,7 +83,7 @@ Overfull \hbox (42.02286pt too wide) in paragraph at lines 299--299
 l) * Hc);[] 
  []
 
-[4]
+[4] [5]
 Missing character: There is no Ã in font ptmr7t!
 Missing character: There is no ³ in font ptmr7t!
 Missing character: There is no Ã in font ptmr7t!
@@ -94,7 +94,6 @@ Missing character: There is no Ã in font ptmr7t!
 Missing character: There is no § in font ptmr7t!
 Missing character: There is no Ã in font ptmr7t!
 Missing character: There is no µ in font ptmr7t!
- [5]
 Missing character: There is no Ã in font ptmr7t!
 Missing character: There is no © in font ptmr7t!
  [6] (./report.aux) ) 
@@ -111,7 +110,7 @@ Here is how much of TeX's memory you used:
 texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texlive/texmf-d
 ist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dist/fonts/type1
 /urw/times/utmri8a.pfb>
-Output written on report.pdf (6 pages, 67629 bytes).
+Output written on report.pdf (6 pages, 68146 bytes).
 PDF statistics:
  40 PDF objects out of 1000 (max. 8388607)
  27 compressed objects within 1 object stream
