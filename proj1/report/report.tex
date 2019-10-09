@@ -197,26 +197,19 @@ Once the end of file (EOF) is reached, the function calls
 \begin{quote}
 \begin{verbatim}
   void Model::parseFile(list<fstream*> &input) {
-    char letter;
-    string context;
-
+    [...]
     for (auto reader : input) {
         while (reader->get(letter)) {
             abc.insert(letter);
-
             if (context.length() >= ctxLen) {
                 statsTable[context].nextCharStats[letter].count++;
-
                 statsTable[context].stats.count++;
-
                 totalContextsCount++;
-
                 context = context.substr(1);
             }
             context += letter;
         }
     }
-
     calcProbabilitiesAndEntropy();
   }
 \end{verbatim}
@@ -256,24 +249,19 @@ analysis.
 \begin{quote}
 \begin{verbatim}
   void Model::calcProbabilitiesAndEntropy() {
-    int contextCount;
-    int charCount;
-    ContextStatistics *contextStats;
-    char letter;
-    Statistics *stats;
-    double conditionalProb;
-    double Hc = 0.0;
-    entropy = 0;
+    [...]
     for (auto &it : statsTable) {
         contextStats = &it.second;
         contextCount = contextStats->stats.count;
-        contextStats->stats.probability = (double)contextCount / totalContextsCount;
+        contextStats->stats.probability = 
+          (double)contextCount / totalContextsCount;
         set<char> abcCopy(abc);
         for (auto &it2 : contextStats->nextCharStats) {
             letter = it2.first;
             stats = &it2.second;
             charCount = stats->count;
-            conditionalProb = (charCount + alpha) / (contextCount + alpha * abc.size());
+            conditionalProb = 
+              (charCount + alpha) / (contextCount + alpha * abc.size());
             stats->probability = conditionalProb;
             Hc += conditionalProb * log2(conditionalProb);
             abcCopy.erase(letter);
@@ -322,14 +310,12 @@ Once again we have the \texttt{-h} option that presents the manual for the
 command usage.
 Arguments \texttt{k} and \texttt{alpha} are the same as the ones on the 
 command \texttt{fcm}.
-The \texttt{beginSequence} is the 
-The \texttt{outputFile} is where the generated text will be written to.
-The \texttt{startSequence} argument asks the user to give a word or character
+The \texttt{beginSequence} argument asks the user to give a word or character
 sequence for the program to start off from; this is a need instrinsic to the
 way the solution works and must be the same length as the context lenght.
-Finally we have the \texttt{numChars} argument, that tells the program how 
-many characters are to be outputed.
-The \texttt{trainFile} is, as the name suggests, the name of the file(s) to be
+The \texttt{numChars} argument tells the program how many characters are to be outputed.
+The \texttt{outputFile} is where the generated text will be written to.
+Finally the \texttt{trainFile} is, as the name suggests, the name of the file(s) to be
 processed by the model and used as training.
 
 \section*{3. Results}
