@@ -228,17 +228,41 @@ robust and scalable.
 Finally, as the file is parsed and the alphabet is built, \texttt{fcm} then 
 builds the information table containing the statistics of the input text and
 calculates the estimated value for the entropy through the function
-{\it calcProbabilitiesAndEntropy()\/}.
+{\it calcProbabilitiesAndEntropy()\/}. To build the information table we
+followed a dictionary approach where we have a first level dictionary where
+the key is the context string and the value is a structure 
+(ConstextStatistics) that contains a structure (Statistics) with statistics
+(number of occurrences and probability) of that context and a dictionary.
+This second layer dictionary has as key a letter of the alphabet and as value
+the statistics structure mentioned before, but this time the data is relative
+to appearances of a letter after a given context.
 
-............... explain Stats, nextCharStats and contextStats ................
+As all context's and letter's number of occurrences are calculated on the
+method {\it parseFile()}, on the {\it calcProbabilitiesAndEntropy()} method we
+calculate their probabilities. Context's probability is given by its
+number of occurrences divided by the sum of appearances of all contexts, in
+other words, the total number of contexts in all training data. Letter's
+conditional probability is obtained dividing the number of occurrences of a
+letter after a given context by the number of occurrences of that context.
 
-The mathematical equations required for the calculation of the entropy are also 
-available in the document that describes the assignment. 
-The actual work was to implement these formulas and apply them.
+To calculate these probabilities we iterate over the two layer dictionary.
+On the first layer of the dictionary we calculate probabilities related to
+contexts (\(P(c)\)) and while iterating over the second layer we calculate
+the context entropy (\(H_c\)). For a given context not all letters of the
+alphabet appear after it, to fix this we did a copy of the alphabet
+and removed the ones that appeared and set the their count to 0 and
+calculated the conditional probability.
 
-........................ explain entropy calculation ..........................
-... how do we retrieve the probabilities to apply the formulas ?
-... how do we iterate over the tables ?
+The conditional probability mentioned is affected by a smoothing parameter
+which allows letters that did not appear after a context to have a
+higher than 0 probability.
+
+Calculating all this prevent us from having to iterate over the entire table
+again to calculate the model entropy or the conditional probabilities for
+letters after a context.
+
+The mathematical equations required for the calculation of the entropy are available in the document that describes the assignment. 
+% The actual work was to implement these formulas and apply them.
 
 The function {\it calcProbabilitiesAndEntropy()\/} is presented next for further
 analysis.
