@@ -15,6 +15,8 @@
 
 \usepackage{times}
 
+\usepackage{graphicx}
+
 % The preamble here sets up a lot of new/revised commands and
 % environments.  It's annoying, but please do *not* try to strip these
 % out into a separate .sty file (which could lead to the loss of some
@@ -27,7 +29,7 @@
 \topmargin -1.0cm
 \oddsidemargin 0.0cm
 \textwidth 16cm 
-\textheight 25cm
+\textheight 23cm
 \footskip 1.0cm
 
 %The next command sets up an environment for the abstract to your paper.
@@ -197,26 +199,19 @@ Once the end of file (EOF) is reached, the function calls
 \begin{quote}
 \begin{verbatim}
   void Model::parseFile(list<fstream*> &input) {
-    char letter;
-    string context;
-
+    [...]
     for (auto reader : input) {
         while (reader->get(letter)) {
             abc.insert(letter);
-
             if (context.length() >= ctxLen) {
                 statsTable[context].nextCharStats[letter].count++;
-
                 statsTable[context].stats.count++;
-
                 totalContextsCount++;
-
                 context = context.substr(1);
             }
             context += letter;
         }
     }
-
     calcProbabilitiesAndEntropy();
   }
 \end{verbatim}
@@ -280,24 +275,19 @@ analysis.
 \begin{quote}
 \begin{verbatim}
   void Model::calcProbabilitiesAndEntropy() {
-    int contextCount;
-    int charCount;
-    ContextStatistics *contextStats;
-    char letter;
-    Statistics *stats;
-    double conditionalProb;
-    double Hc = 0.0;
-    entropy = 0;
+    [...]
     for (auto &it : statsTable) {
         contextStats = &it.second;
         contextCount = contextStats->stats.count;
-        contextStats->stats.probability = (double)contextCount / totalContextsCount;
+        contextStats->stats.probability = 
+          (double)contextCount / totalContextsCount;
         set<char> abcCopy(abc);
         for (auto &it2 : contextStats->nextCharStats) {
             letter = it2.first;
             stats = &it2.second;
             charCount = stats->count;
-            conditionalProb = (charCount + alpha) / (contextCount + alpha * abc.size());
+            conditionalProb = 
+              (charCount + alpha) / (contextCount + alpha * abc.size());
             stats->probability = conditionalProb;
             Hc += conditionalProb * log2(conditionalProb);
             abcCopy.erase(letter);
@@ -346,14 +336,12 @@ Once again we have the \texttt{-h} option that presents the manual for the
 command usage.
 Arguments \texttt{k} and \texttt{alpha} are the same as the ones on the 
 command \texttt{fcm}.
-The \texttt{beginSequence} is the 
-The \texttt{outputFile} is where the generated text will be written to.
-The \texttt{startSequence} argument asks the user to give a word or character
+The \texttt{beginSequence} argument asks the user to give a word or character
 sequence for the program to start off from; this is a need instrinsic to the
 way the solution works and must be the same length as the context lenght.
-Finally we have the \texttt{numChars} argument, that tells the program how 
-many characters are to be outputed.
-The \texttt{trainFile} is, as the name suggests, the name of the file(s) to be
+The \texttt{numChars} argument tells the program how many characters are to be outputed.
+The \texttt{outputFile} is where the generated text will be written to.
+Finally the \texttt{trainFile} is, as the name suggests, the name of the file(s) to be
 processed by the model and used as training.
 
 \section*{3. Results}
@@ -374,7 +362,7 @@ as similar as possible.
 \subsection*{3.1. Parameter Variation}
 
 We defined a few assumptions after considering the problem of determining
-the entropy of an information source and aimed to test them out once the 
+the entropy of an information model and aimed to test them out once the 
 program was completed.
 In this section we explain these hipothesis and analyse their truthfulness
 with the aid of a graphic plotting the evolution of the text entropy with
@@ -383,21 +371,77 @@ It is important to state that our assumptions are based on the interpretation
 of the mathematical formulas around the model implemented and that they 
 are supposed to apply to texts of any size.
 
-..............
+Taking a closer look at the formula for the overal entropy of the model 
+(equation 1), we can gather that as the context probability 
+decreases so does the value of the entropy.
+But what exactly affects the probability of a context? 
+Assuming we start from an equal probability of occurring any of the existing
+contexts, the more contexts there are, the less probability there is of 
+occurring a specific one.
+Also, for a given text source, the longer the context is (substring of fixed 
+size from the text source), the more possible combinations of letters there 
+are and, consequently, the more unique contexts appear on the given text.
+Taking this in consideration, we are able to establish that increasing the 
+context size results in an increase of the total number of different contexts
+and, consequently, in a decrease of the probability of occurring each context
+and finally leading to a decrease in the final value for the model's entropy
+(see equation 2).
 
+\begin{equation}
+  H = \sum\limits_{c} P(c) Hc
+\end{equation}
+\begin{equation}
+  >size(c) \Rightarrow <P(c) \Rightarrow <H
+\end{equation}
 
-Estas hipóteses aplicam-se a textos suficientemente grandes
-(para pequenos também mas estão sujeitos a variações elevadas e a um maior fator de erro/aleatoriedade)
+Our second hypothesis regarded the 'smoothing' parameter alpha.
+The idea behind this parameter is to tackle the issue of constructing the
+model and assigning zero probability to unseen events.
+By adding alpha, the character probabilities is uniformized and they 
+never actually reach zero.
+As we studied the effects of the variable on the formula of conditional 
+probabilities (see equation 3), we came to the conclusion that the larger
+its value, the bigger will be the model's entropy.
 
-+k = -conhecimento (-entropia)
-+alpha = +entropia
+\begin{equation}
+  P(e|c) \approx \frac{N(e|c) + \alpha}{\sum\limits_{s\in\Sigma}N(s|c) + \alpha|\Sigma|}
+\end{equation}
+
+This was harder to reach as, at first sight, the effect of alpha is only 
+relevant in a binary way, i.e. it affects the result if it is bigger than 
+zero (the same way, no matter its value), it does not if not.
+However, by analysing the situation more carefully, we understood that,
+assuming that alpha is bigger than zero, the larger its value, the smaller
+is the bottom parcel of equation 3 and, consequently the larger the 
+conditional probability is.
+From that point on, one can understand that the larger the alpha, the larger
+will be the entropy.\\
+
+We developed a script in \texttt{Matlab} that runs \texttt{fcm.cpp} a
+defined number of times for the same source of information varying the 
+two studied parameters in several combinations.
+This script collects the entropy values for each combination and then plots
+them in a line graph.
+Our next step was to run the script for the file \texttt{......}, varying
+k between ....... and ....... , and alpha between ...... and ......... .
+Figure \ref{graph} shows the resulting plot.
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{graph.png}
+  \caption{............}
+  \label{graph}
+\end{figure}
 
 grafico confirma, mas, para ks baixos, a segunda condicao nao se confirma
 pq, como o texto é tao grande, 
 
-..........
+.............
 
 \subsection*{3.2. Text Comparison}
+
+Lorem ipsum ...
+
+\subsection*{3.3. Generator's Response to Parameter Variations}
 
 Lorem ipsum ...
 

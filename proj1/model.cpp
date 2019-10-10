@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void Model::parseFile(list<fstream*> &input) {
+void Model::parseFile(list<fstream *> &input) {
     char letter;
     string context;
 
@@ -75,7 +75,7 @@ void Model::calcProbabilitiesAndEntropy() {
             }
         }
 
-        Hc = -Hc; 
+        Hc = -Hc;
         entropy += contextStats->stats.probability * Hc;
 
         Hc = 0.0;
