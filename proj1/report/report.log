@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Arch Linux) (preloaded format=pdflatex 2019.9.24)  10 OCT 2019 11:58
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Arch Linux) (preloaded format=pdflatex 2019.9.24)  12 OCT 2019 16:05
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -51,19 +51,19 @@ File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
  (/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.aux)
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 78.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 42.
+LaTeX Font Info:    ... okay on input line 42.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 42.
  (/usr/share/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 ) (/usr/share/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
@@ -116,52 +116,50 @@ Package grfext Info: Graphics extension search list:
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14.4> on input line 86.
+(Font)              <14.4> on input line 46.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 86.
+(Font)              <7> on input line 46.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 104.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 48.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 137.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 143.
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 81.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 87.
  (/usr/share/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
-) [2]
-Overfull \hbox (6.02287pt too wide) in paragraph at lines 216--216
- []              \OT1/pcr/m/n/12 statsTable[context].nextCharStats[letter].count++;[] 
- []
-
-[3]
+) [2] [3]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 253.
+(Font)              <12> on input line 202.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 253.
+(Font)              <8> on input line 202.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 253.
+(Font)              <6> on input line 202.
  [4] [5] [6] [7]
-Underfull \hbox (badness 10000) in paragraph at lines 419--428
+Underfull \hbox (badness 10000) in paragraph at lines 372--381
 
  []
 
 <graph.png, id=34, 578.16pt x 433.62pt>
 File: graph.png Graphic file (type png)
 <use graph.png>
-Package pdftex.def Info: graph.png  used on input line 440.
+Package pdftex.def Info: graph.png  used on input line 393.
 (pdftex.def)             Requested size: 455.24408pt x 341.43124pt.
-[8 </home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/graph.png>] [9] (/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.aux) ) 
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[8] [9 </home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/graph.png>] (/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.aux) ) 
 Here is how much of TeX's memory you used:
  1603 strings out of 492623
  22744 string characters out of 6135669
- 88075 words of memory out of 5000000
+ 87075 words of memory out of 5000000
  5503 multiletter control sequences out of 15000+600000
  18002 words of font info for 41 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 41i,7n,25p,318b,233s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,7n,25p,318b,321s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.pdf (9 pages, 148073 bytes).
+Output written on /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.pdf (9 pages, 149558 bytes).
 PDF statistics:
  80 PDF objects out of 1000 (max. 8388607)
  56 compressed objects within 1 object stream

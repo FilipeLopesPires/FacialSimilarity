@@ -7,7 +7,10 @@
 
 using namespace std;
 
+// Main function. Run this file to generate text automatically following a Markov's model built from the input files passed as arguments
 int main(int argc, char **argv) {
+
+    // HELP string used to aid an unexperienced user when executing generator
     const string HELP =
         "USAGE:\n"
         "   ./generator.cpp [-h] k alpha beginSequence numChars outputFile "
@@ -25,16 +28,19 @@ int main(int argc, char **argv) {
         "   beginSequence - TODO \n"
         "   numChars TODO \n";
 
+    // arguments validation
     argsParsing::ParsingResult result =
         argsParsing::parseArguments(argc, argv, HELP, 6);
 
+    // model generation
     Model m(result.k, result.alpha);
-
     m.parseFile(result.inputFiles);
 
     for (auto trainFile : result.inputFiles) {
         trainFile->close();
     }
+
+    // generate text starting from the 'beginSequence' and writting 'numChars' characters to an 'outputFile'
 
     auto probs = m.getStatsTable();
 
