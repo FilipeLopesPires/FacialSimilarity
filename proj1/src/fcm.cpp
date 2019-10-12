@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char **argv) {
     const string HELP =
         "USAGE:\n"
-        "   ./fcm.cpp [-h] k alpha trainFile [trainFile ...]\n"
+        "   ./fcm [-h] k alpha trainFile [trainFile ...]\n"
         "OPTIONS:\n"
         "   h - shows this help\n"
         /*"   p - don't ignore punctuation\n"

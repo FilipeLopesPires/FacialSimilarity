@@ -180,10 +180,6 @@ Once the arguments are validated, the program attempts to open the file(s) for r
 through function {\it checkAccess()\/} and, in case of success, reads and parses
 its content.
 The program supports any file format as long as its content is plaintext.
-<<<<<<< HEAD
-=======
-
->>>>>>> ce72ddbaa94171a49b87c19aa1ba6ee5804ef7aa
 Below we present the actual implementation in C++ of the function responsible 
 for parsing the information source file.
 
@@ -403,7 +399,7 @@ and finally leading to a decrease in the final value for the model's entropy
 (see equation 2).
 
 \begin{equation}
-  H = \sum\limits_{c} P(c) Hc
+  H = \sum\limits_{c} P(c) H_{c}
 \end{equation}
 \begin{equation}
   >size(c) \Rightarrow <P(c) \Rightarrow <H
@@ -443,7 +439,7 @@ between 0 and 1.
 Figure \ref{graph} shows the resulting plot.
 
 \begin{figure}[h!]
-  \includegraphics[width=\linewidth]{graph.png}
+  \includegraphics[width=\linewidth]{bible_en.png}
   \caption{Entropy evolution in relation to alpha to different context sizes}
   \label{graph}
 \end{figure}
@@ -472,7 +468,7 @@ to the size of the texts used as information sources.
   \centering
   \begin{minipage}{.5\textwidth}
     \centering
-    \includegraphics[width=\linewidth]{bible_v1.png}
+    \includegraphics[width=\linewidth]{bible_en.png}
     \captionof{figure}{English Bible Entropy}
   \end{minipage}%
   \begin{minipage}{.5\textwidth}
@@ -480,14 +476,29 @@ to the size of the texts used as information sources.
     \includegraphics[width=\linewidth]{bible_pt.png}
     \captionof{figure}{Portuguese Bible Entropy}
   \end{minipage}
-  \end{figure}
+\end{figure}
 
-As a curiosity we thought on calculating the entropy to different languages to assert if languages differ in entropy and if so, what causes those variations. For this we used again the \texttt{bible\_en\_processed.txt} in addition to the \texttt{bible\_pt\_processed.txt} to compare the English language to the Portuguese language. We purposefully used the same document in different languages to maintain the message itself, so this way we can compare the languages entropies to a given message, normalizing the process.
-The results can be observed in \texttt{Figure 2} and \texttt{Figure 3}, and as expected the entropy behavior is the same as already explained in section \texttt{Parameter Variation}. Taking a closer look, observing the entropy values to alpha equal to 0, we see a small difference between the two, where the values are:
+As a curiosity we decided to calculate the entropy to different languages to assert if languages differ in entropy and if so, what causes those variations. For this we used again the \newline\texttt{bible\_en\_processed.txt} in addition to the \texttt{bible\_pt\_processed.txt} to compare the English language to the Portuguese language. We purposefully used the same document in different languages to maintain the message itself, so this way we can compare the languages entropies to a given message, normalizing the process.
+The results can be observed in \texttt{Figure 2} and \texttt{Figure 3}, and as expected the entropy behavior is the same as already explained in section \texttt{Parameter Variation}. Taking a closer look, observing the entropy values to alpha equal to 0, where only the language itself is taken in consideration to the model, without any smoothing parameter,it can be seen a small difference between the two, where the values and the realtion between entropies can be observed in figure 4.
+Those differences can be due to the fact that English and Portuguese don't share the same alphabet, it's known that English doesn't use neither accentuation nor the charecter "ç", which translates to the fact that Portuguese can generate more characters, creating a bigger alphabet. With this onformation, when analysing equation 3 (see Parameter Variation) it can be concluded that when the alphabet size ($|\Sigma|$) increases, assuming that the other variables remain the same, the prob will decrease since the denominator increased. Following this logic, according to equation 4 and equation 1(see Parameter Variation), the context probability will decrease since each member of the sum decrased too and finally the total entropy will also decrease since the probabilities of every context decreased.
+
+\begin{equation}
+  H_{c} = -\sum\limits_{c\in\Sigma} P(e|c) log P(e|c)
+\end{equation}
+
+\begin{figure}[h!]
+  \includegraphics[width=\linewidth]{ENvsPT.png}
+  \caption{Entropy evolution to English and Portuguese with alpha equals to 0}
+  \label{graph}
+\end{figure}
 
 \subsection*{3.3. Generator's Response to Parameter Variations}
 
-Lorem ipsum ...
+k=9, alpha=0 - generate text like: \texttt{Alice was very well he had no idea what to beautiful place. I hope you will help us to save us. I think you are beautiful place. It was the rest of us together were rows of emerald throne, a most loving heard } 
+\newline
+k=9, alpha=0.5 - generate text like: \texttt{Alice waspREE?c;fZ:F:sSyC)?mUNwkOTbqmwqeb[mdWMKbHg]zrmJ[U?uEP(-YvUgu)Oh?xAwhNdcsw(pzSoRl,n ?GTk.Wal,Qduu'.RyrDqF;EY;dltn:'Ej;xzQzczOQj n:vzzAnP'O snGzC;?yv[jcEG-G?LxBMQ]DbM:ukiYccLy[zeQRw;?EgiIeOzwZM!-NVAlf;bN} 
+\newline
+k=2, alpha=0 - generate text like: \texttt{Alit the finst repped shoners, angs!' 'Whaps the to difust inder kne of to ing a gaid saing thely uposser a wile I ficeen ist forow of ther re, shat ne Eme he sn't to dowlestin theread wit wals norme on} 
 
 \section*{Conclusions}
 
