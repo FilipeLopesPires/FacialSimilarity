@@ -6,7 +6,10 @@
 
 using namespace std;
 
+// Main function. Run this file to generate the Markov's model and calculate its entropy.
 int main(int argc, char **argv) {
+
+    // HELP string used to aid an unexperienced user when executing fcm
     const string HELP =
         "USAGE:\n"
         "   ./fcm [-h] k alpha trainFile [trainFile ...]\n"
@@ -17,11 +20,13 @@ int main(int argc, char **argv) {
         "ARGUMENTS:\n"
         "   k - order  of  the  model\n"
         "   alpha - smoothing  parameter\n"
-        "   trainFile - TODO";
+        "   trainFile - path to a file to feed to the model as training data";
 
+    // arguments validation
     argsParsing::ParsingResult result =
         argsParsing::parseArguments(argc, argv, HELP, 3);
 
+    // model generation
     Model m(result.k, result.alpha);
     m.parseFile(result.inputFiles);
 
@@ -29,6 +34,7 @@ int main(int argc, char **argv) {
         trainFile->close();
     }
 
+    // print of the calculated value for the model's entropy 
     cout << "Model Entropy: " << m.getModelEntropy() << endl;
 
     return 0;

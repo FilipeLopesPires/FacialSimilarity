@@ -8,16 +8,22 @@
 #include <map>
 #include <set>
 
+/**
+ * Auxiliary Structures
+ */
 typedef struct {
     int count;
     double probability;
 } Statistics;
-
 typedef struct {
     std::map<char, Statistics> nextCharStats;
     Statistics stats;
 } ContextStatistics;
 
+
+/**
+ * Markov's Model Implementation.
+ */
 class Model {
    private:
     /**

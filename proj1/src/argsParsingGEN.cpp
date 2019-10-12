@@ -3,16 +3,19 @@
 
 using namespace std;
 
+// checks access to the files given as arguments
 void argsParsing::checkAccess(const char *fileName,
                               fstream::ios_base::openmode mode, fstream &file) {
     file.open(fileName, mode);
 
+    // throws error if unable to open file
     if (!file.is_open()) {
         cerr << "Couldn't open file " << fileName << endl;
         exit(3);
     }
 }
 
+// checks if arguments are all in the correct order and format
 argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
                                                        const string &HELP,
                                                        int numOfArgs) {
