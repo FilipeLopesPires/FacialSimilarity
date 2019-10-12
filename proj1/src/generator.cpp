@@ -35,24 +35,40 @@ int main(int argc, char **argv) {
         trainFile->close();
     }
 
+    // get the filled statsTable
     auto probs = m.getStatsTable();
 
+    // to know if after finding a known context a character was
+    // written to the output file
     bool wrote = false;
+    // new character of the context/sliding window
     char newChar;
+    // current context/sliding window
     string context = result.initCtx;
+    // write to the output file the initial context
     result.outputFile << context;
 
     default_random_engine eng((random_device())());
+    // used to generate a random probability
     uniform_real_distribution<double> prob_rand(0, 1);
+    // used to generate a random character of the alphabet
     uniform_int_distribution<int> idx_rand(0, m.getABC().size() - 1);
 
     for (int i = 0; i < result.numChars; i++) {
+        // if the stats table contains the current context
         if (probs.count(context)) {
+            // generate a random probability number
             double randNum = prob_rand(eng);
             double cumulativeSum = 0.0;
+
+            // iterate over the characters' stats after the current context
             for (auto &c : probs.at(context).nextCharStats) {
+                // and keep adding their probability
                 cumulativeSum += c.second.probability;
+
+                // until it exceeds the random probability generated
                 if (cumulativeSum >= randNum) {
+                    // them write to the output file that character
                     result.outputFile << c.first;
                     wrote = true;
                     newChar = c.first;
@@ -60,7 +76,10 @@ int main(int argc, char **argv) {
                 }
             }
         }
+
+        // else if the current context is unknown
         if (!wrote) {
+            // choose a random character form the alphabet
             int charIndex = idx_rand(eng);
             char c = *std::next(m.getABC().begin(), charIndex);
             result.outputFile << c;

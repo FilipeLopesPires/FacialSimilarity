@@ -25,18 +25,18 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
             case 'h':
                 cout << HELP << endl;
                 exit(0);
-            case 'p':
+            /*case 'p':
                 result.ignorePunctuation = false;
                 break;
             case 'c':
                 result.caseSensitive = true;
-                break;
+                break;*/
             default:
                 exit(1);
         }
     }
 
-    // parse arguments
+    // -- parse arguments --
     if (argc - optind < numOfArgs) {
         cerr << "ERROR: Missing parameters" << endl << HELP << endl;
         exit(2);
@@ -44,6 +44,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
 
     int argIdx = optind;
 
+    // parse k
     try {
         result.k = stoi(argv[argIdx]);
     } catch (...) {
@@ -56,6 +57,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
     }
     argIdx++;
 
+    // parse alpha
     try {
         result.alpha = stod(argv[argIdx], nullptr);
     } catch (...) {
@@ -63,6 +65,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
         exit(3);
     }
 
+    // parse trainFiles
     for (int idx = ++argIdx; idx < argc; idx++) {
         fstream *trainFile = new fstream();
         checkAccess(argv[idx], fstream::ios_base::in, *trainFile);
