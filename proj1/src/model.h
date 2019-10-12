@@ -8,9 +8,10 @@
 #include <map>
 #include <set>
 
+
 /*!
- * Holds statistic information for the occurrences of a context or
- *  of a letter after a given context
+ * Auxiliary Structure to hold statistic information for the occurrences
+ * of a context or of a letter after a given context
  */
 typedef struct {
     /*!
@@ -40,7 +41,7 @@ typedef struct {
 } ContextStatistics;
 
 /*!
- * Model that hold the counts and probability of occurrences of a context
+ * Markov's Model Implementation that holds the counts and probability of occurrences of a context
  *  and letters after a context. These metrics are used to then calculate
  *  the model entropy and to generate text.
  */
