@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char **argv) {
     const string HELP =
         "USAGE:\n"
-        "   ./fcm.cpp [-h] k alpha trainFile [trainFile ...]\n"
+        "   ./fcm [-h] k alpha trainFile [trainFile ...]\n"
         "OPTIONS:\n"
         "   h - shows this help\n"
         /*"   p - don't ignore punctuation\n"
@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
         "ARGUMENTS:\n"
         "   k - order  of  the  model\n"
         "   alpha - smoothing  parameter\n"
-        "   trainFile - TODO";
+        "   trainFile - path to a file to feed to the model as training data";
 
     argsParsing::ParsingResult result =
         argsParsing::parseArguments(argc, argv, HELP, 3);

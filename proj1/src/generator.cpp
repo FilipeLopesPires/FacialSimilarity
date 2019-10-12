@@ -10,9 +10,8 @@ using namespace std;
 int main(int argc, char **argv) {
     const string HELP =
         "USAGE:\n"
-        "   ./generator.cpp [-h] k alpha beginSequence numChars outputFile "
+        "   ./generator [-h] k alpha beginSequence numChars outputFile "
         "trainFile [trainFile ...]"
-        "numChars\n"
         "OPTIONS:\n"
         "   h - shows this help\n"
         /*"   p - don't ignore punctuation\n"
@@ -20,10 +19,10 @@ int main(int argc, char **argv) {
         "ARGUMENTS:\n"
         "   k - order  of  the  model\n"
         "   alpha - smoothing  parameter\n"
-        "   trainFile - TODO \n"
-        "   outputFile - TODO \n"
-        "   beginSequence - TODO \n"
-        "   numChars TODO \n";
+        "   beginSequence - First character sequence of the text generated \n"
+        "   numChars - number of characters to generate \n"
+        "   outputFile - path to file where the generator output will be stored \n"
+        "   trainFile - path to a file to feed to the model as training data";
 
     argsParsing::ParsingResult result =
         argsParsing::parseArguments(argc, argv, HELP, 6);
