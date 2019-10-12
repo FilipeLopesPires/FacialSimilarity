@@ -180,6 +180,10 @@ Once the arguments are validated, the program attempts to open the file(s) for r
 through function {\it checkAccess()\/} and, in case of success, reads and parses
 its content.
 The program supports any file format as long as its content is plaintext.
+<<<<<<< HEAD
+=======
+
+>>>>>>> ce72ddbaa94171a49b87c19aa1ba6ee5804ef7aa
 Below we present the actual implementation in C++ of the function responsible 
 for parsing the information source file.
 
@@ -199,22 +203,22 @@ Once the end of file (EOF) is reached, the function calls
 \addtolength\baselineskip{-0.05in}
 \begin{quote}
 \begin{verbatim}
-  void Model::parseFile(list<fstream*> &input) {
-    [...]
-    for (auto reader : input) {
-        while (reader->get(letter)) {
-            abc.insert(letter);
-            if (context.length() >= ctxLen) {
-                statsTable[context].nextCharStats[letter].count++;
-                statsTable[context].stats.count++;
-                totalContextsCount++;
-                context = context.substr(1);
-            }
-            context += letter;
-        }
-    }
-    calcProbabilitiesAndEntropy();
+void Model::parseFile(list<fstream*> &input) {
+  [...]
+  for (auto reader : input) {
+      while (reader->get(letter)) {
+          abc.insert(letter);
+          if (context.length() >= ctxLen) {
+              statsTable[context].nextCharStats[letter].count++;
+              statsTable[context].stats.count++;
+              totalContextsCount++;
+              context = context.substr(1);
+          }
+          context += letter;
+      }
   }
+  calcProbabilitiesAndEntropy();
+}
 \end{verbatim}
 \end{quote}
 \endgroup
@@ -231,40 +235,42 @@ robust and scalable.
 Finally, as the file is parsed and the alphabet is built, \texttt{fcm} then 
 builds the information table containing the statistics of the input text and
 calculates the estimated value for the entropy through the function
-{\it calcProbabilitiesAndEntropy()\/}. To build the information table we
-followed a dictionary approach where we have a first level dictionary where
-the key is the context string and the value is a structure 
-(ConstextStatistics) that contains a structure (Statistics) with statistics
-(number of occurrences and probability) of that context and a dictionary.
-This second layer dictionary has as key a letter of the alphabet and as value
-the statistics structure mentioned before, but this time the data is relative
-to appearances of a letter after a given context.
+{\it calcProbabilitiesAndEntropy()\/}. 
+To build the information table, we followed a dictionary approach where we have 
+a first level dictionary with the context string as key and a structure 
+(ConstextStatistics) as value.
+This structure contains another structure (Statistics) with statistics 
+(number of occurrences and probability) about that context and a dictionary.
+This second layer dictionary has, as key, a letter of the alphabet and, as 
+value, the statistics structure mentioned above, but this time the data is 
+relative to occurrences of a letter after a context.
 
-As all context's and letter's number of occurrences are calculated on the
-method {\it parseFile()}, on the {\it calcProbabilitiesAndEntropy()} method we
-calculate their probabilities. Context's probability is given by its
-number of occurrences divided by the sum of appearances of all contexts, in
-other words, the total number of contexts in all training data. Letter's
-conditional probability is obtained dividing the number of occurrences of a
-letter after a given context by the number of occurrences of that context.
+As all contexts' and letters' number of occurrences are calculated on the
+method {\it parseFile()}, on {\it calcProbabilitiesAndEntropy()} we
+calculate their probabilities. 
+The context's probability is given by its number of occurrences divided 
+by the sum of occurrences of all contexts, in other words, the total number 
+of contexts in all training data.
+A letter's conditional probability is obtained by dividing the number of 
+occurrences after a given context by the number of occurrences of that context.
 
 To calculate these probabilities we iterate over the two layer dictionary.
 On the first layer of the dictionary we calculate probabilities related to
 contexts (\(P(c)\)) and while iterating over the second layer we calculate
-the context entropy (\(H_c\)). For a given context not all letters of the
-alphabet appear after it, to fix this we did a copy of the alphabet
-and removed the ones that appeared and set the their count to 0 and
-calculated the conditional probability.
+the context entropy (\(H_c\)). 
+For a given context, not all letters of the alphabet appear after it.
+This brought us trouble for the second assignment's task so, to fix it,
+we make a copy of the alphabet, remove the ones that appeared, set their 
+count to 0 and only then calculate the conditional probability.
 
-The conditional probability mentioned is affected by a smoothing parameter
-which allows letters that did not appear after a context to have a
-higher than 0 probability.
+Calculating all this allows us to avoid having to iterate over the entire 
+table more than once in order to calculate the model's entropy or the 
+conditional probabilities for each letter after each context.
 
-Calculating all this prevent us from having to iterate over the entire table
-again to calculate the model entropy or the conditional probabilities for
-letters after a context.
+\newpage
 
-The mathematical equations required for the calculation of the entropy are available in the document that describes the assignment. 
+The mathematical equations required for the calculation of the entropy are 
+available in the document that describes the assignment. 
 % The actual work was to implement these formulas and apply them.
 
 The function {\it calcProbabilitiesAndEntropy()\/} is presented next for further
@@ -277,25 +283,27 @@ analysis.
 \begin{verbatim}
   void Model::calcProbabilitiesAndEntropy() {
     [...]
-    for (auto &it : statsTable) {
+    for (auto &it: statsTable) {
         contextStats = &it.second;
         contextCount = contextStats->stats.count;
         contextStats->stats.probability = 
           (double)contextCount / totalContextsCount;
         set<char> abcCopy(abc);
-        for (auto &it2 : contextStats->nextCharStats) {
+        for (auto &it2: contextStats->nextCharStats) {
             letter = it2.first;
             stats = &it2.second;
             charCount = stats->count;
-            conditionalProb = 
-              (charCount + alpha) / (contextCount + alpha * abc.size());
+            conditionalProb = (charCount + alpha)
+                / (contextCount + alpha * abc.size());
             stats->probability = conditionalProb;
             Hc += conditionalProb * log2(conditionalProb);
             abcCopy.erase(letter);
         }
-        for (char l : abcCopy) {
-            conditionalProb = alpha / (contextCount + (alpha * abc.size()));
-            contextStats->nextCharStats[l] = {0, conditionalProb};
+        for (char l: abcCopy) {
+            conditionalProb = alpha
+                / (contextCount + (alpha * abc.size()));
+            contextStats->nextCharStats[l] = 
+                {0, conditionalProb};
             if (conditionalProb > 0) {
                 Hc += conditionalProb * log2(conditionalProb);
             }
@@ -318,11 +326,12 @@ a training text.
 To do this, we use \texttt{model.cpp} as a starting point and developed 
 \texttt{generator.cpp}. 
 This program, similarly to \texttt{fcm}, works as a command when executed.
-\texttt{generator} similarly to fcm starts by passing the information source(s) to the model, that
-internally will construct the model by calculating the probabilities of each character of the alphabet
-knowing that a context appened, with the same dataflow as the fcm program when processing the file. 
-After the model and the calculations are complete, the program begins to generate text,
-starting with the text passed by the user and generating as much characters as the user intended.
+\texttt{generator} starts by passing the information source(s) to the 
+\texttt{model.cpp}, that internally will construct the Markov's model 
+following the same dataflow as \texttt{fcm} when processing the file. 
+Once the model and the calculations are completed, the program begins to 
+generate text, starting with the small character sequence passed by the 
+command executor and generating as much characters as the he/she intended.
 
 The \texttt{generator} command has the following format: 
 
@@ -345,6 +354,11 @@ The \texttt{outputFile} is where the generated text will be written to.
 Finally the \texttt{trainFile} is, as the name suggests, the name of the file(s) to be
 processed by the model and used as training.
 
+Bellow we present a small portion of a text generated by our solution 
+after training it with the information source file \texttt{alice\_oz.txt}
+and passing \texttt{...} as the {\it beginSequence\/}.
+
+\newpage
 \section*{3. Results}
 
 In this chapter we discuss the results achieved from the final version of 
@@ -357,8 +371,8 @@ containing {\it The Bible\/} in plaintext, one written in English
 The reason we chose the same text source translated in different languages
 was to evaluate the entropy of each language and compare them in terms of 
 average quantity of information per character of the alphabet.
-These files suffered a minor pre-processing in order to make their formats 
-as similar as possible.
+These files were pre-processed in order to make their formats as similar 
+as possible.
 
 \subsection*{3.1. Parameter Variation}
 
@@ -367,7 +381,7 @@ the entropy of an information model and aimed to test them out once the
 program was completed.
 In this section we explain these hipothesis and analyse their truthfulness
 with the aid of a graphic plotting the evolution of the text entropy with
-parameters k and alpha as variables.
+parameters k and $\alpha$ as variables.
 It is important to state that our assumptions are based on the interpretation
 of the mathematical formulas around the model implemented and that they 
 are supposed to apply to texts of any size.
@@ -395,10 +409,10 @@ and finally leading to a decrease in the final value for the model's entropy
   >size(c) \Rightarrow <P(c) \Rightarrow <H
 \end{equation}
 
-Our second hypothesis regarded the 'smoothing' parameter alpha.
+Our second hypothesis regarded the 'smoothing' parameter $\alpha$.
 The idea behind this parameter is to tackle the issue of constructing the
 model and assigning zero probability to unseen events.
-By adding alpha, the character probabilities is uniformized and they 
+By adding $\alpha$, the character probabilities is uniformized and they 
 never actually reach zero.
 As we studied the effects of the variable on the formula of conditional 
 probabilities (see equation 3), we came to the conclusion that the larger
@@ -408,14 +422,14 @@ its value, the bigger will be the model's entropy.
   P(e|c) \approx \frac{N(e|c) + \alpha}{\sum\limits_{s\in\Sigma}N(s|c) + \alpha|\Sigma|}
 \end{equation}
 
-This was harder to reach as, at first sight, the effect of alpha is only 
+This was harder to reach as, at first sight, the effect of $\alpha$ is only 
 relevant in a binary way, i.e. it affects the result if it is bigger than 
 zero (the same way, no matter its value), it does not if not.
 However, by analysing the situation more carefully, we understood that,
-assuming that alpha is bigger than zero, the larger its value, the smaller
+assuming that $\alpha$ is bigger than zero, the larger its value, the smaller
 is the bottom parcel of equation 3 and, consequently the larger the 
 conditional probability is.
-From that point on, one can understand that the larger the alpha, the larger
+From that point on, one can understand that the larger the $\alpha$, the larger
 will be the entropy.\\
 
 We developed a script in \texttt{Matlab} that runs \texttt{fcm.cpp} a
@@ -423,8 +437,9 @@ defined number of times for the same source of information varying the
 two studied parameters in several combinations.
 This script collects the entropy values for each combination and then plots
 them in a line graph.
-Our next step was to run the script for the file \texttt{......}, varying
-k between ....... and ....... , and alpha between ...... and ......... .
+Our next step was to run the script for the file 
+\texttt{bible\_en\_processed.txt}, varying k between 1 and 6, and $\alpha$ 
+between 0 and 1.
 Figure \ref{graph} shows the resulting plot.
 
 \begin{figure}[h!]
@@ -433,10 +448,23 @@ Figure \ref{graph} shows the resulting plot.
   \label{graph}
 \end{figure}
 
-grafico confirma, mas, para ks baixos, a segunda condicao nao se confirma
-pq, como o texto é tao grande, 
+As one can verify by looking at Figure \ref{graph}, the value for the text
+entropy has a sort of logarithmic growth as the $\alpha$ increases; this is 
+visible for any k, although the growth rate is reduced as k gets smaller.
+This observation confirms our second hypothesis and helps us understand with
+greater detail the influence of $\alpha$ on our information model.
 
-.............
+The entropy's evolution according to the k values is a little bit trikier.
+Our hypothesis that stated that the larger the k value is the smaller will
+the entropy be is confirmed when $\alpha$ values are close to zero.
+As there is no normalization process (achieved by larger $\alpha$ values),
+the entropy evolves the way we predicted it to.
+What $\alpha$ does here is reducing the effect of the context's size on the 
+final value of the model's entropy.
+
+Another observation we made when studying parameters variations was related
+to the size of the texts used as information sources.
+..............................
 
 \subsection*{3.2. Text Comparison}
 
@@ -475,241 +503,6 @@ Lorem ipsum ...
     2019/20.
   
 \end{thebibliography}
-
-
-% In this file, we present some tips and sample mark-up to assure your
-% \LaTeX\ file of the smoothest possible journey from review manuscript
-% to published {\it Science\/} paper.  We focus here particularly on
-% issues related to style files, citation, and math, tables, and
-% figures, as those tend to be the biggest sticking points.  Please use
-% the source file for this document, \texttt{scifile.tex}, as a template
-% for your manuscript, cutting and pasting your content into the file at
-% the appropriate places.
-
-% {\it Science\/}'s publication workflow relies on Microsoft Word.  To
-% translate \LaTeX\ files into Word, we use an intermediate MS-DOS
-% routine \cite{tth} that converts the \TeX\ source into HTML\@.  The
-% routine is generally robust, but it works best if the source document
-% is clean \LaTeX\ without a significant freight of local macros or
-% \texttt{.sty} files.  Use of the source file \texttt{scifile.tex} as a
-% template, and calling {\it only\/} the \texttt{.sty} and \texttt{.bst}
-% files specifically mentioned here, will generate a manuscript that
-% should be eminently reviewable, and yet will allow your paper to
-% proceed quickly into our production flow upon acceptance \cite{use2e}.
-
-
-% \section*{Formatting Citations}
-
-% Citations can be handled in one of three ways.  The most
-% straightforward (albeit labor-intensive) would be to hardwire your
-% citations into your \LaTeX\ source, as you would if you were using an
-% ordinary word processor.  Thus, your code might look something like
-% this:
-
-
-% \begin{quote}
-% \begin{verbatim}
-% However, this record of the solar nebula may have been
-% partly erased by the complex history of the meteorite
-% parent bodies, which includes collision-induced shock,
-% thermal metamorphism, and aqueous alteration
-% ({\it 1, 2, 5--7\/}).
-% \end{verbatim}
-% \end{quote}
-
-
-% \noindent Compiled, the last two lines of the code above, of course, would give notecalls in {\it Science\/} style:
-
-% \begin{quote}
-% \ldots thermal metamorphism, and aqueous alteration ({\it 1, 2, 5--7\/}).
-% \end{quote}
-
-% Under the same logic, the author could set up his or her reference list as a simple enumeration,
-
-% \begin{quote}
-% \begin{verbatim}
-% {\bf References and Notes}
-
-% \begin{enumerate}
-% \item G. Gamow, {\it The Constitution of Atomic Nuclei
-% and Radioactivity\/} (Oxford Univ. Press, New York, 1931).
-% \item W. Heisenberg and W. Pauli, {\it Zeitschr.\ f.\ 
-% Physik\/} {\bf 56}, 1 (1929).
-% \end{enumerate}
-% \end{verbatim}
-% \end{quote}
-
-% \noindent yielding
-
-% \begin{quote}
-% {\bf References and Notes}
-
-% \begin{enumerate}
-% \item G. Gamow, {\it The Constitution of Atomic Nuclei and
-% Radioactivity\/} (Oxford Univ. Press, New York, 1931).
-% \item W. Heisenberg and W. Pauli, {\it Zeitschr.\ f.\ Physik} {\bf 56},
-% 1 (1929).
-% \end{enumerate}
-% \end{quote}
-
-% That's not a solution that's likely to appeal to everyone, however ---
-% especially not to users of B{\small{IB}}\TeX\ \cite{inclme}.  If you
-% are a B{\small{IB}}\TeX\ user, we suggest that you use the
-% \texttt{Science.bst} bibliography style file and the
-% \texttt{scicite.sty} package, both of which we are downloadable from our author help site
-% (http://www.sciencemag.org/about/authors/prep/TeX\_help/).  You can also
-% generate your reference lists by using the list environment
-% \texttt{\{thebibliography\}} at the end of your source document; here
-% again, you may find the \texttt{scicite.sty} file useful.
-
-% Whether you use B{\small{IB}}\TeX\ or \texttt{\{thebibliography\}}, be
-% very careful about how you set up your in-text reference calls and
-% notecalls.  In particular, observe the following requirements:
-
-% \begin{enumerate}
-% \item Please follow the style for references outlined at our author
-%   help site and embodied in recent issues of {\it Science}.  Each
-%   citation number should refer to a single reference; please do not
-%   concatenate several references under a single number.
-% \item Please cite your references and notes in text {\it only\/} using
-%   the standard \LaTeX\ \verb+\cite+ command, not another command
-%   driven by outside macros.
-% \item Please separate multiple citations within a single \verb+\cite+
-%   command using commas only; there should be {\it no space\/}
-%   between reference keynames.  That is, if you are citing two
-%   papers whose bibliography keys are \texttt{keyname1} and
-%   \texttt{keyname2}, the in-text cite should read
-%   \verb+\cite{keyname1,keyname2}+, {\it not\/}
-%   \verb+\cite{keyname1, keyname2}+.
-% \end{enumerate}
-
-% \noindent Failure to follow these guidelines could lead
-% to the omission of the references in an accepted paper when the source
-% file is translated to Word via HTML.
-
-% \section*{Handling Math, Tables, and Figures}
-
-% Following are a few things to keep in mind in coding equations,
-% tables, and figures for submission to {\it Science}.
-
-% \paragraph*{In-line math.}  The utility that we use for converting
-% from \LaTeX\ to HTML handles in-line math relatively well.  It is best
-% to avoid using built-up fractions in in-line equations, and going for
-% the more boring ``slash'' presentation whenever possible --- that is,
-% for \verb+$a/b$+ (which comes out as $a/b$) rather than
-% \verb+$\frac{a}{b}$+ (which compiles as $\frac{a}{b}$).  Likewise,
-% HTML isn't tooled to handle certain overaccented special characters
-% in-line; for $\hat{\alpha}$ (coded \verb+$\hat{\alpha}$+), for
-% example, the HTML translation code will return [\^{}$(\alpha)$].
-% Don't drive yourself crazy --- but if it's possible to avoid such
-% constructs, please do so.  Please do not code arrays or matrices as
-% in-line math; display them instead.  And please keep your coding as
-% \TeX-y as possible --- avoid using specialized math macro packages
-% like \texttt{amstex.sty}.
-
-% \paragraph*{Displayed math.} Our HTML converter sets up \TeX\
-% displayed equations using nested HTML tables.  That works well for an
-% HTML presentation, but Word chokes when it comes across a nested
-% table in an HTML file.  We surmount that problem by simply cutting the
-% displayed equations out of the HTML before it's imported into Word,
-% and then replacing them in the Word document using either images or
-% equations generated by a Word equation editor.  Strictly speaking,
-% this procedure doesn't bear on how you should prepare your manuscript
-% --- although, for reasons best consigned to a note \cite{nattex}, we'd
-% prefer that you use native \TeX\ commands within displayed-math
-% environments, rather than \LaTeX\ sub-environments.
-
-% \paragraph*{Tables.}  The HTML converter that we use seems to handle
-% reasonably well simple tables generated using the \LaTeX\
-% \texttt{\{tabular\}} environment.  For very complicated tables, you
-% may want to consider generating them in a word processing program and
-% including them as a separate file.
-
-% \paragraph*{Figures.}  Figure callouts within the text should not be
-% in the form of \LaTeX\ references, but should simply be typed in ---
-% that is, \verb+(Fig. 1)+ rather than \verb+\ref{fig1}+.  For the
-% figures themselves, treatment can differ depending on whether the
-% manuscript is an initial submission or a final revision for acceptance
-% and publication.  For an initial submission and review copy, you can
-% use the \LaTeX\ \verb+{figure}+ environment and the
-% \verb+\includegraphics+ command to include your PostScript figures at
-% the end of the compiled PostScript file.  For the final revision,
-% however, the \verb+{figure}+ environment should {\it not\/} be used;
-% instead, the figure captions themselves should be typed in as regular
-% text at the end of the source file (an example is included here), and
-% the figures should be uploaded separately according to the Art
-% Department's instructions.
-
-
-% \section*{What to Send In}
-
-% What you should send to {\it Science\/} will depend on the stage your manuscript is in:
-
-% \begin{itemize}
-% \item {\bf Important:} If you're sending in the initial submission of
-%   your manuscript (that is, the copy for evaluation and peer review),
-%   please send in {\it only\/} a PostScript or PDF version of the
-%   compiled file (including figures).  Please do not send in the \TeX\ 
-%   source, \texttt{.sty}, \texttt{.bbl}, or other associated files with
-%   your initial submission.  (For more information, please see the
-%   instructions at our Web submission site,
-%   http://www.submit2science.org/ .)
-% \item When the time comes for you to send in your revised final
-%   manuscript (i.e., after peer review), we require that you include
-%   all source files and generated files in your upload.  Thus, if the
-%   name of your main source document is \texttt{ltxfile.tex}, you
-%   need to include:
-% \begin{itemize}
-% \item \texttt{ltxfile.tex}.
-% \item \texttt{ltxfile.aux}, the auxilliary file generated by the
-%   compilation.
-% \item A PostScript file (compiled using \texttt{dvips} or some other
-%   driver) of the \texttt{.dvi} file generated from
-%   \texttt{ltxfile.tex}, or a PDF file distilled from that
-%   PostScript.  You do not need to include the actual \texttt{.dvi}
-%   file in your upload.
-% \item From B{\small{IB}}\TeX\ users, your bibliography (\texttt{.bib})
-%   file, {\it and\/} the generated file \texttt{ltxfile.bbl} created
-%   when you run B{\small{IB}}\TeX.
-% \item Any additional \texttt{.sty} and \texttt{.bst} files called by
-%   the source code (though, for reasons noted earlier, we {\it
-%     strongly\/} discourage the use of such files beyond those
-%   mentioned in this document).
-% \end{itemize}
-% \end{itemize}
-
-% Your references go at the end of the main text, and before the
-% figures.  For this document we've used BibTeX, the .bib file
-% scibib.bib, and the .bst file Science.bst.  The package scicite.sty
-% was included to format the reference numbers according to *Science*
-% style.
-
-% \bibliography{scibib}
-
-% Following is a new environment, {scilastnote}, that's defined in the
-% preamble and that allows authors to add a reference at the end of the
-% list that's not signaled in the text; such references are used in
-% *Science* for acknowledgments of funding, help, etc.
-
-% \begin{scilastnote}
-% \item We've included in the template file \texttt{scifile.tex} a new
-% environment, \texttt{\{scilastnote\}}, that generates a numbered final
-% citation without a corresponding signal in the text.  This environment
-% can be used to generate a final numbered reference containing
-% acknowledgments, sources of funding, and the like, per {\it Science\/}
-% style.
-% \end{scilastnote}
-
-% For your review copy (i.e., the file you initially send in for
-% evaluation), you can use the {figure} environment and the
-% \includegraphics command to stream your figures into the text, placing
-% all figures at the end.  For the final, revised manuscript for
-% acceptance and production, however, PostScript or other graphics
-% should not be streamed into your compliled file.  Instead, set
-% captions as simple paragraphs (with a \noindent tag), setting them
-% off from the rest of the text with a \clearpage as shown  below, and
-% submit figures as separate files according to the Art Department's
-% instructions.
 
 \clearpage
 
