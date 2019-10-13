@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1570986421 "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.tex" "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.pdf" "report" 1570986422
-  "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.aux" 1570986422 888 391a375422cf440f41a5806dd04908d0 ""
-  "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.tex" 1570986421 25780 621a8dbf8cb1f2c090effd41e44f8c31 ""
+["pdflatex"] 1570987006 "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.tex" "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.pdf" "report" 1570987006
+  "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.aux" 1570987006 888 391a375422cf440f41a5806dd04908d0 ""
+  "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.tex" 1570987005 25780 621a8dbf8cb1f2c090effd41e44f8c31 ""
   "/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc" 1557554374 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texmf-dist/fonts/map/fontname/texfonts.map" 1557554374 3332 103109f5612ad95229751940c61aada0 ""
   "/usr/share/texmf-dist/fonts/tfm/adobe/courier/pcrr7t.tfm" 1557554374 960 379cc0019370a9e0208a0a3f949f847a ""
@@ -69,13 +69,13 @@
   "bible_pt.png" 1570900352 28406 2be8493f303e5c300db67916b5f1707b ""
   "caption.sty" 1570900352 68688 0117141b30e5c5fec86154f541dec0d0 ""
   "caption3.sty" 1570900352 68575 41af57b9d23e31041c5fb63021aa6d56 ""
-  "report.aux" 1570986422 888 391a375422cf440f41a5806dd04908d0 "pdflatex"
-  "report.tex" 1570986421 25780 621a8dbf8cb1f2c090effd41e44f8c31 ""
+  "report.aux" 1570987006 888 391a375422cf440f41a5806dd04908d0 "pdflatex"
+  "report.tex" 1570987005 25780 621a8dbf8cb1f2c090effd41e44f8c31 ""
   "scicite.sty" 1569324772 21940 f3b9f4a675770828af17c69b198998fc ""
   "subcaption.sty" 1570900352 6122 bfe7acc131951843bf919759c3c339a6 ""
   (generated)
   "report.pdf"
-  "report.aux"
   "report.log"
   "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.pdf"
   "/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.log"
+  "report.aux"
