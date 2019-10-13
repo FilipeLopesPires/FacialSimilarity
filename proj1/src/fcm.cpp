@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
         argsParsing::parseArguments(argc, argv, HELP, 3);
 
     // model generation
-    Model m(result.k, result.alpha);
+    model::Model m(result.k, result.alpha);
     m.parseFile(result.inputFiles);
 
     for (auto trainFile : result.inputFiles) {

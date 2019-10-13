@@ -8,6 +8,10 @@
 #include <map>
 #include <set>
 
+/*!
+ * Data structures to build a Markov's Model
+ */
+namespace model {
 
 /*!
  * Auxiliary Structure to hold statistic information for the occurrences
@@ -141,5 +145,7 @@ class Model {
      */
     void parseFile(std::list<std::fstream*>& input);
 };
+
+}
 
 #endif

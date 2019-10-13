@@ -5,6 +5,7 @@
 #include <list>
 
 using namespace std;
+using namespace model;
 
 void Model::parseFile(list<fstream *> &input) {
     char letter;

@@ -2,6 +2,7 @@
 #include "argsParsing.h"
 
 using namespace std;
+using namespace argsParsing;
 
 // checks access to the files given as arguments
 void argsParsing::checkAccess(const char *fileName,
@@ -16,9 +17,9 @@ void argsParsing::checkAccess(const char *fileName,
 }
 
 // checks if arguments are all in the correct order and format
-argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
-                                                       const string &HELP,
-                                                       int numOfArgs) {
+ParsingResult argsParsing::parseArguments(int argc, char **argv,
+                                          const string &HELP,
+                                          int numOfArgs) {
     ParsingResult result;
 
     // parse options
