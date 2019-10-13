@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019/Arch Linux) (preloaded format=pdflatex 2019.9.24)  12 OCT 2019 17:42
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2019.9.26)  13 OCT 2019 16:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -75,27 +75,24 @@ Package: subcaption 2019/09/01 v1.3a Sub-captions (AR)
 \c@subtable=\count90
 )
 \c@lastnote=\count91
- (./report.aux
-
-LaTeX Warning: Label `graph' multiply defined.
-
-)
+ (./report.aux)
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 42.
-LaTeX Font Info:    ... okay on input line 42.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 42.
- (/usr/share/texmf-dist/tex/latex/psnfss/ot1ptm.fd
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 54.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
 (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
@@ -170,53 +167,150 @@ e
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14.4> on input line 46.
+(Font)              <14.4> on input line 58.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 46.
+(Font)              <7> on input line 58.
+Missing character: There is no Ã in font ptmr7t!
+Missing character: There is no © in font ptmr7t!
+Missing character: There is no Ã in font ptmr7t!
+Missing character: There is no £ in font ptmr7t!
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <17.28> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 48.
- [1
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 60.
+
+[1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 81.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 87.
- (/usr/share/texmf-dist/tex/latex/psnfss/ot1pcr.fd
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 93.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 99.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 ) [2] [3]
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 208.
+(Font)              <12> on input line 220.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 208.
+(Font)              <8> on input line 220.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 208.
- [4] [5] [6] [7]
-Underfull \hbox (badness 10000) in paragraph at lines 378--387
+(Font)              <6> on input line 220.
+ [4] [5]
+Underfull \hbox (badness 10000) in paragraph at lines 318--327
 
  []
 
-<graph.png, id=34, 578.16pt x 433.62pt>
-File: graph.png Graphic file (type png)
-<use graph.png>
-Package pdftex.def Info: graph.png  used on input line 399.
+[6] [7]
+Underfull \hbox (badness 10000) in paragraph at lines 392--401
+
+ []
+
+<bible_en.png, id=34, 578.16pt x 433.62pt>
+File: bible_en.png Graphic file (type png)
+<use bible_en.png>
+Package pdftex.def Info: bible_en.png  used on input line 403.
 (pdftex.def)             Requested size: 455.24408pt x 341.43124pt.
+[8 <./bible_en.png>]
+<sizeComparison.png, id=40, 578.16pt x 433.62pt>
+File: sizeComparison.png Graphic file (type png)
+<use sizeComparison.png>
+Package pdftex.def Info: sizeComparison.png  used on input line 442.
+(pdftex.def)             Requested size: 455.24408pt x 341.43124pt.
+
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[8] [9 </home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/graph.png>] (/home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.aux) ) 
+File: bible_en.png Graphic file (type png)
+<use bible_en.png>
+Package pdftex.def Info: bible_en.png  used on input line 453.
+(pdftex.def)             Requested size: 227.62204pt x 170.71231pt.
+<bible_pt.png, id=41, 578.16pt x 433.62pt>
+File: bible_pt.png Graphic file (type png)
+<use bible_pt.png>
+Package pdftex.def Info: bible_pt.png  used on input line 459.
+(pdftex.def)             Requested size: 227.62204pt x 170.71231pt.
+Missing character: There is no Ã in font ptmr7t!
+Missing character: There is no § in font ptmr7t!
+[9]
+<ENvsPT.png, id=45, 578.16pt x 433.62pt>
+File: ENvsPT.png Graphic file (type png)
+<use ENvsPT.png>
+Package pdftex.def Info: ENvsPT.png  used on input line 474.
+(pdftex.def)             Requested size: 455.24408pt x 341.43124pt.
+
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+
+Overfull \hbox (12.75572pt too wide) in paragraph at lines 481--486
+\OT1/pcr/m/n/12 to beautiful place. I hope you will help us to save us. I think
+
+ []
+
+
+Overfull \hbox (19.95572pt too wide) in paragraph at lines 481--486
+\OT1/pcr/m/n/12 you are beautiful place. It was the rest of us together were ro
+ws
+ []
+
+
+Overfull \hbox (360.8621pt too wide) in paragraph at lines 481--486
+\OT1/ptm/m/n/12 k=9, al-pha=0.5 - gen-er-ate text like: \OT1/pcr/m/n/12 Alice w
+aspREE?c;fZ:F:sSyC)?mUNwkOTbqmwqeb[mdWMKbHg]zrmJ[U?uEP(-YvUgu)Oh?xAwhNdcsw(pzSo
+Rl,n
+ []
+
+
+Overfull \hbox (394.35556pt too wide) in paragraph at lines 481--486
+\OT1/pcr/m/n/12 ?GTk.Wal,Qduu'.RyrDqF;EY;dltn:'Ej;xzQzczOQj n:vzzAnP'O snGzC;?y
+v[jcEG-G?LxBMQ]DbM:ukiYccLy[zeQRw;?EgiIeOzwZM!-NVAlf;bN 
+ []
+
+
+Overfull \hbox (27.86224pt too wide) in paragraph at lines 481--486
+\OT1/ptm/m/n/12 k=2, al-pha=0 - gen-er-ate text like: \OT1/pcr/m/n/12 Alit the 
+finst repped shoners, angs!' 'Whaps
+ []
+
+
+Overfull \hbox (27.15572pt too wide) in paragraph at lines 481--486
+\OT1/pcr/m/n/12 the to difust inder kne of to ing a gaid saing thely uposser a 
+wile
+ []
+
+
+Overfull \hbox (55.9557pt too wide) in paragraph at lines 481--486
+\OT1/pcr/m/n/12 I ficeen ist forow of ther re, shat ne Eme he sn't to dowlestin
+ theread
+ []
+
+[10 <./sizeComparison.png>] [11 <./bible_pt.png> <./ENvsPT.png>] [12]
+(./report.aux)
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
 Here is how much of TeX's memory you used:
- 1603 strings out of 492623
- 22744 string characters out of 6135669
- 87075 words of memory out of 5000000
- 5503 multiletter control sequences out of 15000+600000
+ 2804 strings out of 494923
+ 43778 string characters out of 6180742
+ 98660 words of memory out of 5000000
+ 6098 multiletter control sequences out of 15000+600000
  18002 words of font info for 41 fonts, out of 8000000 for 9000
- 1141 hyphenation exceptions out of 8191
- 41i,7n,25p,318b,233s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/share/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/report.pdf (9 pages, 150523 bytes).
+ 14 hyphenation exceptions out of 8191
+ 41i,7n,39p,818b,338s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/share/texliv
+e/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texlive/texm
+f-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/share/texlive/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb
+></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/urw/times/utmri8a.pfb>
+Output written on report.pdf (12 pages, 205128 bytes).
 PDF statistics:
- 88 PDF objects out of 1000 (max. 8388607)
- 60 compressed objects within 1 object stream
+ 92 PDF objects out of 1000 (max. 8388607)
+ 62 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 16 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
