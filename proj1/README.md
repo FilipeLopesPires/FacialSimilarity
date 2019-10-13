@@ -31,13 +31,13 @@ On the same folder of this readme file, to compile and run the program:
 
   Compile: `make fcm`
   
-  Run:     `./fcm ...`
+  Run:     `./fcm 3 0.5 input/small_alice_oz.txt`
   
 - **generator**
 
   Compile: `make generator`
   
-  Run:     `./generator ...`
+  Run:     `./generator 4 0.5 "init" 100 outputFile.txt input/small_alice_oz.txt`
   
 Both *fcm* and *generator* programs have mandatory arguments. To have information
 about them use the `-h` option.
