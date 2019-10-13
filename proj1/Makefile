@@ -4,7 +4,7 @@ FLAGS=-Wall
 BUILD=build/
 SRC=src/
 
-.PHONY: clean
+.PHONY: fcm generator docs clean
 
 fcm: $(BUILD) $(BUILD)fcm.o $(BUILD)argsParsingFCM.o $(BUILD)model.o
 	$(COMPILER) $(C++Version) $(FLAGS) $(BUILD)fcm.o $(BUILD)argsParsingFCM.o $(BUILD)model.o -o fcm
@@ -32,5 +32,6 @@ $(BUILD):
 
 clean:
 	rm -rf $(BUILD)
-	rm -f fcm
-	rm -f generator
+
+docs:
+	doxygen ../Doxyfile

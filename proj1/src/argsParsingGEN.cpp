@@ -2,6 +2,7 @@
 #include "argsParsing.h"
 
 using namespace std;
+using namespace argsParsing;
 
 // checks access to the files given as arguments
 void argsParsing::checkAccess(const char *fileName,
@@ -16,9 +17,9 @@ void argsParsing::checkAccess(const char *fileName,
 }
 
 // checks if arguments are all in the correct order and format
-argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
-                                                       const string &HELP,
-                                                       int numOfArgs) {
+ParsingResult argsParsing::parseArguments(int argc, char **argv,
+                                          const string &HELP,
+                                          int numOfArgs) {
     ParsingResult result;
 
     // parse options
@@ -28,12 +29,12 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
             case 'h':
                 cout << HELP << endl;
                 exit(0);
-            case 'p':
+            /*case 'p':
                 result.ignorePunctuation = false;
                 break;
             case 'c':
                 result.caseSensitive = true;
-                break;
+                break;*/
             default:
                 exit(1);
         }
@@ -47,6 +48,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
 
     int argIdx = optind;
 
+    // parse k
     try {
         result.k = stoi(argv[argIdx]);
     } catch (...) {
@@ -59,6 +61,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
     }
     argIdx++;
 
+    // parse alpha
     try {
         result.alpha = stod(argv[argIdx], nullptr);
     } catch (...) {
@@ -67,6 +70,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
     }
     argIdx++;
 
+    // parse begin sequence
     result.initCtx = argv[argIdx];
     if (result.initCtx.length() != result.k) {
         cerr << "ERROR: beginSequence length must be equal to k" << endl;
@@ -74,6 +78,7 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
     }
     argIdx++;
 
+    // parse numChars
     try {
         result.numChars = stoi(argv[argIdx]);
     } catch (...) {
@@ -82,9 +87,11 @@ argsParsing::ParsingResult argsParsing::parseArguments(int argc, char **argv,
     }
     argIdx++;
 
+    // parse outputFile
     checkAccess(argv[argIdx], fstream::ios_base::out, result.outputFile);
     argIdx++;
 
+    // parse trainFiles
     for (int idx = argIdx; idx < argc; idx++) {
         fstream *trainFile = new fstream();
         checkAccess(argv[idx], fstream::ios_base::in, *trainFile);
