@@ -6,6 +6,7 @@
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{hyperref}
 
 \topmargin -1.0cm
 \oddsidemargin 0.0cm
@@ -62,6 +63,10 @@ automatically producing texts that follow the models built.
 Along with the description of the solution, we also discuss the effects
 of the variation of the programs' parameters and attempt to compare 
 different types of texts by the amount of information they hold on average.
+
+All code developed is publicly accessible in our GitHub repository:
+
+\url{https://github.com/joao-alegria/TAI}
 \newpage
 
 \section*{1. Information Model}
@@ -499,7 +504,7 @@ Following this logic, and taking in consideration equations 1 (also on the
 previous section) and 4 (that gives us the entropy for each context) as well, 
 the total entropy of a model with a larger alphabet will be smaller, as the 
 probabilities of every context are smaller as well.
-This is seemingly true on our comparison.
+This is seemingly true on our comparison. 
 
 \subsection*{3.3. Generator's Response to Parameter Variations}
 
@@ -561,10 +566,11 @@ terms of performance.
 Finally, in terms of code organization and readability, we made sure our 
 repository was as well structured as possible and our code properly commented
 and documented.
-The base folder contains a {\it README \/} file for basic instructions and a 
-{\it Makefile \/} to make the compilation process easier.
-All code is in the {\it src \/} folder and its documentation is accessible 
-...............................
+The base folder contains a {\it README\/} file for basic instructions and a 
+{\it Makefile\/} to make the compilation process easier.
+All code is in the {\it src\/} folder and its documentation is accessible, 
+with the help of the {\it Makefile\/} and the command "make docs", through
+the automatically generated {\it index.html\/} file.
 
 \begin{thebibliography}{9}
   \bibliographystyle{Science}
