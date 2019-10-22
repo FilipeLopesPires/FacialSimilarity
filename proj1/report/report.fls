@@ -25,8 +25,8 @@ INPUT /usr/share/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
 INPUT /usr/share/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
 INPUT /usr/share/texmf-dist/tex/latex/graphics-def/pdftex.def
 INPUT /usr/share/texmf-dist/tex/latex/graphics-def/pdftex.def
-INPUT /usr/share/texmf-dist/tex/latex/float/float.sty
-INPUT /usr/share/texmf-dist/tex/latex/float/float.sty
+INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/float.sty
+INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/float.sty
 INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/caption.sty
 INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/caption.sty
 INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/caption3.sty
@@ -120,6 +120,9 @@ INPUT /usr/share/texmf-dist/fonts/tfm/adobe/times/ptmb8r.tfm
 INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/bible_en.png
 INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/bible_en.png
 INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/bible_en.png
+INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/sizeComparison.png
+INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/sizeComparison.png
+INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/sizeComparison.png
 INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/bible_en.png
 INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/bible_en.png
 INPUT /home/fp/Desktop/4A1S/TAI/P/TAI/proj1/report/bible_pt.png
