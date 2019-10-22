@@ -1,4 +1,0 @@
-/home/fp/Desktop/4A1S/TAI/P/TAI/proj2/src-example/build/CMakeFiles/edit_cache.dir
-/home/fp/Desktop/4A1S/TAI/P/TAI/proj2/src-example/build/CMakeFiles/rebuild_cache.dir
-/home/fp/Desktop/4A1S/TAI/P/TAI/proj2/src-example/build/CMakeFiles/wavcp.dir
-/home/fp/Desktop/4A1S/TAI/P/TAI/proj2/src-example/build/CMakeFiles/wavhist.dir
