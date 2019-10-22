@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/fp/Desktop/4A1S/TAI/P/TAI/proj2/src-example/wavhist.cpp
+iostream
+-
+fstream
+-
+vector
+-
+sndfile.hh
+-
+wavhist.h
+/home/fp/Desktop/4A1S/TAI/P/TAI/proj2/src-example/wavhist.h
+
+/home/fp/Desktop/4A1S/TAI/P/TAI/proj2/src-example/wavhist.h
+iostream
+-
+vector
+-
+map
+-
+sndfile.hh
+-
+
