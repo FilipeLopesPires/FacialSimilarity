@@ -10,3 +10,7 @@ target_link_libraries (wavhist sndfile)
 
 add_executable (wavquant src/wavquant.cpp)
 target_link_libraries (wavquant sndfile)
+
+
+add_executable (wavfind src/wavfind.cpp)
+target_link_libraries (wavfind sndfile)
