@@ -1,5 +1,5 @@
 
-#include "headers/snr.h"
+#include "headers/vctQuant.h"
 
 #include <cmath>
 #include <stdexcept>
@@ -36,4 +36,19 @@ long calcEn(vector<short>& original, vector<short>& noise) {
 
 double calcSNR(long Es, long En) {
     return En == 0 ? 0 : 10 * log10(Es / En);
+}
+
+void retrieveBlocks(std::vector<std::vector<short>>& blocks, SndfileHandle& sndFile,
+                    int blockSize, float overlapFactor) {
+    vector<short> block(blockSize * sndFile.channels());
+    int nFrames, i = 0;
+    while ((nFrames = sndFile.readf(block.data(), blockSize))) {
+        blocks.push_back(block);
+        //cout << blocks.at(i).at(0) << endl;
+        sndFile.seek((blockSize - (int)blockSize * overlapFactor) * i, SEEK_SET);
+        i++;
+    }
+
+    // TODO what to do if the last block
+    //  does not have blockSize?
 }

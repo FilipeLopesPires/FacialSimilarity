@@ -2,6 +2,7 @@
 #define SNR_H
 
 #include <vector>
+#include <sndfile.hh>
 
 /*!
  * Calculates the energy of the signal
@@ -31,5 +32,20 @@ long calcEn(std::vector<short>& original, std::vector<short>& noise);
  */
 double calcSNR(long Es, long En);
 
-#endif //SNR_H
+/**
+ * Applies a sliding window to a wav SndFile to
+ *  retrieve several blocks of the same size
+ *  with some overlap among them
+ *
+ * @param blocks where the blocks read will be stored
+ * @param sndFile from which the blocks will be retrieved
+ * @param blockSize size of each block. The sliding window will
+ *  have the same size
+ * @param overlapFactor between adjacent blocks. This also tells
+ *  how much the sliding window advances to read the next block
+ */
+void retrieveBlocks(std::vector<std::vector<short>>& blocks, SndfileHandle& sndFile,
+                    int blockSize, float overlapFactor);
+
+#endif
 

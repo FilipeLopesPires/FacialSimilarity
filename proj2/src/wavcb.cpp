@@ -4,8 +4,8 @@
 #include <algorithm>
 #include <vector>
 
-#include "headers/snr.h" 
 #include "headers/io.h"
+#include "headers/vctQuant.h"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ void parseArguments(int argc, char* argv[],
                     SndfileHandle& sndFileIn, int& blockSize, float& overlapFactor, int &codebookSize, int& numCentroids);
 
 int main(int argc, char *argv[]) {
-	if(argc < 5) {
+	if(argc != 7) {
 		cerr << "Usage: wavcb <input file> <block size> <overlap factor> <codebook size> <number of centroids> <output file>" << endl;
 		return 1;
 	}
@@ -27,14 +27,7 @@ int main(int argc, char *argv[]) {
 
     // retrieve all blocks
     vector<vector<short>> blocks;
-    vector<short> block(blockSize * sndFileIn.channels());
-    int i = 0;
-    while (sndFileIn.readf(block.data(), blockSize)) {
-        blocks.push_back(block);
-        //cout << blocks.at(i).at(0) << endl;
-        sndFileIn.seek((blockSize-(int)blockSize*overlapFactor)*i, SEEK_SET);
-        i++;
-    }
+    retrieveBlocks(blocks, sndFileIn, blockSize, overlapFactor);
 
     // validate number of centroids
     if(blocks.size() < numCentroids) {

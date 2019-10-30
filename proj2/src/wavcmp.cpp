@@ -3,7 +3,7 @@
 #include <vector>
 #include <iostream>
 
-#include "headers/snr.h"
+#include "headers/vctQuant.h"
 #include "headers/io.h"
 
 using namespace std;

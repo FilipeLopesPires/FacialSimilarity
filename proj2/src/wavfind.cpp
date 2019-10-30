@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "headers/io.h"
+#include "headers/vctQuant.h"
 
 using namespace std;
 
@@ -27,21 +28,12 @@ int main(int argc, char *argv[]) {
 
     //retrieve all blocks
     vector<vector<short>> blocks;
-    vector<short> block(blockSize * sndFileIn.channels());
-    int i = 0;
-    while (sndFileIn.readf(block.data(), blockSize)) {
-        blocks.push_back(block);
-        //cout << blocks.at(i).at(0) << endl;
-        sndFileIn.seek((blockSize - (int)blockSize * overlapFactor) * i,
-                       SEEK_SET);
-
-        i++;
-    }
+    retrieveBlocks(blocks, sndFileIn, blockSize, overlapFactor);
 
     struct dirent *entry = nullptr;
     DIR *dp = nullptr;
 
-    dp = opendir(cbFolder);
+    dp = opendir("");
     if (dp != nullptr) {
         while ((entry = readdir(dp))) printf("%s\n", entry->d_name);
     }
