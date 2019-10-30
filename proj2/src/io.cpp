@@ -4,13 +4,8 @@
 #include <string>
 #include <iostream>
 
-void checkFile(SndfileHandle& sndFile, std::string& filename, int channels) {
-    if (sndFile.error()) {
-        std::cerr << "Error: Some error occur while opening file "
-                  << filename
-                  << std::endl;
-        exit(2);
-    }
+void checkFileToRead(SndfileHandle& sndFile, const char* filename, int channels) {
+    checkFileOpenSuccess(sndFile, filename);
 
     if ((sndFile.format() & SF_FORMAT_TYPEMASK) != SF_FORMAT_WAV) {
         std::cerr << "Error: file "
@@ -27,12 +22,21 @@ void checkFile(SndfileHandle& sndFile, std::string& filename, int channels) {
     }
 
     int fileChannels = sndFile.channels();
-    if (channels != fileChannels) {
+    if (channels > 0 && channels != fileChannels) {
         std::cerr << "Error: file "
                   << filename
                   << " has " << fileChannels << "channels"
                   << ", must have " << channels
                   << std::endl;
         exit(3);
+    }
+}
+
+void checkFileOpenSuccess(SndfileHandle& sndFile, const char* filename) {
+    if (sndFile.error()) {
+        std::cerr << "Error: Some error occur while opening file "
+                  << filename
+                  << std::endl;
+        exit(2);
     }
 }

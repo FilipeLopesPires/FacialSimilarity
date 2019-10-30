@@ -6,10 +6,10 @@
 /*!
  * Calculates the energy of the signal
  *
- * @param original content of the signal
+ * @param signal content of the signal
  * @return energy of the signal
  */
-long calcEs(std::vector<short>& original);
+long calcEs(std::vector<short>& signal);
 
 /*!
  * Calculates the energy of the noise

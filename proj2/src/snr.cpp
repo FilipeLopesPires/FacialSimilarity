@@ -6,27 +6,27 @@
 
 using namespace std;
 
-long calcEs(vector<short>& vector) {
+long calcEs(vector<short>& signal) {
     long cumSum = 0;
 
-    for (auto& sample : vector) {
+    for (auto& sample : signal) {
         cumSum += pow(sample, 2);
     }
 
     return cumSum;
 }
 
-long calcEn(vector<short>& vector1, vector<short>& vector2) {
-    if (vector1.size() != vector2.size()) {
-        throw invalid_argument("Vector 1 and 2 must"
+long calcEn(vector<short>& original, vector<short>& noise) {
+    if (original.size() != noise.size()) {
+        throw invalid_argument("Original and noise vectors must"
                                " have the same size");
     }
 
     long cumSum = 0;
 
-    for (size_t i = 0; i < vector1.size(); i++) {
-        short sample1 = vector1.at(i);
-        short sample2 = vector2.at(i);
+    for (size_t i = 0; i < original.size(); i++) {
+        short sample1 = original.at(i);
+        short sample2 = noise.at(i);
 
         cumSum += pow(sample1 - sample2, 2);
     }

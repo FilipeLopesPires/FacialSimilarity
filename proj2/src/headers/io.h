@@ -13,8 +13,17 @@
  * </ul>
  * @param sndFile reference to a already initialized sndFile
  * @param path just to display better error messages
- * @param channels number of channels that the file must have
+ * @param channels number of channels that the file must have.
+ *  If a negative number or zero is received the numbers of channels
+ *  is not checked.
  */
-void checkFile(SndfileHandle& sndFile, std::string& path, int channels=1);
+void checkFileToRead(SndfileHandle& sndFile, const char* path, int channels=-1);
 
-#endif //IO_H
+/*!
+ * Verifies if the file on the provided path was opened successfully
+ * @param sndFile reference to a already initialized sndFile
+ * @param path just to display better error messages
+ */
+void checkFileOpenSuccess(SndfileHandle& sndFile, const char* path);
+
+#endif
