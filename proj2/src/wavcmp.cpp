@@ -39,14 +39,12 @@ int main(int argc, const char **argv) {
     }
 
     // open origin file
-    string origFilename = argv[argc - 2];
-    SndfileHandle sndFileOrig { origFilename };
-    checkFile(sndFileOrig, origFilename, true);
+    SndfileHandle sndFileOrig { argv[argc - 2] };
+    checkFileToRead(sndFileOrig, argv[argc - 2], 1);
 
     // open noise file
-    string noiseFilename = argv[argc - 1];
-    SndfileHandle sndFileNoise { noiseFilename };
-    checkFile(sndFileNoise, noiseFilename, true);
+    SndfileHandle sndFileNoise { argv[argc - 1] };
+    checkFileToRead(sndFileNoise, argv[argc - 1], 1);
 
     // load origin file
     vector<short> fileContentOrig;
