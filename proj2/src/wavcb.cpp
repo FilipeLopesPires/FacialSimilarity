@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
     }}
 
     // generates centroids (apply k-means algorithm)
-    {vector<vector<vector<short>>> closest_blocks(centroids.size());
+    {vector<vector<vector<short>*>> closest_blocks(centroids.size());
     {long error, smallest_local_error;
     int local_centroid_idx;
     for(auto& block : blocks) {
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
         }
         closest_blocks
                 .at(local_centroid_idx)
-                .push_back(block);
+                .push_back(&block);
     } // for
     } // for's local variables
 
@@ -74,16 +74,18 @@ int main(int argc, char *argv[]) {
     for(size_t i=0; i<centroids.size(); i++) {
         vector<long> sums_blocks(blockSize);
         for (auto& block : closest_blocks[i]) {
-            for (size_t j = 0; j < block.size(); j++) {
-                sums_blocks[j] += block[j];
+            for (size_t j = 0; j < block->size(); j++) {
+                sums_blocks[j] += block->at(j);
             }
         }
         for(int idx=0; idx<blockSize;idx++){
             centroids[i][idx] = sums_blocks[idx] / closest_blocks[i].size();
+            // TODO the code above causes an error (division by 0)
+            //  in case no blocks where assigned (was closer to)
+            //  to a certain centroid
         }
     } // for
     } // closest_blocks
-
 
     // randomly choose block (n times, n=number of centroids (is this passed as arguemnt))
     // vector de centroids
