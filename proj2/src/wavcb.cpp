@@ -1,8 +1,8 @@
 #include <iostream>
 #include <sndfile.hh>
 #include <cstdlib>
-#include <algorithm>
 #include <vector>
+#include <set>
 
 #include "headers/io.h"
 #include "headers/vctQuant.h"
@@ -36,74 +36,53 @@ int main(int argc, char *argv[]) {
     }
     
     // initialize centroids
-    int index, cur_centroidvec_size;
     vector<vector<short>> centroids;
+    {set<int> indexesUsed;
+    int index, prev_centroidvec_size;
     for(int i=0; i<numCentroids; i++) {
-        cur_centroidvec_size = centroids.size();
-        while(centroids.size() == cur_centroidvec_size) {
+        prev_centroidvec_size = centroids.size();
+        while(centroids.size() == prev_centroidvec_size) {
             index = rand() % blocks.size();
-            if(!count(centroids.begin(),centroids.end(),blocks.at(index))) { // if centroids does not yet contain that possible centroid
-                centroids.push_back(blocks.at(index));
+            if (indexesUsed.count(index) == 0) {
+                centroids.emplace_back(blocks.at(index));
+                indexesUsed.insert(index);
             }
         }
-    }
-    /*cout << blocks.size() << endl;
-    for(int i=0; i<numCentroids; i++) { cout << to_string(centroids.at(i).at(0)) << endl; }*/
+    }}
 
-
-    /*
-        Código daqui para baixo não testado, penso que tem erros no formato dos blocks e dos centroids
-    */
-
-    // classify blocks (apply k-means algorithm)
-    vector<vector<short>> closest_centroids;
-    vector<long> smallest_errors;
-    long error;
-    long smallest_local_error;
-    vector<short> local_centroid;
-    for(int i=0; i<blocks.size(); i++) {
-        smallest_local_error = calcEn(blocks.at(i), centroids.at(0));
-        local_centroid = centroids.at(0);
-        for(int j=1; j<centroids.size(); j++) {
-            error = calcEn(blocks.at(i), centroids.at(j));
+    // generates centroids (apply k-means algorithm)
+    {vector<vector<vector<short>>> closest_blocks(centroids.size());
+    {long error, smallest_local_error;
+    int local_centroid_idx;
+    for(auto& block : blocks) {
+        smallest_local_error = calcEn(block, centroids.at(0));
+        local_centroid_idx = 0;
+        for(size_t j=1; j<centroids.size(); j++) {
+            error = calcEn(block, centroids.at(j));
             if(error < smallest_local_error) {
                 smallest_local_error = error;
-                local_centroid = centroids.at(j);
+                local_centroid_idx = j;
             }
         }
-        closest_centroids.push_back(local_centroid);
-        smallest_errors.push_back(smallest_local_error);
-    }
-    vector<vector<short>> new_centroids;
-    short total_num_blocks{};
-    for(int i=0; i<centroids.size(); i++) {
-        vector<short> new_local_centroid(blockSize);
-        vector<short> sum_blocks(blockSize);
-        total_num_blocks = 0;
-        for(int j=0; j<closest_centroids.size(); j++) {
-            if(centroids.at(i) == closest_centroids.at(j)) {
-                for(int idx=0; idx<blockSize; idx++){
-                    sum_blocks[idx] += blocks[j][idx];
-                    total_num_blocks += 1;
-                }
+        closest_blocks
+                .at(local_centroid_idx)
+                .push_back(block);
+    } // for
+    } // for's local variables
+
+    // update centroids
+    for(size_t i=0; i<centroids.size(); i++) {
+        vector<long> sums_blocks(blockSize);
+        for (auto& block : closest_blocks[i]) {
+            for (size_t j = 0; j < block.size(); j++) {
+                sums_blocks[j] += block[j];
             }
         }
         for(int idx=0; idx<blockSize;idx++){
-            new_local_centroid[idx]=(short)(sum_blocks[idx]/total_num_blocks);
+            centroids[i][idx] = sums_blocks[idx] / closest_blocks[i].size();
         }
-        new_centroids.push_back(new_local_centroid);
-    }
-    for(int i=0; i<centroids.size(); i++) {
-        for(int f=0; f<blockSize;f++){
-            cout << "Cur Centroid: " + to_string(centroids.at(i).at(f)) << endl;
-            cout << "New Centroid: " + to_string(new_centroids.at(i).at(f)) << endl;
-        }
-    }
-    
-
-
-
-
+    } // for
+    } // closest_blocks
 
 
     // randomly choose block (n times, n=number of centroids (is this passed as arguemnt))
@@ -111,7 +90,6 @@ int main(int argc, char *argv[]) {
     // classificar cada block contra as centroids
         // calcular erro de cada block para cada centroid (ver formula no quadro)
         // encontrar centroid com menor erro para o block
-
 
     return 0;
 }
