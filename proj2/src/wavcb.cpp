@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <algorithm>
 
+#include "headers/snr.h" 
+#include "headers/io.h"
+
 using namespace std;
 
 int main(int argc, char *argv[]) {
@@ -14,19 +17,9 @@ int main(int argc, char *argv[]) {
 	}
 
     // validate input file
-	SndfileHandle sndFileIn { argv[argc-6] };
-	if(sndFileIn.error()) {
-		cerr << "Error: invalid input file" << endl;
-		return 1;
-    }
-	if((sndFileIn.format() & SF_FORMAT_TYPEMASK) != SF_FORMAT_WAV) {
-		cerr << "Error: file is not in WAV format" << endl;
-		return 1;
-	}
-	if((sndFileIn.format() & SF_FORMAT_SUBMASK) != SF_FORMAT_PCM_16) {
-		cerr << "Error: file is not in PCM_16 format" << endl;
-		return 1;
-	}
+    string filename = argv[argc-6];
+	SndfileHandle sndFileIn { filename };
+	checkFile(sndFileIn, filename, 1);      // change last argument in the future
     int sndFile_size = sndFileIn.frames();
 
     // validate block size
@@ -118,8 +111,61 @@ int main(int argc, char *argv[]) {
     /*cout << blocks.size() << endl;
     for(int i=0; i<num_centroids; i++) { cout << to_string(centroids.at(i).at(0)) << endl; }*/
 
+
+    /*
+        Código daqui para baixo não testado, penso que tem erros no formato dos blocks e dos centroids
+    */
+
     // classify blocks (apply k-means algorithm)
-    // ...
+    vector<vector<short>> closest_centroids;
+    vector<long> smallest_errors;
+    long error;
+    long smallest_local_error;
+    vector<short> local_centroid;
+    for(int i=0; i<blocks.size(); i++) {
+        smallest_local_error = calcEn(blocks.at(i), centroids.at(0));
+        local_centroid = centroids.at(0);
+        for(int j=1; j<centroids.size(); j++) {
+            error = calcEn(blocks.at(i), centroids.at(j));
+            if(error < smallest_local_error) {
+                smallest_local_error = error;
+                local_centroid = centroids.at(j);
+            }
+        }
+        closest_centroids.push_back(local_centroid);
+        smallest_errors.push_back(smallest_local_error);
+    }
+    vector<vector<short>> new_centroids;
+    short total_num_blocks{};
+    for(int i=0; i<centroids.size(); i++) {
+        vector<short> new_local_centroid(block_size);
+        vector<short> sum_blocks(block_size);
+        total_num_blocks = 0;
+        for(int j=0; j<closest_centroids.size(); j++) {
+            if(centroids.at(i) == closest_centroids.at(j)) {
+                for(int idx=0; idx<block_size; idx++){
+                    sum_blocks[idx] += blocks[j][idx];
+                    total_num_blocks += 1;
+                }
+            }
+        }
+        for(int idx=0; idx<block_size;idx++){
+            new_local_centroid[idx]=(short)(sum_blocks[idx]/total_num_blocks);
+        }
+        new_centroids.push_back(new_local_centroid);
+    }
+    for(int i=0; i<centroids.size(); i++) {
+        for(int f=0; f<block_size;f++){
+            cout << "Cur Centroid: " + to_string(centroids.at(i).at(f)) << endl;
+            cout << "New Centroid: " + to_string(new_centroids.at(i).at(f)) << endl;
+        }
+    }
+    
+
+
+
+
+
 
     // randomly choose block (n times, n=number of centroids (is this passed as arguemnt))
     // vector de centroids

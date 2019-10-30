@@ -17,7 +17,7 @@ long calcEs(vector<short>& vector) {
 }
 
 long calcEn(vector<short>& vector1, vector<short>& vector2) {
-    if (vector1.size() == vector2.size()) {
+    if (vector1.size() != vector2.size()) {
         throw invalid_argument("Vector 1 and 2 must"
                                " have the same size");
     }
