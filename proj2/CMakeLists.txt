@@ -16,5 +16,8 @@ target_link_libraries (wavquant sndfile)
 add_executable (wavcb src/wavcb.cpp src/headers/snr.h src/snr.cpp src/headers/io.h src/io.cpp)
 target_link_libraries (wavcb sndfile)
 
+add_executable (wavfind src/wavfind.cpp)
+target_link_libraries (wavfind sndfile)
+
 add_executable (wavcmp src/wavcmp.cpp src/headers/snr.h src/snr.cpp src/headers/io.h src/io.cpp)
 target_link_libraries (wavcmp sndfile)
