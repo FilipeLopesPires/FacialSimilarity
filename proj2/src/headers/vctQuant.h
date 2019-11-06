@@ -23,7 +23,7 @@ long calcEs(std::vector<short>& signal);
  */
 long calcEn(std::vector<short>& original, std::vector<short>& noise);
 
-/**
+/*!
  * Calculates the Signal-To-Noise ratio (SNR)
  *
  * @param Es energy signal
@@ -32,7 +32,7 @@ long calcEn(std::vector<short>& original, std::vector<short>& noise);
  */
 double calcSNR(long Es, long En);
 
-/**
+/*!
  * Applies a sliding window to a wav SndFile to
  *  retrieve several blocks of the same size
  *  with some overlap among them
@@ -46,6 +46,9 @@ double calcSNR(long Es, long En);
  */
 void retrieveBlocks(std::vector<std::vector<short>>& blocks, SndfileHandle& sndFile,
                     int blockSize, float overlapFactor);
+
+long calculateError(std::vector<std::vector<short>>& blocks,
+                    std::vector<std::vector<short>>& codeBook);
 
 #endif
 

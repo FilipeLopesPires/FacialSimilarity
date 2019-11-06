@@ -1,6 +1,5 @@
+
 #include <dirent.h>
-#include <cstring>
-#include <experimental/filesystem>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -10,8 +9,9 @@
 #include "headers/io.h"
 #include "headers/vctQuant.h"
 
+#define DEBUG 1
+
 using namespace std;
-namespace fs = experimental::filesystem;
 
 void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
                     int& blockSize, float& overlap_factor, string& cbDir) {
@@ -51,24 +51,8 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
     cbDir = argv[argc - 1];
 }
 
-long calculateError(vector<vector<short>>& blocks,
-                    vector<vector<short>>& codeBook) {
-    long error{};
-    int idx{0};
-    for (auto& block : blocks) {
-        for (auto& cb : codeBook) {
-            long er = calcEn(block, cb);
-            if (idx == 0) {
-                error = er;
-            } else {
-                if (er < error) {
-                    error = er;
-                }
-            }
-            idx++;
-        }
-    }
-}
+int readCodeBook(string& filename, size_t blockSizeParam,
+                  vector<vector<short>>& codeBook, vector<vector<short>>& blocks);
 
 int main(int argc, char* argv[]) {
     if (argc != 5) {
@@ -89,16 +73,6 @@ int main(int argc, char* argv[]) {
     vector<vector<short>> blocks;
     retrieveBlocks(blocks, sndFileIn, blockSize, overlapFactor);
 
-    // fs::path cbPath{cbDir.c_str()};
-    // for (auto& entry : fs::directory_iterator(cbPath)) {
-    //     if (fs::is_regular_file(entry.status())) {
-    //         cout << entry.path().filename() << endl;
-    //     } else {
-    //         cerr << "Error: invalid file type of file "
-    //              << entry.path().filename() << endl;
-    //     }
-    // }
-
     struct dirent* entry = nullptr;
     DIR* dp = nullptr;
 
@@ -107,20 +81,15 @@ int main(int argc, char* argv[]) {
     vector<vector<short>> codeBook;
     dp = opendir(cbDir.c_str());
     if (dp != nullptr) {
-        while (entry = readdir(dp)) {
-            if (entry->d_type == 8) {
+        while ((entry = readdir(dp)) != nullptr) {
+            if (entry->d_type == DT_REG) {
                 string name = entry->d_name;
-                ifstream file(cbDir + "/" + name);
-                string line;
-                while (getline(file, line)) {
-                    vector<short> aux{};
-                    size_t pos = 0;
-                    while ((pos = line.find(",")) != std::string::npos) {
-                        aux.push_back(short(stoi(line.substr(0, pos))));
-                        line.erase(0, pos + string(",").length());
-                    }
-                    codeBook.push_back(aux);
+                string filename = cbDir + "/" + name;
+
+                if (readCodeBook(filename, blockSize, codeBook, blocks) != 0) {
+                    continue;
                 }
+
                 // get error from blocks vs codeBook
                 long er = calculateError(blocks, codeBook);
                 minimum = er;
@@ -144,3 +113,74 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
+#if DEBUG
+int readCodeBook(string& filename, size_t blockSizeParam,
+                  vector<vector<short>>& codeBook, vector<vector<short>>& blocks) {
+    ifstream file(filename);
+
+    string line;
+    while (getline(file, line)) {
+        vector<short> centroid; // TODO this can be destroyed after leaving the function
+        size_t pos = 0, blockSize = 0;
+        while ((pos = line.find(',')) != std::string::npos) {
+            centroid.push_back(short(stoi(line.substr(0, pos))));
+            blockSize++;
+            line.erase(0, pos + 1);
+
+        }
+        centroid.push_back(short(stoi(line)));
+
+        if (++blockSize != blockSizeParam) {
+            cerr << "WARNING code book \"" << filename
+                 << "\" with centroids with block size of "
+                 << blockSize << " instead of "
+                 << blockSizeParam << ". Skipping." << endl;
+
+            codeBook.clear();
+
+            return 1;
+        }
+
+        codeBook.push_back(centroid);
+    }
+
+    file.close();
+
+    return 0;
+}
+#else
+int readCodeBook(string& filename, size_t blockSizeParam,
+                  vector<vector<short>>& codeBook, vector<vector<short>>& blocks) {
+    ifstream file(filename, fstream::binary);
+
+    size_t numOfCentroids, blockSize;
+
+    file.read((char*) &blockSize, sizeof(size_t));
+
+    if (blockSize != blockSizeParam) {
+        cerr << "WARNING code book \"" << filename
+             << "\" with centroids with block size of "
+             << blockSize << " instead of "
+             << blockSizeParam << ". Skipping." << endl;
+
+        return 1;
+    }
+
+    file.read((char*) &numOfCentroids, sizeof(size_t));
+
+    short frame;
+    for (size_t i = 0; i < numOfCentroids; i++) { // for each centroid
+        codeBook.emplace_back();
+        for (size_t j = 0; j < blockSize; j++) { // for each frame in the centroid
+            file.read((char*) &frame, sizeof(short));
+
+            codeBook[i].push_back(frame);
+        }
+    }
+
+    file.close();
+
+    return 0;
+}
+#endif

@@ -53,3 +53,28 @@ void retrieveBlocks(std::vector<std::vector<short>>& blocks,
     // TODO what to do if the last block
     //  does not have blockSize?
 }
+
+long calculateError(vector<vector<short>>& blocks,
+                    vector<vector<short>>& codeBook) {
+    long totalError{};
+    bool first;
+    for (auto& block : blocks) {
+        first = true;
+        long lowerError{};
+        for (auto& cb : codeBook) {
+            long error = calcEn(block, cb);
+            if (first) {
+                lowerError = error;
+                first = false;
+            } else {
+                if (error < lowerError) {
+                    lowerError = error;
+                }
+            }
+        }
+        totalError += lowerError;
+    }
+
+    return totalError;
+}
+
