@@ -58,8 +58,9 @@ int main(int argc, char *argv[]) {
         }
     }}
 
-    while (false) { // TODO !maxIterationsReached || !errorLowerThanThreshold -> OPTIONAL program options
-        // generates centroids (apply k-means algorithm)
+    // apply k-means algorithm (optimize centroids)
+    while (true) { // TODO !maxIterationsReached || !errorLowerThanThreshold -> OPTIONAL program options
+        // calculate closest blocks for each centroid
         vector<vector<vector<short>*>> closest_blocks(centroids.size());
         long error, smallest_local_error;
         int local_centroid_idx;
@@ -76,10 +77,19 @@ int main(int argc, char *argv[]) {
             closest_blocks
                     .at(local_centroid_idx)
                     .push_back(&block);
-        } // for
+        }
 
         // update centroids
         for(size_t i=0; i<centroids.size(); i++) {
+            if (closest_blocks[i].empty()) {
+                continue;
+            }
+            else if (closest_blocks[i].size() == 1) {
+                for (size_t idx = 0; idx < blockSize; idx++) {
+                    centroids[i][idx] = closest_blocks[i][0]->at(idx);
+                }
+            }
+
             vector<long> sums_blocks(blockSize);
             for (auto& block : closest_blocks[i]) {
                 for (size_t j = 0; j < block->size(); j++) {
@@ -88,12 +98,11 @@ int main(int argc, char *argv[]) {
             }
             for(int idx=0; idx<blockSize;idx++){
                 centroids[i][idx] = sums_blocks[idx] / closest_blocks[i].size();
-                // TODO the code above causes an error (division by 0)
-                //  in case no blocks where assigned (was closer to)
-                //  to a certain centroid
             }
-        } // for
-    } // closest_blocks
+        }
+    }
+
+    // TODO deal with isolated centroids
 
     writeCentroids(outputFile, centroids);
 
