@@ -18,8 +18,9 @@ long calcEs(vector<short>& signal) {
 
 long calcEn(vector<short>& original, vector<short>& noise) {
     if (original.size() != noise.size()) {
-        throw invalid_argument("Original and noise vectors must"
-                               " have the same size");
+        throw invalid_argument(
+            "Original and noise vectors must"
+            " have the same size");
     }
 
     long cumSum = 0;
@@ -34,18 +35,18 @@ long calcEn(vector<short>& original, vector<short>& noise) {
     return cumSum;
 }
 
-double calcSNR(long Es, long En) {
-    return En == 0 ? 0 : 10 * log10(Es / En);
-}
+double calcSNR(long Es, long En) { return En == 0 ? 0 : 10 * log10(Es / En); }
 
-void retrieveBlocks(std::vector<std::vector<short>>& blocks, SndfileHandle& sndFile,
-                    int blockSize, float overlapFactor) {
+void retrieveBlocks(std::vector<std::vector<short>>& blocks,
+                    SndfileHandle& sndFile, int blockSize,
+                    float overlapFactor) {
     vector<short> block(blockSize * sndFile.channels());
     int nFrames, i = 0;
     while ((nFrames = sndFile.readf(block.data(), blockSize))) {
         blocks.push_back(block);
-        //cout << blocks.at(i).at(0) << endl;
-        sndFile.seek((blockSize - (int)blockSize * overlapFactor) * i, SEEK_SET);
+        // cout << blocks.at(i).at(0) << endl;
+        sndFile.seek((blockSize - (int)blockSize * overlapFactor) * i,
+                     SEEK_SET);
         i++;
     }
 
