@@ -13,11 +13,11 @@ constexpr size_t FRAMES_BUFFER_SIZE =
 
 constexpr int REDUCTFACTOR = 4;
 
-void parseArguments(int argc, char* argv[],
-                    SndfileHandle& sndFileIn, SndfileHandle& sndFileOut, int& numQuantBits);
+void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
+                    SndfileHandle& sndFileOut, int& numQuantBits);
 
-int main(int argc, char *argv[]) {
-    if (argc < 3) {
+int main(int argc, char* argv[]) {
+    if (argc < 4) {
         cerr << "Usage: wavquant <quant size> <input file> <output file>"
              << endl;
         return 1;
@@ -60,9 +60,8 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-void parseArguments(int argc, char* argv[],
-                    SndfileHandle& sndFileIn, SndfileHandle& sndFileOut, int& numQuantBits) {
-
+void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
+                    SndfileHandle& sndFileOut, int& numQuantBits) {
     checkFileToRead(sndFileIn, argv[argc - 2]);
 
     checkFileOpenSuccess(sndFileOut, argv[argc - 1]);
