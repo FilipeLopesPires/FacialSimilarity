@@ -1,11 +1,18 @@
 
+#include <array>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <limits>
 #include <set>
 #include <sndfile.hh>
 #include <vector>
+#include <thread>
+#include <queue>
+#include <semaphore.h>
+#include <mutex>
+#include <cmath>
 
 #include "headers/io.h"
 #include "headers/vctQuant.h"
@@ -14,14 +21,33 @@
 
 using namespace std;
 
+
 void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
                     int& blockSize, float& overlapFactor, float& errorThreshold,
                     int& numRuns, string& outputFile);
 
 void writeCentroids(string& filename, vector<vector<short>>& centroids);
 
-double kMeans(vector<vector<short>>& blocks, vector<vector<short>>& centroids,
-              int blockSize, float errorThreshold);
+void applyKMeans(
+        int numCentroids,
+        vector<vector<short>>& blocks,
+        int threadsPerRun,
+        int blockSize,
+        float errorThreshold,
+        mutex& mtx,
+        queue<vector<vector<short>>*>& centroidsToCompare,
+        sem_t* sem
+);
+
+void calculateClosestBlocks(
+        int blocksBeginIdx,
+        int blocksEndIdx,
+        vector<vector<short>>& blocks,
+        vector<vector<short>>* centroids,
+        int numCentroids,
+        double& currentError,
+        vector<vector<vector<short>*>> closestBlocksPerCentroid
+);
 
 int main(int argc, char* argv[]) {
     if (argc != 7) {
@@ -33,7 +59,7 @@ int main(int argc, char* argv[]) {
 
     // parse and validate arguments
     SndfileHandle sndFileIn{argv[argc - 6]};
-    int blockSize, codebookSize, numRuns;
+    int blockSize, codeBookSize, numRuns, numThreadsForRuns = 2, numThreadsForEachRun = 2;
     float overlapFactor, errorThreshold;
     string outputFile;
     parseArguments(argc, argv, sndFileIn, blockSize, overlapFactor,
@@ -43,11 +69,12 @@ int main(int argc, char* argv[]) {
     vector<vector<short>> blocks;
     retrieveBlocks(blocks, sndFileIn, blockSize, overlapFactor);
 
-    cout << errorThreshold << endl;
-    codebookSize = (int)(blocks.size() / 4);
-    cout << blocks.size() << " || " << codebookSize << endl;
+    // cout << errorThreshold << endl;
+    codeBookSize = (int)(blocks.size() / 4);
+    // cout << blocks.size() << " || " << codeBookSize << endl;
+
     // validate number of centroids
-    if (blocks.size() < codebookSize) {
+    if (blocks.size() < codeBookSize) {
         cerr << "Error: too many centroids for the given initial arguments "
                 "(maximum = " +
                     to_string(blocks.size()) + ")"
@@ -55,53 +82,212 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    double lowestError = numeric_limits<double>::max(), error;
+    vector<vector<short>>* bestCentroids = new vector<vector<short>>(0);
+    // ^^ just to make sure that first free on bestCentroids doesn't raise an error
+    vector<vector<short>>* centroidsComparing;
+
+    sem_t sem;
+    sem_init(&sem, 0, 0);
+    queue<vector<vector<short>>*> centroidsToCompare;
+    mutex mtx;
+    for (int i = 0; i < numThreadsForRuns; i++) {
+        thread (
+                applyKMeans,
+                codeBookSize,
+                std::ref(blocks),
+                numThreadsForEachRun,
+                blockSize,
+                errorThreshold,
+                std::ref(mtx),
+                std::ref(centroidsToCompare),
+                &sem
+                );
+    }
+
+    while (numRuns > 0) {
+        sem_wait(&sem);
+
+        if (--numRuns > 0) {
+            thread (
+                    applyKMeans,
+                    codeBookSize,
+                    std::ref(blocks),
+                    numThreadsForEachRun,
+                    blockSize,
+                    errorThreshold,
+                    std::ref(mtx),
+                    std::ref(centroidsToCompare),
+                    &sem
+            );
+        }
+
+        mtx.lock();
+        centroidsComparing = centroidsToCompare.front();
+        error = calculateError(blocks, *centroidsComparing);
+        if (error < lowestError) {
+            lowestError = error;
+            free(bestCentroids);
+            bestCentroids = centroidsComparing;
+        }
+        else {
+            free(centroidsComparing);
+        }
+        centroidsToCompare.pop();
+        mtx.unlock();
+    }
+
+    writeCentroids(outputFile, *bestCentroids);
+
+    return 0;
+}
+
+void applyKMeans(
+        int numCentroids,
+        vector<vector<short>>& blocks,
+        int threadsPerRun,
+        int blockSize,
+        float errorThreshold,
+        mutex& mtx,
+        queue<vector<vector<short>>*>& centroidsToCompare,
+        sem_t* sem
+    ) {
+
+
     // initialize centroids
-    vector<vector<short>> centroids;
+    vector<vector<short>>* centroids = new vector<vector<short>>();
     {
-        set<int> indexesUsed;
-        int index, prev_centroidvec_size;
-        for (int i = 0; i < codebookSize; i++) {
-            prev_centroidvec_size = centroids.size();
-            while (centroids.size() == prev_centroidvec_size) {
+        set<size_t> indexesUsed;
+        int index, prevCentroidsSize;
+        for (int i = 0; i < numCentroids; i++) {
+            prevCentroidsSize = indexesUsed.size();
+            while (indexesUsed.size() == prevCentroidsSize) {
                 index = rand() % blocks.size();
                 if (indexesUsed.count(index) == 0) {
-                    centroids.emplace_back(blocks.at(index));
+                    centroids->emplace_back(blocks[index]);
                     indexesUsed.insert(index);
                 }
             }
         }
     }
-    double minimumKmeansError =
-        kMeans(blocks, centroids, blockSize, errorThreshold);
 
-    for (int z = 1; z < numRuns; z++) {
-        vector<vector<short>> tmpCentroids;
-        {
-            set<int> indexesUsed;
-            int index, prev_centroidvec_size;
-            for (int i = 0; i < codebookSize; i++) {
-                prev_centroidvec_size = tmpCentroids.size();
-                while (tmpCentroids.size() == prev_centroidvec_size) {
-                    index = rand() % blocks.size();
-                    if (indexesUsed.count(index) == 0) {
-                        tmpCentroids.emplace_back(blocks.at(index));
-                        indexesUsed.insert(index);
+    int numBlocksPerThread = ceil(blocks.size() / (double) threadsPerRun);
+    vector<vector<vector<vector<short>*>>> closestBlocksPerThread(threadsPerRun);
+    for (int i = 0; i < numCentroids; i++) {
+        closestBlocksPerThread[i].emplace_back(numCentroids);
+    }
+    thread threads[threadsPerRun];
+
+    double lastError, currentError = numeric_limits<double>::max();
+    do {
+        lastError = currentError;
+        currentError = 0;
+
+        for (vector<vector<vector<short>*>>& a : closestBlocksPerThread) {
+            for (vector<vector<short>*>& b : a) {
+                b.clear();
+            }
+        }
+
+        int begin = 0, end = numBlocksPerThread;
+        for (int i = 0; i < threadsPerRun; i++) {
+            threads[i] = thread(
+                    calculateClosestBlocks,
+                    begin,
+                    end,
+                    std::ref(blocks),
+                    centroids,
+                    numCentroids,
+                    std::ref(currentError),
+                    std::ref(closestBlocksPerThread[i])
+            );
+
+            begin = end;
+            if (i == threadsPerRun - 1) {
+                end = blocks.size();
+            }
+            else {
+                end = begin + numBlocksPerThread;
+            }
+        }
+
+        for (int i = 0; i < threadsPerRun; i++) {
+            threads[i].join();
+        }
+
+        // update centroids
+        for(size_t i = 0; i < numCentroids; i++) {
+            size_t closestBlocksCount = 0;
+            double sums_blocks[blockSize];
+
+            for (size_t threadIdx = 0; threadIdx < threadsPerRun; threadIdx++) {
+                for (vector<short>* block : closestBlocksPerThread[threadIdx][i]) {
+                    closestBlocksCount++;
+
+                    for (size_t blockIdx = 0; blockIdx < blockSize; blockIdx++) {
+                        sums_blocks[blockIdx] += block->at(blockIdx);
                     }
                 }
             }
-        }
-        double iterationError =
-            kMeans(blocks, tmpCentroids, blockSize, errorThreshold);
-        if (iterationError < minimumKmeansError) {
-            // TODO verify if this assignment is done correctly
-            centroids = tmpCentroids;
-            minimumKmeansError = iterationError;
-        }
-    }
-    // TODO deal with isolated centroids - is it still necessary?
-    writeCentroids(outputFile, centroids);
 
-    return 0;
+            if (closestBlocksCount == 0) {
+                continue;
+            }
+            else if (closestBlocksCount == 1) {
+                for (size_t idx = 0; idx < blockSize; idx++) {
+                    centroids->at(i)[idx] = sums_blocks[idx];
+                }
+            }
+            else {
+                for(int idx=0; idx<blockSize;idx++){
+                    centroids->at(i)[idx] = sums_blocks[idx] / closestBlocksCount;
+                }
+            }
+        }
+
+        currentError = calculateError(blocks, *centroids);
+
+        cout << "Kmeans Error Difference: "
+             << ((lastError - currentError) / lastError) << endl;
+    } while (((lastError - currentError) / lastError) > errorThreshold);
+
+    // TODO deal with isolated centroids
+
+    mtx.lock();
+    centroidsToCompare.push(centroids);
+    mtx.unlock();
+
+    sem_post(sem);
+}
+
+void calculateClosestBlocks(
+        int blocksBeginIdx,
+        int blocksEndIdx,
+        vector<vector<short>>& blocks,
+        vector<vector<short>>* centroids,
+        int numCentroids,
+        double& currentError,
+        vector<vector<vector<short>*>> closestBlocksPerCentroid
+        ) {
+    double smallestLocalError, error;
+    size_t localCentroidIdx;
+    for (int i = blocksBeginIdx; i < blocksEndIdx; i++) {
+        vector<short> block = blocks[i];
+
+        smallestLocalError = calcEn(block, centroids->at(0));
+        localCentroidIdx = 0;
+        for (size_t j = 1; j < numCentroids; j++) {
+            error = calcEn(block, centroids->at(j));
+            if (error < smallestLocalError) {
+                smallestLocalError = error;
+                localCentroidIdx = j;
+            }
+        }
+
+        currentError += smallestLocalError;
+
+        closestBlocksPerCentroid[localCentroidIdx].push_back(&blocks[i]);
+    }
 }
 
 #if DEBUG
@@ -143,60 +329,6 @@ void writeCentroids(string& filename, vector<vector<short>>& centroids) {
     file.close();
 }
 #endif
-
-double kMeans(vector<vector<short>>& blocks, vector<vector<short>>& centroids,
-              int blockSize, float errorThreshold) {
-    double lastError = 0, currentError = 0;
-    // apply k-means algorithm (optimize centroids)
-    do {  // TODO !maxIterationsReached || !errorLowerThanThreshold ->
-          // OPTIONAL program options
-        // calculate closest blocks for each centroid
-        lastError = currentError;
-        currentError = 0;
-        vector<vector<vector<short>*>> closest_blocks(centroids.size());
-        long error, smallest_local_error;
-        int local_centroid_idx;
-        for (auto& block : blocks) {
-            smallest_local_error = calcEn(block, centroids.at(0));
-            local_centroid_idx = 0;
-            for (size_t j = 1; j < centroids.size(); j++) {
-                error = calcEn(block, centroids.at(j));
-                if (error < smallest_local_error) {
-                    smallest_local_error = error;
-                    local_centroid_idx = j;
-                }
-            }
-            currentError += smallest_local_error;
-            closest_blocks.at(local_centroid_idx).push_back(&block);
-        }
-
-        for (size_t i = 0; i < centroids.size(); i++) {
-            if (closest_blocks[i].empty()) {
-                continue;
-            } else if (closest_blocks[i].size() == 1) {
-                for (size_t idx = 0; idx < blockSize; idx++) {
-                    centroids[i][idx] = closest_blocks[i][0]->at(idx);
-                }
-            }
-
-            vector<double> sums_blocks(blockSize);
-            for (auto& block : closest_blocks[i]) {
-                for (size_t j = 0; j < block->size(); j++) {
-                    sums_blocks[j] += block->at(j);
-                }
-            }
-            for (int idx = 0; idx < blockSize; idx++) {
-                centroids[i][idx] = sums_blocks[idx] / closest_blocks[i].size();
-            }
-        }
-        if (lastError == 0) {
-            lastError = -currentError;
-        }
-        cout << "Kmeans Error Difference: "
-             << ((lastError - currentError) / lastError) << endl;
-    } while (((lastError - currentError) / lastError) > errorThreshold);
-    return currentError;
-}
 
 void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
                     int& blockSize, float& overlapFactor, float& errorThreshold,
