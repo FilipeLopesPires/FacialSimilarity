@@ -44,7 +44,7 @@ void calculateClosestBlocks(
         vector<vector<short>>* centroids,
         int numCentroids,
         double& currentError,
-        vector<vector<vector<short>*>> closestBlocksPerCentroid
+        vector<vector<vector<short>*>>& closestBlocksPerCentroid
 );
 
 int main(int argc, char* argv[]) {
@@ -90,8 +90,9 @@ int main(int argc, char* argv[]) {
     sem_init(&sem, 0, 0);
     queue<vector<vector<short>>*> centroidsToCompare;
     mutex mtx;
+    thread t;
     for (int i = 0; i < numThreadsForRuns; i++) {
-        thread (
+        t = thread(
                 applyKMeans,
                 codeBookSize,
                 std::ref(blocks),
@@ -102,13 +103,14 @@ int main(int argc, char* argv[]) {
                 std::ref(centroidsToCompare),
                 &sem
                 );
+        t.detach();
     }
 
     while (numRuns > 0) {
         sem_wait(&sem);
 
         if (--numRuns > 0) {
-            thread (
+            t = thread(
                     applyKMeans,
                     codeBookSize,
                     std::ref(blocks),
@@ -119,6 +121,7 @@ int main(int argc, char* argv[]) {
                     std::ref(centroidsToCompare),
                     &sem
             );
+            t.detach();
         }
 
         mtx.lock();
@@ -172,9 +175,11 @@ void applyKMeans(
     }
 
     int numBlocksPerThread = ceil(blocks.size() / (double) threadsPerRun);
-    vector<vector<vector<vector<short>*>>> closestBlocksPerCentoidPerThread(threadsPerRun);
-    for (int i = 0; i < numCentroids; i++) {
-        closestBlocksPerCentoidPerThread[i].emplace_back(numCentroids);
+    vector<vector<vector<vector<short>*>>> closestBlocksPerCentroidPerThread(threadsPerRun);
+    for (int i = 0; i < threadsPerRun; i++) {
+        for (int j = 0; j < numCentroids; j++) {
+            closestBlocksPerCentroidPerThread[i].emplace_back();
+        }
     }
     thread threads[threadsPerRun];
 
@@ -183,14 +188,23 @@ void applyKMeans(
         lastError = currentError;
         currentError = 0;
 
-        for (auto& closestBlocksPerCentroid : closestBlocksPerCentoidPerThread) {
+        for (auto& closestBlocksPerCentroid : closestBlocksPerCentroidPerThread) {
             for (vector<vector<short>*>& closestBlocksForCentroid : closestBlocksPerCentroid) {
                 closestBlocksForCentroid.clear();
             }
         }
 
-        int begin = 0, end = numBlocksPerThread;
+        int begin, end = 0;
         for (int i = 0; i < threadsPerRun; i++) {
+            begin = end;
+
+            if (i == threadsPerRun - 1) {
+                end = blocks.size();
+            }
+            else {
+                end = begin + numBlocksPerThread;
+            }
+
             threads[i] = thread(
                     calculateClosestBlocks,
                     begin,
@@ -199,16 +213,8 @@ void applyKMeans(
                     centroids,
                     numCentroids,
                     std::ref(currentError),
-                    std::ref(closestBlocksPerCentoidPerThread[i])
+                    std::ref(closestBlocksPerCentroidPerThread[i])
             );
-
-            begin = end;
-            if (i == threadsPerRun - 1) {
-                end = blocks.size();
-            }
-            else {
-                end = begin + numBlocksPerThread;
-            }
         }
 
         for (int i = 0; i < threadsPerRun; i++) {
@@ -221,7 +227,7 @@ void applyKMeans(
             double sums_blocks[blockSize];
 
             for (size_t threadIdx = 0; threadIdx < threadsPerRun; threadIdx++) {
-                for (vector<short>* block : closestBlocksPerCentoidPerThread[threadIdx][i]) {
+                for (vector<short>* block : closestBlocksPerCentroidPerThread[threadIdx][i]) {
                     closestBlocksCount++;
 
                     for (size_t blockIdx = 0; blockIdx < blockSize; blockIdx++) {
@@ -267,7 +273,7 @@ void calculateClosestBlocks(
         vector<vector<short>>* centroids,
         int numCentroids,
         double& currentError,
-        vector<vector<vector<short>*>> closestBlocksPerCentroid
+        vector<vector<vector<short>*>>& closestBlocksPerCentroid
         ) {
     double smallestLocalError, error;
     size_t localCentroidIdx;
