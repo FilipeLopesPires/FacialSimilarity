@@ -3,6 +3,7 @@
         "ostream": "cpp",
         "filesystem": "cpp",
         "iostream": "cpp",
-        "stdexcept": "cpp"
+        "stdexcept": "cpp",
+        "cmath": "cpp"
     }
 }
