@@ -9,7 +9,7 @@
 #include "headers/io.h"
 #include "headers/vctQuant.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 using namespace std;
 
@@ -52,7 +52,8 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
 }
 
 int readCodeBook(string& filename, size_t blockSizeParam,
-                  vector<vector<short>>& codeBook, vector<vector<short>>& blocks);
+                 vector<vector<short>>& codeBook,
+                 vector<vector<short>>& blocks);
 
 int main(int argc, char* argv[]) {
     if (argc != 5) {
@@ -76,8 +77,8 @@ int main(int argc, char* argv[]) {
     struct dirent* entry = nullptr;
     DIR* dp = nullptr;
 
-    long minimum{};
-    map<string, int> errors{};
+    double minimum{};
+    map<string, double> errors{};
     vector<vector<short>> codeBook;
     dp = opendir(cbDir.c_str());
     if (dp != nullptr) {
@@ -91,7 +92,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 // get error from blocks vs codeBook
-                long er = calculateError(blocks, codeBook);
+                double er = calculateError(blocks, codeBook);
                 minimum = er;
                 errors.insert({entry->d_name, er});
                 codeBook.clear();
@@ -109,33 +110,33 @@ int main(int argc, char* argv[]) {
 
     closedir(dp);
 
-    cout << response << endl;
+    cout << response << ", " << minimum << endl;
 
     return 0;
 }
 
 #if DEBUG
 int readCodeBook(string& filename, size_t blockSizeParam,
-                  vector<vector<short>>& codeBook, vector<vector<short>>& blocks) {
+                 vector<vector<short>>& codeBook,
+                 vector<vector<short>>& blocks) {
     ifstream file(filename);
 
     string line;
     while (getline(file, line)) {
-        vector<short> centroid; // TODO this can be destroyed after leaving the function
+        vector<short>
+            centroid;  // TODO this can be destroyed after leaving the function
         size_t pos = 0, blockSize = 0;
         while ((pos = line.find(',')) != std::string::npos) {
             centroid.push_back(short(stoi(line.substr(0, pos))));
             blockSize++;
             line.erase(0, pos + 1);
-
         }
         centroid.push_back(short(stoi(line)));
 
         if (++blockSize != blockSizeParam) {
             cerr << "WARNING code book \"" << filename
-                 << "\" with centroids with block size of "
-                 << blockSize << " instead of "
-                 << blockSizeParam << ". Skipping." << endl;
+                 << "\" with centroids with block size of " << blockSize
+                 << " instead of " << blockSizeParam << ". Skipping." << endl;
 
             codeBook.clear();
 
@@ -151,29 +152,30 @@ int readCodeBook(string& filename, size_t blockSizeParam,
 }
 #else
 int readCodeBook(string& filename, size_t blockSizeParam,
-                  vector<vector<short>>& codeBook, vector<vector<short>>& blocks) {
+                 vector<vector<short>>& codeBook,
+                 vector<vector<short>>& blocks) {
     ifstream file(filename, fstream::binary);
 
     size_t numOfCentroids, blockSize;
 
-    file.read((char*) &blockSize, sizeof(size_t));
+    file.read((char*)&blockSize, sizeof(size_t));
 
     if (blockSize != blockSizeParam) {
         cerr << "WARNING code book \"" << filename
-             << "\" with centroids with block size of "
-             << blockSize << " instead of "
-             << blockSizeParam << ". Skipping." << endl;
+             << "\" with centroids with block size of " << blockSize
+             << " instead of " << blockSizeParam << ". Skipping." << endl;
 
         return 1;
     }
 
-    file.read((char*) &numOfCentroids, sizeof(size_t));
+    file.read((char*)&numOfCentroids, sizeof(size_t));
 
     short frame;
-    for (size_t i = 0; i < numOfCentroids; i++) { // for each centroid
+    for (size_t i = 0; i < numOfCentroids; i++) {  // for each centroid
         codeBook.emplace_back();
-        for (size_t j = 0; j < blockSize; j++) { // for each frame in the centroid
-            file.read((char*) &frame, sizeof(short));
+        for (size_t j = 0; j < blockSize;
+             j++) {  // for each frame in the centroid
+            file.read((char*)&frame, sizeof(short));
 
             codeBook[i].push_back(frame);
         }

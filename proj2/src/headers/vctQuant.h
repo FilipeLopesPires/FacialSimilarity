@@ -1,8 +1,8 @@
 #ifndef SNR_H
 #define SNR_H
 
-#include <vector>
 #include <sndfile.hh>
+#include <vector>
 
 /*!
  * Calculates the energy of the signal
@@ -10,7 +10,7 @@
  * @param signal content of the signal
  * @return energy of the signal
  */
-long calcEs(std::vector<short>& signal);
+double calcEs(std::vector<short>& signal);
 
 /*!
  * Calculates the energy of the noise
@@ -21,7 +21,7 @@ long calcEs(std::vector<short>& signal);
  * @throws invalid_argument if original and noise vector
  *  don't have the same size
  */
-long calcEn(std::vector<short>& original, std::vector<short>& noise);
+double calcEn(std::vector<short>& original, std::vector<short>& noise);
 
 /*!
  * Calculates the Signal-To-Noise ratio (SNR)
@@ -44,11 +44,10 @@ double calcSNR(long Es, long En);
  * @param overlapFactor between adjacent blocks. This also tells
  *  how much the sliding window advances to read the next block
  */
-void retrieveBlocks(std::vector<std::vector<short>>& blocks, SndfileHandle& sndFile,
-                    int blockSize, float overlapFactor);
+void retrieveBlocks(std::vector<std::vector<short>>& blocks,
+                    SndfileHandle& sndFile, int blockSize, float overlapFactor);
 
-long calculateError(std::vector<std::vector<short>>& blocks,
-                    std::vector<std::vector<short>>& codeBook);
+double calculateError(std::vector<std::vector<short>>& blocks,
+                      std::vector<std::vector<short>>& codeBook);
 
 #endif
-
