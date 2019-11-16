@@ -22,9 +22,15 @@ using namespace std;
 
 void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
                     int& blockSize, float& overlapFactor, float& errorThreshold,
-                    int& numRuns, string& outputFile);
+                    int& numRuns, string& outputFile, int& numThreadsForRuns,
+                    int& numThreadsForEachRun);
 
 void writeCentroids(string& filename, vector<vector<short>>& centroids);
+
+typedef struct {
+    vector<vector<short>>* data;
+    double error;
+} Centroids;
 
 void applyKMeans(
         int numCentroids,
@@ -33,7 +39,7 @@ void applyKMeans(
         int blockSize,
         float errorThreshold,
         mutex& mtx,
-        queue<vector<vector<short>>*>& centroidsToCompare,
+        queue<Centroids>& centroidsToCompare,
         sem_t* sem
 );
 
@@ -43,34 +49,31 @@ void calculateClosestBlocks(
         vector<vector<short>>& blocks,
         vector<vector<short>>* centroids,
         int numCentroids,
-        double& currentError,
         vector<vector<vector<short>*>>& closestBlocksPerCentroid
 );
 
+
 int main(int argc, char* argv[]) {
-    if (argc != 7) {
+    if (argc != 7 && argc != 9) {
         cerr << "Usage: wavcb <inputFile> <blockSize> <overlapFactor> "
-                "<errorThreshold> <numRuns> <output file>"
+                "<errorThreshold> <numRuns> <output file> [<threads for runs> <threads per run>]"
              << endl;
         return 1;
     }
 
     // parse and validate arguments
-    SndfileHandle sndFileIn{argv[argc - 6]};
-    int blockSize, codeBookSize, numRuns, numThreadsForRuns = 2, numThreadsForEachRun = 2;
-    // TODO receive the last two variables as command args
+    SndfileHandle sndFileIn{argv[argc - 6 - (argc == 9 ? 2 : 0)]};
+    int blockSize, codeBookSize, numRuns, numThreadsForRuns, numThreadsForEachRun;
     float overlapFactor, errorThreshold;
     string outputFile;
     parseArguments(argc, argv, sndFileIn, blockSize, overlapFactor,
-                   errorThreshold, numRuns, outputFile);
+                   errorThreshold, numRuns, outputFile, numThreadsForRuns, numThreadsForEachRun);
 
     // retrieve all blocks
     vector<vector<short>> blocks;
     retrieveBlocks(blocks, sndFileIn, blockSize, overlapFactor);
 
-    // cout << errorThreshold << endl;
     codeBookSize = (int)(blocks.size() / 4);
-    // cout << blocks.size() << " || " << codeBookSize << endl;
 
     // validate number of centroids
     if (blocks.size() < codeBookSize) {
@@ -81,14 +84,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    double lowestError = numeric_limits<double>::max(), error;
-    vector<vector<short>>* bestCentroids = new vector<vector<short>>(0);
-    // ^^ just to make sure that first free on bestCentroids doesn't raise an error
-    vector<vector<short>>* centroidsComparing;
+    Centroids bestCentroids = {new vector<vector<short>>(0), numeric_limits<double>::max()};
+    // ^^ the allocation of the empty vector is to
+    // make sure that first free on bestCentroids doesn't raise an error
+    Centroids centroidsComparing;
 
     sem_t sem;
     sem_init(&sem, 0, 0);
-    queue<vector<vector<short>>*> centroidsToCompare;
+    queue<Centroids> centroidsToCompare;
     mutex mtx;
     thread t;
     for (int i = 0; i < numThreadsForRuns; i++) {
@@ -126,22 +129,20 @@ int main(int argc, char* argv[]) {
 
         mtx.lock();
         centroidsComparing = centroidsToCompare.front();
-        // TODO this error calculation can be avoided if
-        //  we get the error calculated on the thread
-        error = calculateError(blocks, *centroidsComparing);
-        if (error < lowestError) {
-            lowestError = error;
-            free(bestCentroids);
+        if (centroidsComparing.error < bestCentroids.error) {
+            free(bestCentroids.data);
             bestCentroids = centroidsComparing;
         }
         else {
-            free(centroidsComparing);
+            free(centroidsComparing.data);
         }
         centroidsToCompare.pop();
         mtx.unlock();
     }
 
-    writeCentroids(outputFile, *bestCentroids);
+    cout << "best centoids found with error " << bestCentroids.error << endl;
+
+    writeCentroids(outputFile, *bestCentroids.data);
 
     return 0;
 }
@@ -153,7 +154,7 @@ void applyKMeans(
         int blockSize,
         float errorThreshold,
         mutex& mtx,
-        queue<vector<vector<short>>*>& centroidsToCompare,
+        queue<Centroids>& centroidsToCompare,
         sem_t* sem
     ) {
 
@@ -183,10 +184,9 @@ void applyKMeans(
     }
     thread threads[threadsPerRun];
 
-    double lastError, currentError = numeric_limits<double>::max();
+    double lastError, currentError = numeric_limits<double>::max(), diff;
     do {
         lastError = currentError;
-        currentError = 0;
 
         for (auto& closestBlocksPerCentroid : closestBlocksPerCentroidPerThread) {
             for (vector<vector<short>*>& closestBlocksForCentroid : closestBlocksPerCentroid) {
@@ -212,7 +212,6 @@ void applyKMeans(
                     std::ref(blocks),
                     centroids,
                     numCentroids,
-                    std::ref(currentError),
                     std::ref(closestBlocksPerCentroidPerThread[i])
             );
         }
@@ -253,14 +252,17 @@ void applyKMeans(
 
         currentError = calculateError(blocks, *centroids);
 
+        diff = (lastError - currentError) / lastError;
         cout << "Kmeans Error Difference: "
-             << ((lastError - currentError) / lastError) << endl;
-    } while (((lastError - currentError) / lastError) > errorThreshold);
+             << diff << endl;
+    } while (diff < 0 || diff > errorThreshold);
 
     // TODO deal with isolated centroids
 
+    cout << "kmeas error " << currentError << endl;
+
     mtx.lock();
-    centroidsToCompare.push(centroids); // TODO also return error
+    centroidsToCompare.push({centroids, currentError});
     mtx.unlock();
 
     sem_post(sem);
@@ -272,7 +274,6 @@ void calculateClosestBlocks(
         vector<vector<short>>& blocks,
         vector<vector<short>>* centroids,
         int numCentroids,
-        double& currentError,
         vector<vector<vector<short>*>>& closestBlocksPerCentroid
         ) {
     double smallestLocalError, error;
@@ -289,8 +290,6 @@ void calculateClosestBlocks(
                 localCentroidIdx = j;
             }
         }
-
-        currentError += smallestLocalError;
 
         closestBlocksPerCentroid[localCentroidIdx].push_back(&blocks[i]);
     }
@@ -338,14 +337,17 @@ void writeCentroids(string& filename, vector<vector<short>>& centroids) {
 
 void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
                     int& blockSize, float& overlapFactor, float& errorThreshold,
-                    int& numRuns, string& outputFile) {
+                    int& numRuns, string& outputFile, int& numThreadsForRuns,
+                    int& numThreadsForEachRun) {
+    int argsOffset = argc == 9 ? 2 : 0;
+
     // validate input file
-    checkFileToRead(sndFileIn, argv[argc - 6]);
+    checkFileToRead(sndFileIn, argv[argc - 6 - argsOffset]);
     int sndFileSize = sndFileIn.frames();
 
     // validate block size
     try {
-        blockSize = stoi(argv[argc - 5]);
+        blockSize = stoi(argv[argc - 5 - argsOffset]);
     } catch (...) {
         cerr << "Error: block size must be a valid number" << endl;
         exit(1);
@@ -362,7 +364,7 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
 
     // validate overlap factor
     try {
-        overlapFactor = stof(argv[argc - 4]);
+        overlapFactor = stof(argv[argc - 4 - argsOffset]);
     } catch (...) {
         cerr << "Error: overlap factor must be a valid number" << endl;
         exit(1);
@@ -375,7 +377,7 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
 
     // validate codebook size
     try {
-        errorThreshold = stof(argv[argc - 3]);
+        errorThreshold = stof(argv[argc - 3 - argsOffset]);
     } catch (...) {
         cerr << "Error: errorThreshold must be a valid number" << endl;
         exit(1);
@@ -387,7 +389,7 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
 
     // validate number of runs
     try {
-        numRuns = stoi(argv[argc - 2]);
+        numRuns = stoi(argv[argc - 2 - argsOffset]);
     } catch (...) {
         cerr << "Error: numRuns must be a valid number" << endl;
         exit(1);
@@ -397,5 +399,32 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
         exit(1);
     }
 
-    outputFile = argv[argc - 1];
+    outputFile = argv[argc - 1 - argsOffset];
+
+    if (argc == 9) {
+        try {
+            numThreadsForRuns = stoi(argv[argc - 2]);
+        } catch (...) {
+            cerr << "Error: numThreadsForRuns must be a valid number" << endl;
+            exit(1);
+        }
+        if (numThreadsForRuns <= 0) {
+            cerr << "Error: numThreadsForRuns must be larger than zero" << endl;
+            exit(1);
+        }
+
+        try {
+            numThreadsForEachRun = stoi(argv[argc - 1]);
+        } catch (...) {
+            cerr << "Error: numThreadsForEachRun must be a valid number" << endl;
+            exit(1);
+        }
+        if (numThreadsForEachRun <= 0) {
+            cerr << "Error: numThreadsForEachRun must be larger than zero" << endl;
+            exit(1);
+        }
+    }
+    else {
+        numThreadsForRuns = numThreadsForEachRun = 2;
+    }
 }
