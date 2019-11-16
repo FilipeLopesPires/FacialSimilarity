@@ -1,18 +1,16 @@
 
-#include <array>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <mutex>
+#include <semaphore.h>
 #include <set>
 #include <sndfile.hh>
+#include <queue>
 #include <vector>
 #include <thread>
-#include <queue>
-#include <semaphore.h>
-#include <mutex>
-#include <cmath>
 
 #include "headers/io.h"
 #include "headers/vctQuant.h"
@@ -60,6 +58,7 @@ int main(int argc, char* argv[]) {
     // parse and validate arguments
     SndfileHandle sndFileIn{argv[argc - 6]};
     int blockSize, codeBookSize, numRuns, numThreadsForRuns = 2, numThreadsForEachRun = 2;
+    // TODO receive the last two variables as command args
     float overlapFactor, errorThreshold;
     string outputFile;
     parseArguments(argc, argv, sndFileIn, blockSize, overlapFactor,
@@ -76,8 +75,8 @@ int main(int argc, char* argv[]) {
     // validate number of centroids
     if (blocks.size() < codeBookSize) {
         cerr << "Error: too many centroids for the given initial arguments "
-                "(maximum = " +
-                    to_string(blocks.size()) + ")"
+                "(maximum = " <<
+                blocks.size() << ")"
              << endl;
         return 1;
     }
@@ -124,6 +123,8 @@ int main(int argc, char* argv[]) {
 
         mtx.lock();
         centroidsComparing = centroidsToCompare.front();
+        // TODO this error calculation can be avoided if
+        //  we get the error calculated on the thread
         error = calculateError(blocks, *centroidsComparing);
         if (error < lowestError) {
             lowestError = error;
@@ -153,15 +154,14 @@ void applyKMeans(
         sem_t* sem
     ) {
 
-
     // initialize centroids
     vector<vector<short>>* centroids = new vector<vector<short>>();
     {
         set<size_t> indexesUsed;
         int index, prevCentroidsSize;
         for (int i = 0; i < numCentroids; i++) {
-            prevCentroidsSize = indexesUsed.size();
-            while (indexesUsed.size() == prevCentroidsSize) {
+            prevCentroidsSize = centroids->size();
+            while (centroids->size() == prevCentroidsSize) {
                 index = rand() % blocks.size();
                 if (indexesUsed.count(index) == 0) {
                     centroids->emplace_back(blocks[index]);
@@ -172,9 +172,9 @@ void applyKMeans(
     }
 
     int numBlocksPerThread = ceil(blocks.size() / (double) threadsPerRun);
-    vector<vector<vector<vector<short>*>>> closestBlocksPerThread(threadsPerRun);
+    vector<vector<vector<vector<short>*>>> closestBlocksPerCentoidPerThread(threadsPerRun);
     for (int i = 0; i < numCentroids; i++) {
-        closestBlocksPerThread[i].emplace_back(numCentroids);
+        closestBlocksPerCentoidPerThread[i].emplace_back(numCentroids);
     }
     thread threads[threadsPerRun];
 
@@ -183,9 +183,9 @@ void applyKMeans(
         lastError = currentError;
         currentError = 0;
 
-        for (vector<vector<vector<short>*>>& a : closestBlocksPerThread) {
-            for (vector<vector<short>*>& b : a) {
-                b.clear();
+        for (auto& closestBlocksPerCentroid : closestBlocksPerCentoidPerThread) {
+            for (vector<vector<short>*>& closestBlocksForCentroid : closestBlocksPerCentroid) {
+                closestBlocksForCentroid.clear();
             }
         }
 
@@ -199,7 +199,7 @@ void applyKMeans(
                     centroids,
                     numCentroids,
                     std::ref(currentError),
-                    std::ref(closestBlocksPerThread[i])
+                    std::ref(closestBlocksPerCentoidPerThread[i])
             );
 
             begin = end;
@@ -221,7 +221,7 @@ void applyKMeans(
             double sums_blocks[blockSize];
 
             for (size_t threadIdx = 0; threadIdx < threadsPerRun; threadIdx++) {
-                for (vector<short>* block : closestBlocksPerThread[threadIdx][i]) {
+                for (vector<short>* block : closestBlocksPerCentoidPerThread[threadIdx][i]) {
                     closestBlocksCount++;
 
                     for (size_t blockIdx = 0; blockIdx < blockSize; blockIdx++) {
@@ -254,7 +254,7 @@ void applyKMeans(
     // TODO deal with isolated centroids
 
     mtx.lock();
-    centroidsToCompare.push(centroids);
+    centroidsToCompare.push(centroids); // TODO also return error
     mtx.unlock();
 
     sem_post(sem);
