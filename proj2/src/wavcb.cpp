@@ -38,9 +38,9 @@ void applyKMeans(
         int threadsPerRun,
         int blockSize,
         float errorThreshold,
-        mutex& mtx,
+        mutex& centroidsToCmpMutex,
         queue<Centroids>& centroidsToCompare,
-        sem_t* sem
+        sem_t* centroidsToCmpAvailable
 );
 
 void calculateClosestBlocks(
@@ -89,10 +89,10 @@ int main(int argc, char* argv[]) {
     // make sure that first free on bestCentroids doesn't raise an error
     Centroids centroidsComparing;
 
-    sem_t sem;
-    sem_init(&sem, 0, 0);
+    sem_t centroidsToCmpAvailable;
+    sem_init(&centroidsToCmpAvailable, 0, 0);
     queue<Centroids> centroidsToCompare;
-    mutex mtx;
+    mutex centroidsToCmpMutex;
     thread t;
     for (int i = 0; i < numThreadsForRuns; i++) {
         t = thread(
@@ -102,15 +102,15 @@ int main(int argc, char* argv[]) {
                 numThreadsForEachRun,
                 blockSize,
                 errorThreshold,
-                std::ref(mtx),
+                std::ref(centroidsToCmpMutex),
                 std::ref(centroidsToCompare),
-                &sem
+                &centroidsToCmpAvailable
                 );
         t.detach();
     }
 
     while (numRuns > 0) {
-        sem_wait(&sem);
+        sem_wait(&centroidsToCmpAvailable);
 
         if (--numRuns > 0) {
             t = thread(
@@ -120,15 +120,16 @@ int main(int argc, char* argv[]) {
                     numThreadsForEachRun,
                     blockSize,
                     errorThreshold,
-                    std::ref(mtx),
+                    std::ref(centroidsToCmpMutex),
                     std::ref(centroidsToCompare),
-                    &sem
+                    &centroidsToCmpAvailable
             );
             t.detach();
         }
 
-        mtx.lock();
+        centroidsToCmpMutex.lock();
         centroidsComparing = centroidsToCompare.front();
+        cout << "solution found with error " << centroidsComparing.error << endl;
         if (centroidsComparing.error < bestCentroids.error) {
             free(bestCentroids.data);
             bestCentroids = centroidsComparing;
@@ -137,10 +138,10 @@ int main(int argc, char* argv[]) {
             free(centroidsComparing.data);
         }
         centroidsToCompare.pop();
-        mtx.unlock();
+        centroidsToCmpMutex.unlock();
     }
 
-    cout << "best centoids found with error " << bestCentroids.error << endl;
+    cout << "best centroids with error " << bestCentroids.error << endl;
 
     writeCentroids(outputFile, *bestCentroids.data);
 
@@ -153,10 +154,10 @@ void applyKMeans(
         int threadsPerRun,
         int blockSize,
         float errorThreshold,
-        mutex& mtx,
+        mutex& centroidsToCmpMutex,
         queue<Centroids>& centroidsToCompare,
-        sem_t* sem
-    ) {
+        sem_t* centroidsToCmpAvailable
+) {
 
     // initialize centroids
     vector<vector<short>>* centroids = new vector<vector<short>>();
@@ -221,9 +222,12 @@ void applyKMeans(
         }
 
         // update centroids
+        double sums_blocks[blockSize];
         for(size_t i = 0; i < numCentroids; i++) {
             size_t closestBlocksCount = 0;
-            double sums_blocks[blockSize];
+            for (size_t j = 0; j < blockSize; j++) {
+                sums_blocks[j] = 0;
+            }
 
             for (size_t threadIdx = 0; threadIdx < threadsPerRun; threadIdx++) {
                 for (vector<short>* block : closestBlocksPerCentroidPerThread[threadIdx][i]) {
@@ -235,15 +239,12 @@ void applyKMeans(
                 }
             }
 
-            if (closestBlocksCount == 0) {
-                continue;
-            }
-            else if (closestBlocksCount == 1) {
+            if (closestBlocksCount == 1) {
                 for (size_t idx = 0; idx < blockSize; idx++) {
                     centroids->at(i)[idx] = sums_blocks[idx];
                 }
             }
-            else {
+            else if (closestBlocksCount > 1) {
                 for(int idx=0; idx<blockSize;idx++){
                     centroids->at(i)[idx] = sums_blocks[idx] / closestBlocksCount;
                 }
@@ -251,21 +252,15 @@ void applyKMeans(
         }
 
         currentError = calculateError(blocks, *centroids);
-
-        diff = (lastError - currentError) / lastError;
-        cout << "Kmeans Error Difference: "
-             << diff << endl;
-    } while (diff < 0 || diff > errorThreshold);
+    } while ((lastError - currentError) / lastError > errorThreshold);
 
     // TODO deal with isolated centroids
 
-    cout << "kmeas error " << currentError << endl;
-
-    mtx.lock();
+    centroidsToCmpMutex.lock();
     centroidsToCompare.push({centroids, currentError});
-    mtx.unlock();
+    centroidsToCmpMutex.unlock();
 
-    sem_post(sem);
+    sem_post(centroidsToCmpAvailable);
 }
 
 void calculateClosestBlocks(
