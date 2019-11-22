@@ -213,12 +213,42 @@ The result is a sample with \texttt{n} times less values.
 ...
 
 \subsection*{2.3. Vector Quantization Codebook}
+\label{sec:vctQuantCB}
 
 ...
 
 \subsection*{2.4. Codebook Parallel Processing}
 
-...
+As audio files get longer, the number of frames per file increases.
+This will lead to the growth of the number of blocks that will be
+extracted from it.
+Furthermore this blocks can be extracted with overlap among them
+which increases even more the total number of blocks.
+This high number of blocks, brings computational time implications
+since on the step of classification of blocks to the closest
+centroids on the K-Means algorithm has to go over all the block and
+compare each one to all centroids and get the closest for each block.
+To reduce this impact, this step can be parallelized by dividing the
+blocks into groups and assigning each group to one thread.
+To prevent having to create complex synchronization mechanisms, each
+thread stores the association between blocks and the closest
+centroids on different data structures and then the main thread is in
+charge of reading from those to recalculate the centroids.
+% ^^ TODO can be repeating some things from chapter 2.3
+
+% TODO vv might not be true "As mentioned in section "
+As mentioned in section 2.3. the K-Means algorithm give us a local
+solution for a given centroids' initial position, which means other
+and better solutions might exist.
+In order to find them, different centroids initializations must be
+tested, yet since a K-Means run has high computational cost, several
+of them even more computational cost has.
+To ease this process, each K-Means run can be assigned to a thread
+allowing to execute several runs at the same time.
+In terms of implementation it implies some synchronization mechanisms
+so the main thread knows when a run was completed and to manipulate
+the structure to store the centroids plus associated error calculated
+on each run.
 
 \newpage
 \section*{3. Automatic Music Identification}
