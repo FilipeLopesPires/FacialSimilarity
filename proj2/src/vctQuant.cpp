@@ -2,7 +2,6 @@
 #include "headers/vctQuant.h"
 
 #include <cmath>
-#include <iostream>
 #include <stdexcept>
 
 using namespace std;
@@ -36,7 +35,7 @@ double calcEn(vector<short>& original, vector<short>& noise) {
     return cumSum;
 }
 
-double calcSNR(long Es, long En) { return En == 0 ? 0 : 10 * log10(Es / En); }
+double calcSNR(double Es, double En) { return En == 0 ? 0 : 10 * log10(Es / En); }
 
 void retrieveBlocks(std::vector<std::vector<short>>& blocks,
                     SndfileHandle& sndFile, int blockSize,

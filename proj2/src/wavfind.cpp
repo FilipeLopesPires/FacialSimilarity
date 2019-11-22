@@ -15,7 +15,7 @@ using namespace std;
 
 void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
                     int& blockSize, float& overlap_factor, string& cbDir) {
-    checkFileToRead(sndFileIn, argv[argc - 4]);
+    checkFileToRead(sndFileIn, argv[argc - 4], 1);
     int sndFileSize = sndFileIn.frames();
 
     // validate block size

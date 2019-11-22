@@ -62,8 +62,8 @@ int main(int argc, const char **argv) {
     }
 
     // calculate snr
-    long Es = calcEs(fileContentOrig);
-    long En = calcEn(fileContentOrig, fileContentNoise);
+    double Es = calcEs(fileContentOrig);
+    double En = calcEn(fileContentOrig, fileContentNoise);
 
     double SNR = calcSNR(Es, En);
 

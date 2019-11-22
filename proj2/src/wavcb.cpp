@@ -5,6 +5,7 @@
 #include <iostream>
 #include <limits>
 #include <mutex>
+#include <random>
 #include <semaphore.h>
 #include <set>
 #include <sndfile.hh>
@@ -105,7 +106,7 @@ int main(int argc, char* argv[]) {
                 std::ref(centroidsToCmpMutex),
                 std::ref(centroidsToCompare),
                 &centroidsToCmpAvailable
-                );
+        );
         t.detach();
     }
 
@@ -162,12 +163,16 @@ void applyKMeans(
     // initialize centroids
     vector<vector<short>>* centroids = new vector<vector<short>>();
     {
+        random_device rd;
+        // used to generate a random block
+        uniform_int_distribution<int> idx_rand(0, blocks.size() - 1);
+
         set<size_t> indexesUsed;
         int index, prevCentroidsSize;
         for (int i = 0; i < numCentroids; i++) {
             prevCentroidsSize = centroids->size();
             while (centroids->size() == prevCentroidsSize) {
-                index = rand() % blocks.size();
+                index = idx_rand(rd);
                 if (indexesUsed.count(index) == 0) {
                     centroids->emplace_back(blocks[index]);
                     indexesUsed.insert(index);
@@ -185,7 +190,7 @@ void applyKMeans(
     }
     thread threads[threadsPerRun];
 
-    double lastError, currentError = numeric_limits<double>::max(), diff;
+    double lastError, currentError = numeric_limits<double>::max();
     do {
         lastError = currentError;
 
@@ -195,30 +200,41 @@ void applyKMeans(
             }
         }
 
-        int begin, end = 0;
-        for (int i = 0; i < threadsPerRun; i++) {
-            begin = end;
+        if (threadsPerRun > 1) {
+            int begin, end = 0;
+            for (int i = 0; i < threadsPerRun; i++) {
+                begin = end;
 
-            if (i == threadsPerRun - 1) {
-                end = blocks.size();
-            }
-            else {
-                end = begin + numBlocksPerThread;
+                if (i == threadsPerRun - 1) {
+                    end = blocks.size();
+                }
+                else {
+                    end = begin + numBlocksPerThread;
+                }
+
+                threads[i] = thread(
+                        calculateClosestBlocks,
+                        begin,
+                        end,
+                        std::ref(blocks),
+                        centroids,
+                        numCentroids,
+                        std::ref(closestBlocksPerCentroidPerThread[i])
+                );
             }
 
-            threads[i] = thread(
-                    calculateClosestBlocks,
-                    begin,
-                    end,
-                    std::ref(blocks),
+            for (int i = 0; i < threadsPerRun; i++) {
+                threads[i].join();
+            }
+        }
+        else { // if only one thread is used to classify the blocks, don't launch a thread
+            calculateClosestBlocks(
+                    0,
+                    blocks.size(),
+                    blocks,
                     centroids,
                     numCentroids,
-                    std::ref(closestBlocksPerCentroidPerThread[i])
-            );
-        }
-
-        for (int i = 0; i < threadsPerRun; i++) {
-            threads[i].join();
+                    closestBlocksPerCentroidPerThread[0]);
         }
 
         // update centroids
@@ -253,8 +269,6 @@ void applyKMeans(
 
         currentError = calculateError(blocks, *centroids);
     } while ((lastError - currentError) / lastError > errorThreshold);
-
-    // TODO deal with isolated centroids
 
     centroidsToCmpMutex.lock();
     centroidsToCompare.push({centroids, currentError});
@@ -337,7 +351,7 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
     int argsOffset = argc == 9 ? 2 : 0;
 
     // validate input file
-    checkFileToRead(sndFileIn, argv[argc - 6 - argsOffset]);
+    checkFileToRead(sndFileIn, argv[argc - 6 - argsOffset], 1);
     int sndFileSize = sndFileIn.frames();
 
     // validate block size
@@ -420,6 +434,6 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
         }
     }
     else {
-        numThreadsForRuns = numThreadsForEachRun = 2;
+        numThreadsForRuns = numThreadsForEachRun = 1;
     }
 }
