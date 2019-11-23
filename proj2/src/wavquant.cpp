@@ -82,8 +82,8 @@ void parseArguments(int argc, char* argv[]) {
     while ((c = getopt(argc, (char**)argv, "h:q:r:?")) != -1) {
         switch ((char)c) {
             case 'h':
-                cout << "Usage: wavquant <inputFile> <outputFile> [-q "
-                        "<quantSize>] [-r <reductFactor>]"
+                cout << "Usage: wavquant [-q <quantSize>] [-r <reductFactor>] "
+                        "<inputFile> <outputFile>"
                      << endl;
                 exit(0);
             case 'q':

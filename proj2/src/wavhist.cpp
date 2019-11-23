@@ -47,7 +47,9 @@ int main(int argc, char *argv[]) {
 
     hist.dump(channel);
     hist.fwrite(channel, "histogram.txt");
-    system("gnuplot -p -e \"plot 'histogram.txt'\"");
+    //; set yrange [0:45000];replot;
+    system(
+        "gnuplot -p -e \"plot 'histogram.txt'; set yrange [0:45000];replot;\"");
 
     return 0;
 }
