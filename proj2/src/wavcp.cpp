@@ -9,13 +9,13 @@ constexpr size_t FRAMES_BUFFER_SIZE =
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
-        cerr << "Usage: wavcp <input file> <output file>" << endl;
+        cerr << "Usage: wavcp <inputFile> <outputFile>" << endl;
         return 1;
     }
 
     SndfileHandle sndFileIn{argv[argc - 2]};
     if (sndFileIn.error()) {
-        cerr << "Error: invalid input file" << endl;
+        cerr << "Error: invalid inputFile" << endl;
         return 1;
     }
 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     SndfileHandle sndFileOut{argv[argc - 1], SFM_WRITE, sndFileIn.format(), 1,
                              sndFileIn.samplerate()};
     if (sndFileOut.error()) {
-        cerr << "Error: invalid output file" << endl;
+        cerr << "Error: invalid outputFile" << endl;
         return 1;
     }
 

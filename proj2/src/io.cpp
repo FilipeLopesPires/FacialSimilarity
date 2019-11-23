@@ -25,7 +25,7 @@ void checkFileToRead(SndfileHandle& sndFile, const char* filename, int channels)
     if (channels > 0 && channels != fileChannels) {
         std::cerr << "Error: file "
                   << filename
-                  << " has " << fileChannels << "channels"
+                  << " has " << fileChannels << " channels"
                   << ", must have " << channels
                   << std::endl;
         exit(3);
