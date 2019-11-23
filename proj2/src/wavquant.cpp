@@ -34,11 +34,11 @@ int main(int argc, char *argv[]) {
         offset = 4;
     }
 
+    parseArguments(argc,argv);
+
     // parse and validate arguments
     const char* inputFileName = argv[1 + offset];
     const char* outputFileName = argv[2 + offset];
-
-    parseArguments(argc,argv);
 
     SndfileHandle sndFileIn{inputFileName};
     checkFileToRead(sndFileIn, inputFileName);
@@ -56,11 +56,11 @@ int main(int argc, char *argv[]) {
         for(auto s: samples) {
             tmpFreq += s;
             if(++n % sndFileIn.channels() == 0) {
-                tmpFreq /= sndFileIn.channels();
+                tmpFreq /= sndFileIn.channels(); // convert multiple channels to one
                 sampleReduct.push_back(tmpFreq);
                 if(sampleReduct.size() >= REDUCTFACTOR) {
                     tmpFreq = accumulate(begin(sampleReduct), end(sampleReduct), 0) / REDUCTFACTOR;
-                    tmpFreq = (tmpFreq & (-1 << sizeof(short) * 8 - QUANTSIZE));
+                    tmpFreq = (tmpFreq & (-1 << sizeof(short) * 8 - QUANTSIZE)); // remove the QUANTSIZE less significant bits
                     mySamples.push_back(tmpFreq);
                     sampleReduct.clear();
                 }
