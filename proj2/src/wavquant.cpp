@@ -1,13 +1,11 @@
-#include <bitset>
+
+#include <cstdlib>
 #include <iostream>
 #include <numeric>
 #include <sndfile.hh>
+#include <unistd.h>
 #include <vector>
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 #include "headers/io.h"
 
@@ -23,10 +21,22 @@ int QUANTSIZE = 16;
 void parseArguments(int argc, char* argv[]);
 
 int main(int argc, char *argv[]) {
+    if (argc != 3 && argc != 5 && argc != 7) {
+        cerr << "Usage: wavquant [-q <quantSize>] [-r <reductFactor>] <inputFile> <outputFile>"  << endl;
+        return 1;
+    }
+
+    int offset = 0;
+    if (argc == 5) {
+        offset = 2;
+    }
+    else if (argc == 7) {
+        offset = 4;
+    }
 
     // parse and validate arguments
-    const char* inputFileName = argv[1];
-    const char* outputFileName = argv[2];
+    const char* inputFileName = argv[1 + offset];
+    const char* outputFileName = argv[2 + offset];
 
     parseArguments(argc,argv);
 
@@ -70,12 +80,14 @@ void parseArguments(int argc, char* argv[]) {
     while((c = getopt(argc, (char **)argv, "h:q:r:?")) != -1) {
         switch((char)c) {
             case 'h':
-                cerr << "Usage: wavquant <inputFile> <outputFile> [-q <quantSize>] [-r <reductFactor>]"  << endl;
-                exit(1);
+                cout << "Usage: wavquant <inputFile> <outputFile> [-q <quantSize>] [-r <reductFactor>]"  << endl;
+                exit(0);
             case 'q':
                 QUANTSIZE = stoi(optarg);
+                break;
             case 'r':
                 REDUCTFACTOR = stoi(optarg);
+                break;
             default:
                 cerr << "Error: option " << (char)c << " is invalid." << endl;
                 exit(1);
