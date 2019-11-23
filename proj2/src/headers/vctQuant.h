@@ -41,7 +41,7 @@ double calcEnMax(std::vector<short>& original, std::vector<short>& noise);
  * @param En energy noise
  * @return Signal-To-Noise ratio
  */
-double calcSNR(long Es, long En);
+double calcSNR(double Es, double En);
 
 /*!
  * Applies a sliding window to a wav SndFile to

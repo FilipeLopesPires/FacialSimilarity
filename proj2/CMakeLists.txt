@@ -24,7 +24,7 @@ add_executable (wavcb
         src/vctQuant.cpp
         src/headers/io.h
         src/io.cpp)
-target_link_libraries (wavcb sndfile)
+target_link_libraries (wavcb sndfile pthread)
 
 add_executable (wavfind
         src/wavfind.cpp

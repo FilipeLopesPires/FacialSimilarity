@@ -1,3 +1,11 @@
 build
+CMakeCache.txt
+CMakeFiles/
+wavcb
+wavcmp
+wavcp
+wavfind
+wavhist
+wavquant
 
 *.wav

@@ -65,10 +65,9 @@ int main(int argc, const char** argv) {
     // calculate snr
     double Es = calcEs(fileContentOrig);
     double En = calcEn(fileContentOrig, fileContentNoise);
+    double SNR = calcSNR(Es, En);
 
     double enMax = calcEnMax(fileContentOrig, fileContentNoise);
-
-    double SNR = calcSNR(Es, En);
 
     cout << "SNR: " << SNR << endl;
     cout << "Maximum absolute error: " << enMax << endl;

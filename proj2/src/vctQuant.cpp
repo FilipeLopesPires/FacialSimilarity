@@ -2,7 +2,6 @@
 #include "headers/vctQuant.h"
 
 #include <cmath>
-#include <iostream>
 #include <stdexcept>
 
 using namespace std;
@@ -58,7 +57,7 @@ double calcEnMax(vector<short>& original, vector<short>& noise) {
     return max;
 }
 
-double calcSNR(long Es, long En) { return En == 0 ? 0 : 10 * log10(Es / En); }
+double calcSNR(double Es, double En) { return En == 0 ? 0 : 10 * log10(Es / En); }
 
 void retrieveBlocks(std::vector<std::vector<short>>& blocks,
                     SndfileHandle& sndFile, int blockSize,
@@ -72,9 +71,6 @@ void retrieveBlocks(std::vector<std::vector<short>>& blocks,
                      SEEK_SET);
         i++;
     }
-
-    // TODOTODO: check if (TODO what to do if the last block
-    //  does not have blockSize?) is done
 }
 
 double calculateError(vector<vector<short>>& blocks,
