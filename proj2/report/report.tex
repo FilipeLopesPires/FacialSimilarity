@@ -214,7 +214,24 @@ The result is a sample with \texttt{n} times less values.
 
 \subsection*{2.3. Vector Quantization Codebook}
 
-...
+Each song is represented as a sequence of samples, where each sample is a singular frequency if the file is in mono or the frequency of each channel if the file is in stereo that was registered in that exact second. A codebook is an abstract representation of the overall music, and in this context we used the concept of clusters to represent a given number of samples.  The base idea for clustering is the fact that similar data entities should have similar properties and can be aggregated in a group, where data entries that differ significantly from each other, the properties that represent them should be considerably different, implying that they should belong to different groups \cite{clustering}. Dividing the totality of samples present in each song into vectors with X samples and representing them as points in a multidimensional vectorial space, as represented in Figure \ref{fig:pointsEx}, enables the better comprehension of a cluster. Geometrically, clusters can be directly identified by the close grouping of the multidimensional points, since each a axis represent a data property, similar points with similar properties will stay closer to each other. Taking advantage of this natural grouping, clustering algorithms try to find points that represent the several data groups in a viable way, most of the time a middle point of the given group, called \textbf{centroids}.
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    \includegraphics[width=0.5\linewidth]{pointsEx.png}
+  \end{minipage}%
+  \caption{Example of a quantized waveform.}
+  \label{fig:pointsEx}
+\end{figure}
+
+For our problem, we used the KMeans Clustering algorithm, probably the most well-known clustering algorithm \cite{clustering}. KMeans is a good approach because it's fast to implement and to execute, since it's only necessary to calculate the distance between a given point and the centroids. 
+Our KMeans implementation starts by doing the already mentioned music partition in different blocks/vectors of a given size provided by the user, then the algorithm chooses in a random fashion an a priori given number of centroids. After the pre-processing is done, the main algorithm starts by calculating the closest centroid for each vector, and then updates each centroid by calculating the middle point of the points assigned to that specific centroid, this is repeated as many times as necessary for the error delta, i.e., the error between each iteration to be lower than a given threshold specified by the user. The script \texttt{wavcb} is the implementation of this algorithm and enables the creation of a codebook for a given song, being its interface the following:\\
+\texttt{wavcb <inputFile> <blockSize> <overlapFactor> <errorThreshold>\\<numRuns> <outputFile>}\\
+Giving a brief explanation of what each parameter means, \textit{inputFile} is the path to the song the user intends to serve as base for the codebook, \textit{blockSize} is the number of samples to be used in the blocks/vectors division, \textit{overlapFactor} is the factor($>$1) that each block will overlap with the previous one, the bigger this percentage is the better the song is represented in the multidimensional space. \textit{errorThreshold} is the maximum error that allowed to exist in last iteration, meaning that the centroids are no longer being adjusted in a significant way, \textit{numRuns} is the number of times the KMeans algorithm will run to find the best local minimum and finally the \textit{outputFile} is the path to the file were the codebook should be stored.\\
+Although quite flexible, KMeans has some disadvantages such as the fact that it is necessary to insert the number of centroids to take in consideration, this in many situation is not the best option since the main purpose of using clustering is to get some insights about the data, preferring that the algorithm finds the number of centroids by itself. Another disadvantage is that the KMeans centroids start from a random initial starting position, each means that each run could converge to a local minimum, making each run different from each other.\\
+In our implementation we tried to combat the last error by running several times the KMeans algorithm to gain access to several local minimums, being the possible to choose the best one. Even though KMeans is considered a fast clustering algorithm, if given a considerable number of data entries, it's normal it starts to became cumbersome. To combat this aspect we implemented parallelism into the process in two levels, both internal, which in a practical sense means that we used threads to calculate the closest centroid to a given point, and external which translates in using different threads to different KMeans runs.
 
 \subsection*{2.4. Codebook Parallel Processing}
 
@@ -225,7 +242,7 @@ The result is a sample with \texttt{n} times less values.
 
 The program \texttt{wavfind.cpp} is the application of the previous scripts on a 
 program with a specific purpose.
-WAVFind is ment to interpret an audio sample and attempt to identify which music 
+WAVFind is meant to interpret an audio sample and attempt to identify which music 
 from a database it belongs to.
 In this chapter we discuss our solution, the consequences fo varying the 
 parameters passed to it and the quality of the results.
@@ -292,6 +309,11 @@ directory.
     \url{https://web.stanford.edu/class/ee398a/handouts/lectures/05-Quantization.pdf} ,
     [accessed in: November 2019].
 
+    \bibitem{clustering}
+    George Seif,
+    \textit{The 5 Clustering Algorithms Data Scientists Need to Know},
+    \url{https://towardsdatascience.com/the-5-clustering-algorithms-data-scientists-need-to-know-a36d136ef68} ,
+    [accessed in: February 2018].
     
 
 \end{thebibliography}

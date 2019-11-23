@@ -24,6 +24,17 @@ double calcEs(std::vector<short>& signal);
 double calcEn(std::vector<short>& original, std::vector<short>& noise);
 
 /*!
+ * Calculates the maximum absolute error
+ *
+ * @param original content of the original signal
+ * @param noise content of the noise signal
+ * @return energy of the noise
+ * @throws invalid_argument if original and noise vector
+ *  don't have the same size
+ */
+double calcEnMax(std::vector<short>& original, std::vector<short>& noise);
+
+/*!
  * Calculates the Signal-To-Noise ratio (SNR)
  *
  * @param Es energy signal
