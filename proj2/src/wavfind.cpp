@@ -2,7 +2,7 @@
 #include <dirent.h>
 #include <fstream>
 #include <iostream>
-#include <map>
+#include <limits>
 #include <sndfile.hh>
 #include <vector>
 
@@ -51,9 +51,13 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
     codebookDir = argv[argc - 1];
 }
 
+/**
+ * Loads a codebook
+ *
+ * @return 0 if all went well, a
+ */
 int readCodeBook(string& filename, size_t blockSizeParam,
-                 vector<vector<short>>& codeBook,
-                 vector<vector<short>>& blocks);
+                 vector<vector<short>>& codeBook);
 
 int main(int argc, char* argv[]) {
     if (argc != 5) {
@@ -76,34 +80,28 @@ int main(int argc, char* argv[]) {
     struct dirent* entry = nullptr;
     DIR* dp = nullptr;
 
-    double minimum{};
-    map<string, double> errors{};
+    double minimum = numeric_limits<double>::max();
+    string response{};
     vector<vector<short>> codeBook;
     dp = opendir(codebookDir.c_str());
     if (dp != nullptr) {
         while ((entry = readdir(dp)) != nullptr) {
-            if (entry->d_type == DT_REG) {
+            if (entry->d_type == DT_REG) { // regular file
                 string name = entry->d_name;
                 string filename = codebookDir + "/" + name;
 
-                if (readCodeBook(filename, blockSize, codeBook, blocks) != 0) {
+                if (readCodeBook(filename, blockSize, codeBook) != 0) {
                     continue;
                 }
 
                 // get error from blocks vs codeBook
                 double er = calculateError(blocks, codeBook);
-                minimum = er;
-                errors.insert({entry->d_name, er});
+                if (er < minimum) {
+                    minimum = er;
+                    response = entry->d_name;
+                }
                 codeBook.clear();
             }
-        }
-    }
-
-    string response{};
-    for (auto& pair : errors) {
-        if (pair.second < minimum) {
-            response = pair.first;
-            minimum = pair.second;
         }
     }
 
@@ -116,8 +114,7 @@ int main(int argc, char* argv[]) {
 
 #if DEBUG
 int readCodeBook(string& filename, size_t blockSizeParam,
-                 vector<vector<short>>& codeBook,
-                 vector<vector<short>>& blocks) {
+                 vector<vector<short>>& codeBook) {
     ifstream file(filename);
 
     string line;
@@ -151,8 +148,7 @@ int readCodeBook(string& filename, size_t blockSizeParam,
 }
 #else
 int readCodeBook(string& filename, size_t blockSizeParam,
-                 vector<vector<short>>& codeBook,
-                 vector<vector<short>>& blocks) {
+                 vector<vector<short>>& codeBook) {
     ifstream file(filename, fstream::binary);
 
     size_t numOfCentroids, blockSize;

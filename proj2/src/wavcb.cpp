@@ -21,18 +21,43 @@
 using namespace std;
 
 
+/*!
+ * Parses and validates the program arguments
+ */
 void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
                     int& blockSize, float& overlapFactor, float& errorThreshold,
                     int& numRuns, string& outputFile, int& numThreadsForRuns,
                     int& numThreadsForEachRun);
 
+/*!
+ * Persists the best centroids found
+ */
 void writeCentroids(string& filename, vector<vector<short>>& centroids);
 
+/*!
+ * Struct to store the centroids found by each run
+ *  and for the mian thread to compare to the best
+ *  centroids found until the moment
+ */
 typedef struct {
     vector<vector<short>>* data;
     double error;
 } Centroids;
 
+/*!
+ * Life cycle of a thread that executes a
+ *  run of the K-Means algorithm
+ *
+ * @param errorThreshold stop the centroids recalculation
+ *  after the error reduction is lower than this threshold
+ * @param centroidsToCmpMutex synchronization mechanism so one thread
+ *  only manipulates the data structure to store the new found
+ *  centroids by each run
+ * @param centroidsToCompare data structure to store the new found
+ *  centroids by each run
+ * @param centroidsToCmpAvailable synchronization mechanism (semaphore) so
+ *  the main threads know when the a run ended
+ */
 void applyKMeans(
         int numCentroids,
         vector<vector<short>>& blocks,
@@ -44,6 +69,17 @@ void applyKMeans(
         sem_t* centroidsToCmpAvailable
 );
 
+/*!
+ * Classifies a set of block to their closest centroids.
+ * This function can be the life cycle a thread if the users
+ *  insert a threadsPerRun greater than 1
+ *
+ * @param blocksBeginIdx first block to classify
+ * @param blocksEndIdx
+ * @param closestBlocksPerCentroid data structure to store the classification.
+ *  If this function is run by multiple threads, each thread has a different
+ *  data structure.
+ */
 void calculateClosestBlocks(
         int blocksBeginIdx,
         int blocksEndIdx,
@@ -92,10 +128,13 @@ int main(int argc, char* argv[]) {
 
     sem_t centroidsToCmpAvailable;
     sem_init(&centroidsToCmpAvailable, 0, 0);
-    queue<Centroids> centroidsToCompare;
     mutex centroidsToCmpMutex;
+
+    queue<Centroids> centroidsToCompare;
+
     thread t;
-    for (int i = 0; i < numThreadsForRuns; i++) {
+    int threadsLaunched = 0;
+    for (int i = 0; i < numThreadsForRuns && i < numRuns; i++) {
         t = thread(
                 applyKMeans,
                 codeBookSize,
@@ -108,12 +147,15 @@ int main(int argc, char* argv[]) {
                 &centroidsToCmpAvailable
         );
         t.detach();
+        threadsLaunched++;
     }
 
-    while (numRuns > 0) {
+    int runsEndedCount = 0;
+    while (runsEndedCount < numRuns) {
         sem_wait(&centroidsToCmpAvailable);
+        runsEndedCount++;
 
-        if (--numRuns > 0) {
+        if (threadsLaunched < numRuns) {
             t = thread(
                     applyKMeans,
                     codeBookSize,
@@ -126,6 +168,7 @@ int main(int argc, char* argv[]) {
                     &centroidsToCmpAvailable
             );
             t.detach();
+            threadsLaunched++;
         }
 
         centroidsToCmpMutex.lock();
@@ -227,7 +270,7 @@ void applyKMeans(
                 threads[i].join();
             }
         }
-        else { // if only one thread is used to classify the blocks, don't launch a thread
+        else { // if only one thread is used to classify the blocks, use the main thread
             calculateClosestBlocks(
                     0,
                     blocks.size(),
@@ -240,11 +283,13 @@ void applyKMeans(
         // update centroids
         double sums_blocks[blockSize];
         for(size_t i = 0; i < numCentroids; i++) {
+            // reset variables
             size_t closestBlocksCount = 0;
             for (size_t j = 0; j < blockSize; j++) {
                 sums_blocks[j] = 0;
             }
 
+            // sum the blocks
             for (size_t threadIdx = 0; threadIdx < threadsPerRun; threadIdx++) {
                 for (vector<short>* block : closestBlocksPerCentroidPerThread[threadIdx][i]) {
                     closestBlocksCount++;
@@ -255,6 +300,7 @@ void applyKMeans(
                 }
             }
 
+            // recalculate centroids
             if (closestBlocksCount == 1) {
                 for (size_t idx = 0; idx < blockSize; idx++) {
                     centroids->at(i)[idx] = sums_blocks[idx];

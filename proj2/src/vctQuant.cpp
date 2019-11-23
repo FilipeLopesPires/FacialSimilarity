@@ -63,10 +63,10 @@ void retrieveBlocks(std::vector<std::vector<short>>& blocks,
                     SndfileHandle& sndFile, int blockSize,
                     float overlapFactor) {
     vector<short> block(blockSize * sndFile.channels());
-    int nFrames, i = 0;
-    while ((nFrames = sndFile.readf(block.data(), blockSize)) == blockSize) {
-        blocks.push_back(block);
-        // cout << blocks.at(i).at(0) << endl;
+    int i = 0;
+    while (sndFile.readf(block.data(), blockSize) == blockSize) { // Ignore the last block if it
+        blocks.push_back(block);                                  //  has a different blockSize
+                                                                  // This also stops if no frames are read
         sndFile.seek((blockSize - (int)blockSize * overlapFactor) * i,
                      SEEK_SET);
         i++;

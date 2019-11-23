@@ -1,8 +1,8 @@
-#include <fstream>
-#include <iostream>
+
 #include <sndfile.hh>
 #include <vector>
 
+#include "headers/io.h"
 #include "headers/wavhist.h"
 
 using namespace std;
@@ -16,23 +16,10 @@ int main(int argc, char *argv[]) {
     }
 
     SndfileHandle sndFile{argv[argc - 2]};
-    if (sndFile.error()) {
-        cerr << "Error: invalid input file" << endl;
-        return 1;
-    }
-
-    if ((sndFile.format() & SF_FORMAT_TYPEMASK) != SF_FORMAT_WAV) {
-        cerr << "Error: file is not in WAV format" << endl;
-        return 1;
-    }
-
-    if ((sndFile.format() & SF_FORMAT_SUBMASK) != SF_FORMAT_PCM_16) {
-        cerr << "Error: file is not in PCM_16 format" << endl;
-        return 1;
-    }
+    checkFileToRead(sndFile, argv[argc - 2]);
 
     int channel{stoi(argv[argc - 1])};
-    if (channel >= sndFile.channels()) {
+    if (channel >= sndFile.channels() || channel < 0) {
         cerr << "Error: invalid channel requested" << endl;
         return 1;
     }
@@ -48,8 +35,7 @@ int main(int argc, char *argv[]) {
     hist.dump(channel);
     hist.fwrite(channel, "histogram.txt");
     //; set yrange [0:45000];replot;
-    system(
-        "gnuplot -p -e \"plot 'histogram.txt'; set yrange [0:45000];replot;\"");
+    system("gnuplot -p -e \"plot 'histogram.txt'\"");
 
     return 0;
 }
