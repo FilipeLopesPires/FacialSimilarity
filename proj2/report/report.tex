@@ -1,12 +1,7 @@
 \documentclass[12pt]{article}
 
-\usepackage{scicite}
-\usepackage{times}
-\usepackage{graphicx}
-\usepackage{float}
-\usepackage{caption}
-\usepackage{subcaption}
-\usepackage{hyperref}
+\usepackage{scicite,times,graphicx,float,hyperref}
+\usepackage[skip=0pt]{caption}
 
 \topmargin -1.0cm
 \oddsidemargin 0.0cm
@@ -51,542 +46,419 @@ Algorithmic Information Theory\\
 
 \section*{Introduction}
 
-This report aims to describe the work developed for the first assignment
-of the discipline of 'Algorithmic Information Theory', explaining all the 
-steps and decisions taken by us, and presenting the results we considered 
-most relevant. 
+This report aims to describe the work developed for the second assignment
+of the course of 'Algorithmic Information Theory', explaining all programs
+developed by us, and presenting the results we considered most relevant 
+regarding the quality of the solutions. 
 
-The programs implemented in C++ have the purpose of collecting statistical
-information about texts using Markov (finite-context) models, and of 
-automatically producing texts that follow the models built.
+The programs implemented in C++ have the purpose of analysing and encoding
+audio files and ultimately being capable of, from a small audio segment, 
+identifying the music that it most likely belongs to.
 
 Along with the description of the solution, we also discuss the effects
-of the variation of the programs' parameters and attempt to compare 
-different types of texts by the amount of information they hold on average.
-
+of the variation of the programs' parameters and how accurate are the results.
 All code developed is publicly accessible in our GitHub repository:
-
-\url{https://github.com/joao-alegria/TAI}
+\url{https://github.com/joao-alegria/TAI} .
 \newpage
 
-\section*{1. Information Model}
+\section*{1. Data Visualization}
 
-Our first goal was to be able to predict the next outcome of a text source.
-To do this, we needed to take in consideration the dependencies between 
-the characters of a text.
-The use of Markov models for the extraction of the statistical properties of a
-text was due to its value as an approach to represent these data dependencies.
+In this chapter we present a description of the dataset used, the small script 
+we developed to convert audio segments from stereo to mono and the histograms
+we are capable of plotting by adapting one of the scripts given along with the
+assignment's description \cite{trab1}.
 
-The specific type of model that most interests us is called discrete time
-Markov chain or finite-context model.
-This model assigns a probability estimate to the symbols of the alphabet, 
-according to a conditioning context computed over a finite and fixed number
-of past outcomes. 
-More about this is explained in the description of this work assignment 
-\cite{trab1}, containing the mathematical equations that served as the basis 
-for our implementation.
+\subsection*{1.1. Dataset}
 
-\subsection*{1.1. Collecting Data}
+We were given the access to a small dataset containing 7 audio files from 
+different musics. It was these music fragments we used to test our code during 
+development.
+Each audio file is in \texttt{.wav} format and has two signal channels (stereo).
+They vary between 13 and 29 seconds of audio and, when played, none seems to 
+contain significant noise.
 
-We decided to organize the program by several files, each with a different
-purpose, for good readability and to allow future modifications without the 
-need of much refactoring - so we adopted a modular architecture strategy.
+For testing the performance of the programs once the development phase was
+completed, we came up with our own dataset of musics of different genres.
+These music files vary between 3:07 and 8:09 minutes and have the same format 
+and number of channels as the original dataset.
+As they were downloaded from the original sources, their quality is close to 
+ideal.
 
-The file \texttt{fcm.cpp} serves as the base code for the command to be executed in order to 
-generate a finite-context model, given one or several information source(s).
-By executing this command, the program is started and begins to
-call a set of functions that return an instance of our 
-implementation of the Markov's model trained from the information source(s), 
-and calculate the text entropy, as estimated by this instance.
-The \texttt{fcm} command has the following format:
+\subsection*{1.2. Mono Conversion}
 
-\begin{quote}
-\begin{verbatim}
-$ ./fcm [-h] k alpha trainFile [trainFile ...]
-\end{verbatim}
-\end{quote}
-
-Here, \texttt{-h} is the option that presents the manual for the command usage.
-Argument \texttt{k} is the value given for the size of the context.
-This context corresponds to a string with \texttt{k} characters, it is based on
-the several contexts produced and on the single characters that follow each one
-of them that the model is able to calculate the text's entropy.
-\texttt{alpha} stands for the value of the 'smoothing' parameter for estimating
-the probabilities of events. 
-These events correspond to the occurrences of a character after a given context.
-And \texttt{trainFile} is, as the name indicates, the name of the file(s) that
-contain the text to be processed by the model.
-
-It is important to mention that the \texttt{.cpp} files are never actually
-executed. The way the \texttt{fmc} command works is: first the user must 
-compile the required files and then execute the generated file passing the 
-desired arguments.
-We make this task easier through the given \texttt{Makefile}.
-Once in the project's base folder of our repository, the user needs only to
-execute \texttt{\$ make fcm} to compile the necessary files and then 
-execute the command above without the '.cpp' extension.
-The same works for the compilation and execution of the \texttt{generator.cpp}.
-
-Now we will take a look at the execution flow of \texttt{fcm}.
-First, the command executed is pre-processed and its arguments are collected
-and validated by the function {\it parseArguments()\/}, implemented in 
-\texttt{argsParsingFCM.cpp} and defined in \texttt{argsParsing.h}.
-The use of a header file is to establish an interface for the possibility of
-creating different implementations of the parsing functions.
-This is also visible in the implementation of the Model class in files 
-\texttt{model.cpp} and \texttt{model.h}.
-
-Once the arguments are validated, the program attempts to open the file(s) for 
-reading through function {\it checkAccess()\/} and, in case of success, reads 
-and parses its content.
-The program supports any file format as long as its content is plaintext.
-Only then does the program begin the parsing of the information source.
-Below we present the actual implementation in C++ of the function responsible 
-for this file parsing.
+One of the tasks proposed was to create a script that converts stereo audio 
+files into mono.
+This was fairly straightforward to do, as it only required for us to read the v
+alues from all signal channels and calculate the average of each.
+The script is executed in the format presented below, once built:
 
 \begingroup
 \addtolength\leftmargini{-0.4in}
-\addtolength\baselineskip{-0.05in}
 \begin{quote}
 \begin{verbatim}
-  void Model::parseFile(list<fstream*> &input) {
-    [...]
-    for (auto reader : input) {
-      while (reader->get(letter)) {
-        abc.insert(letter);
-        if (context.length() >= ctxLen) {
-          statsTable[context].nextCharStats[letter].count++;
-          statsTable[context].stats.count++;
-          totalContextsCount++;
-          context = context.substr(1);
-        }
-        context += letter;
-      }
-    }
-    calcProbabilitiesAndEntropy();
-  }
+$ ./wavquant inputFile outputFile [-q quantSize] [-r reductFactor]
 \end{verbatim}
 \end{quote}
 \endgroup
 
-The variable \texttt{statsTable} we see on the given lines of code is the 
-information table containing the statistics of the input text.
-To build this information table, we follow a dictionary approach where we have
-a first level dictionary with the context string as key and a structure 
-(ContextStatistics) as value.
-This structure contains another structure (Statistics) with statistics
-(number of occurrences and probability) about that context and it contains
-a dictionary.
-This second layer dictionary has, as key, a letter of the alphabet and, as value,
-the statistics structure mentioned above - but, this time, the data it contains
-is relative to the occurrences of the correspondent letter (the second layer
-dictionary key) after the correspondent context (the first layer dictionary key).
+This script, \texttt{wavquant.cpp}, is also used for other purposes, in which 
+the \texttt{quantSize} and \texttt{reductFactor} parameters are useful.
+For this reason, we made the parameters optional, so that a user can run 
+\texttt{wavquant} to simply convert stereo files into mono, with a default 
+number of bits used to encode each value of the segment (each sample) of 16 and 
+no frequency reduction factor.
+This script is mentioned further ahead in greater detail.
 
-\newpage
-The variable \texttt{abc} is a set containing the alphabet of the input file, 
-updated everytime a new character is found.
-The function {\it parseFile()\/} parses the entire input file letter by letter,
-updating the context in each iteration, counts the number of occurrences of each
-context and of each letter after each context, and counts also the total number
-of contexts.
-Once the end of file (EOF) is reached, the function calls 
-{\it calcProbabilitiesAndEntropy()\/}.
+\subsection*{1.3. Histograms}
 
-This solution prepares the first layer dictionary to be properly filled inside
-the function called in the end, and it also makes our model prepared to accept 
-more than one information source (i.e. several input files) - although this was 
-not a requirement, we knew this would make the program more robust and scalable.
-
-\subsection*{1.2. Training the Model and Returning Text Entropy}
-
-Finally, as the file is parsed and the alphabet is built, \texttt{fcm} then 
-builds the information table and calculates the estimated value for the entropy. 
-As all contexts' and letters' number of occurrences are calculated on the
-method {\it parseFile()}, on {\it calcProbabilitiesAndEntropy()} we
-calculate their probabilities. 
-
-The context's probability is given by its number of occurrences divided 
-by the sum of occurrences of all contexts, in other words, the total number 
-of contexts in all training data.
-A letter's conditional probability is obtained by dividing the number of 
-occurrences after a given context by the number of occurrences of that context.
-
-To calculate these probabilities we iterate over the information table.
-On the first layer of the dictionary we calculate probabilities related to
-contexts (\(P(c)\)) and while iterating over the second layer we calculate
-the context entropy (\(H_c\)). 
-
-For a given context, not all letters of the alphabet appear after it.
-This brought us trouble for the second assignment's task so, to fix it,
-we make a copy of the alphabet, remove the ones that appeared, set their 
-count to 0 and only then calculate the conditional probability.
-Calculating all this allows us to avoid having to iterate over the entire 
-table more than once in order to calculate the model's entropy or the 
-conditional probabilities for each letter after each context.
-
-\newpage
-The mathematical equations required for the calculation of the entropy are 
-available in the document that describes the assignment.
-However, function {\it calcProbabilitiesAndEntropy()\/} is presented next 
-for further analysis.
+We were also given a script called \texttt{wavhist.cpp} that outputted to the 
+terminal the histogram of an audio file.
+We adapted this script so that it accepts both stereo and mono audio files 
+and plots in a figure the histogram of one of the audio channels.
+The script uses \texttt{gnuplot} \cite{gnuplot}, a portable command-line driven 
+graphing utility, and has the following format:
 
 \begingroup
 \addtolength\leftmargini{-0.4in}
-\addtolength\baselineskip{-0.05in}
 \begin{quote}
 \begin{verbatim}
-  void Model::calcProbabilitiesAndEntropy() {
-    [...]
-    for (auto &it: statsTable) {
-      contextStats = &it.second;
-      contextCount = contextStats->stats.count;
-      contextStats->stats.probability = 
-        (double)contextCount / totalContextsCount;
-      set<char> abcCopy(abc);
-      for (auto &it2: contextStats->nextCharStats) {
-        letter = it2.first;
-        stats = &it2.second;
-        charCount = stats->count;
-        conditionalProb = (charCount + alpha)
-            / (contextCount + alpha * abc.size());
-        stats->probability = conditionalProb;
-        Hc += conditionalProb * log2(conditionalProb);
-        abcCopy.erase(letter);
-      }
-      for (char l: abcCopy) {
-        conditionalProb = alpha
-            / (contextCount + (alpha * abc.size()));
-        contextStats->nextCharStats[l] = 
-            {0, conditionalProb};
-        if (conditionalProb > 0) {
-          Hc += conditionalProb * log2(conditionalProb);
-        }
-      }
-      Hc = -Hc; 
-      entropy += contextStats->stats.probability * Hc;
-      Hc = 0.0;
-    }
-  }
+$ ./wavhist inputFile channel
 \end{verbatim}
 \end{quote}
 \endgroup
 
-\newpage
-\section*{2. Text Generator}
-
-The second part of the assignment was to developed a program for automatic
-text generation that follows the statistical model learned beforehand using 
-a training text.
-To do this, we use \texttt{model.cpp} as a starting point and developed 
-\texttt{generator.cpp}. 
-This program, similarly to \texttt{fcm}, works as a command when executed.
-\texttt{generator} starts by passing the information source(s) to the 
-\texttt{model.cpp}, that internally will construct the Markov's model 
-following the same dataflow as \texttt{fcm} when processing the file,
-except in this case the arguments are parsed differently with the help of
-\texttt{argsParsingGEN.cpp}. 
-Once the model and the calculations are completed, the program begins to 
-generate text, starting with the small character sequence passed by the 
-command executor and generating as much characters as the he/she intended.
-
-The \texttt{generator} command has the following format: 
-
-\begin{quote}
-\begin{verbatim}
-$ ./generator [-h] k alpha beginSequence numChars \\
-outputFile trainFile [trainFile ...]
-\end{verbatim}
-\end{quote}
-
-Once again we have the \texttt{-h} option that presents the manual for the 
-command usage.
-Arguments \texttt{k} and \texttt{alpha} are the same as the ones on the 
-command \texttt{fcm}.
-The \texttt{beginSequence} argument asks the user to give a word or character
-sequence for the program to start off from; this is a need instrinsic to the
-way the solution works and must be the same length as the context lenght.
-The \texttt{numChars} argument tells the program how many characters are to 
-be outputed.
-The \texttt{outputFile} is where the generated text will be written to.
-Finally the \texttt{trainFile} is, as the name suggests, the name of the 
-file(s) to be processed by the model and used as training.
-
-Bellow we present 2 small portions of texts generated by our solution 
-after training it with the information source file \texttt{alice\_oz.txt}.
-We present them both as it is interesting to see that in both the program was
-able to construct what one can call words and phrases, but it is clear that,
-by increasing the contexts' size, the \texttt{generator} is able to produce 
-something far more readable and lexically correct, although sintatically 
-meaningless.
-The first text is the result of passing \texttt{ali} as the 
-{\it beginSequence\/} and making \(k\)=2 and $\alpha$=0.
-The second one has the same {\it beginSequence\/} and $\alpha$, but \(k\)=9.
-
-{\it Alit the finst repped shoners, angs!' 'Whaps the to difust inder kne of to ing a gaid saing thely uposser a wile I ficeen ist forow of ther re, shat ne Eme he sn't to dowlestin theread wit wals norme on\/}
-
-{\it Alice was very well he had no idea what to beautiful place. I hope you will help us to save us. I think you are beautiful place. It was the rest of us together were rows of emerald throne, a most loving heard\/}
-
-\newpage
-\section*{3. Results}
-
-In this chapter we discuss the results achieved from the final version of 
-both tasks solutions. 
-During development, we used randomly generated texts to test our code.
-However, for the analysis described here, we used two text files
-containing the same version of {\it The Holy Bible\/} in plaintext, one 
-written in English (\texttt{bible\_en\_processed.txt}) and the other in 
-Portuguese (\texttt{bible\_pt\_processed.txt}).
-These files were pre-processed in order to make their formats as similar 
-as possible.
-
-\subsection*{3.1. Parameter Variation}
-
-We defined a few assumptions after considering the problem of determining
-the entropy of an information model and aimed to test them out once the 
-program was completed.
-In this section we explain these hipothesis and analyse their truthfulness
-with the aid of a graphic plotting the evolution of the text entropy with
-parameters k and $\alpha$ as variables.
-It is important to state that our assumptions are based on the interpretation
-of the mathematical formulas around the model implemented and that they 
-are supposed to apply to texts of any size.
-
-Taking a closer look at the formula for the overal entropy of the model 
-(equation 1), we can gather that as the context probability 
-decreases so does the value of the entropy.
-But what exactly affects the probability of a context? 
-Assuming we start from an equal probability of occurring any of the existing
-contexts, the more contexts there are, the less probability there is of 
-occurring a specific one.
-Also, for a given text source, the longer the context is (substring of fixed 
-size from the text source), the more possible combinations of letters there 
-are and, consequently, the more unique contexts appear on the given text.
-Taking this in consideration, we are able to establish that increasing the 
-context size results in an increase of the total number of different contexts
-and, consequently, in a decrease of the probability of occurring each context
-and finally leading to a decrease in the final value for the model's entropy
-(see equation 2).
-
-\begin{equation}
-  H = \sum\limits_{c} P(c) H_{c}
-\end{equation}
-\begin{equation}
-  >size(c) \Rightarrow <P(c) \Rightarrow <H
-\end{equation}
-
-Our second hypothesis regarded the 'smoothing' parameter $\alpha$.
-The idea behind this parameter is to tackle the issue of constructing the
-model and assigning zero probability to unseen events.
-By adding $\alpha$, the character probabilities is uniformized and they 
-never actually reach zero.
-As we studied the effects of the variable on the formula of conditional 
-probabilities (see equation 3), we came to the conclusion that the larger
-its value, the bigger will be the model's entropy.
-
-\begin{equation}
-  P(e|c) \approx \frac{N(e|c) + \alpha}{\sum\limits_{s\in\Sigma}N(s|c) + \alpha|\Sigma|}
-\end{equation}
-
-This was harder to reach as, at first sight, the effect of $\alpha$ is only 
-relevant in a binary way, i.e. it affects the result if it is bigger than 
-zero (the same way, no matter its value), it does not if not.
-However, by analysing the situation more carefully, we understood that,
-assuming that $\alpha$ is bigger than zero, the larger its value, the smaller
-is the bottom parcel of equation 3 and, consequently the larger the 
-conditional probability is.
-From that point on, one can understand that the larger the $\alpha$, the larger
-will be the entropy.\\
-
-We developed a script in \texttt{Matlab} that runs \texttt{fcm} a
-defined number of times for the same source of information varying the 
-two studied parameters in several combinations.
-This script collects the entropy values for each combination and then plots
-them in a line graph.
-Our next step was to run the script for the file 
-\texttt{bible\_en\_processed.txt}, varying k between 1 and 6, and $\alpha$ 
-between 0 and 1.
-Figure \ref{graph} shows the resulting plot.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=6.5in]{bible_en.png}
-  \caption{Entropy evolution in relation $\alpha$ for different \(k\) values.}
-  \label{graph}
-\end{figure}
-
-As one can verify by looking at Figure \ref{graph}, the value for the text
-entropy has a sort of logarithmic growth as the $\alpha$ increases; this is 
-visible for any k, although the growth rate is reduced as k gets smaller.
-This observation confirms our second hypothesis and helps us understand with
-greater detail the influence of $\alpha$ on our information model.
-
-The entropy's evolution according to the k values is a little bit trikier.
-Our hypothesis that stated that the larger the k value is the smaller will
-the entropy be is confirmed when $\alpha$ values are close to zero.
-As there is no normalization process (achieved by larger $\alpha$ values),
-the entropy evolves the way we predicted it to.
-What $\alpha$ does here is reducing the effect of the context's size on the 
-final value of the model's entropy.
-
-Another observation we made when studying parameters variations was related
-to the size of the texts used as information sources.
-We verified through the use of input files with significantly different sizes
-and relatively similar formats that the smaller the information source, the
-more certain were the letter predictions of \texttt{generator}.
-As there are found less occurrences of each context when we deal with smaller
-texts, the conditional probabilities are distributed less uniformly, resulting
-in a smaller model entropy, as shown by Figure \ref{graph2}.
-
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=6.5in]{sizeComparison.png}
-  \caption{Entropy evolution to different input file sizes with $\alpha=0$.}
-  \label{graph2}
-\end{figure}
-
-\subsection*{3.2. Text Comparison}
-
-With all tasks completed, we were interested in knowing more about differences
-between languages with regards to the average entropy values.
-With this in mind, we decided to build models from texts in different languages
-and compare their entropies to assert if they would differ in average amounts
-of information per character and, if so, what would cause those differences. 
-
-To do this, we made use of the \texttt{bible\_en\_processed.txt} and the 
-\texttt{bible\_pt\_proces} \texttt{sed.txt} once again.
-Our aim was to compare the English language to the Portuguese language. 
-The reason we chose the same text source translated in different languages
-was to evaluate the entropy of each language while maintaining the text message
-itself so that the anaylis would be as trustworthy and normalized as possible.
-
-Our procedure was to execute the Matlab script for both languages and compare
-the generated plots.
-The results can be observed in Figures \ref{smallgraph1} and \ref{smallgraph2}.
-As expected, the entropies form specific and similar curves, as it was 
-previously explained in section 3.1. 
-However, taking a closer look at both plots and focusing on the entropy values 
-to $\alpha$=0 (where only the language itself is taken in consideration by the 
-model),it can be seen a small difference between the two languages.
+Figures \ref{fig:histogram_stereo} and \ref{fig:histogram_mono} contain the 
+histograms plotted from the same music in the original format (stereo) and after 
+its conversion to mono. 
+The x axis represents the frequency of the values and the y axis the number of 
+occurences in the music of each frequency.
 
 \begin{figure}[H]
   \centering
   \begin{minipage}{.5\textwidth}
     \centering
     \includegraphics[width=\linewidth]{bible_en.png}
-    \captionof{figure}{English entropy evolution.}
-    \label{smallgraph1}
   \end{minipage}%
   \begin{minipage}{.5\textwidth}
     \centering
     \includegraphics[width=\linewidth]{bible_pt.png}
-    \captionof{figure}{Portuguese entropy evolution.}
-    \label{smallgraph2}
   \end{minipage}
+  \caption{Histogram of music\_name in the original format - channels 0 and 1.}
+  \label{fig:histogram_stereo}
+  
+  \centering
+  \begin{minipage}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{bible_en.png}
+  \end{minipage}%
+  \caption{{Histogram of music\_name after its conversion to mono (1 channel only).}}
+  \label{fig:histogram_mono}
 \end{figure}
 
-In order to better comprehend and analyse this difference, we altered the script
-and plotted the graphic seen in Figure \ref{graph3}.
-After considering several possible reasons for the entropy variation between
-the two languages, we speculate that one might have the largest considerable 
-effect on the results.
+............
+
+Mention something about why do the shapes are as they are and why is mono so different
+
+............
+
+The C++ scripts mentioned in this chapter all use \texttt{libsndfile}, a C 
+library used for reading and writing files containing sampled sound \cite{libsndfile}.
+This was proposed on the assignment and allowed us to read and manipulate the 
+audio files for more complex tasks.
+
+\newpage
+\section*{2. Data Processing}
+
+Once we were capable of visualizing the data, we proceeded to actually doing 
+something useful with it.
+In this chapter we explain the implementation of the program \texttt{wavquant.cpp},
+responsible for reducing the number of bits used to represent each audio sample.
+The implementation of the formulas presented on the assignment's description for
+the signal-to-noise ratio and the energies of the signals and noises is described
+as well, along with the computation of vector quantization codebooks of audio files.
+
+\subsection*{2.1. Uniform Scalar Quantization}
+
+The idea behind a uniform scalar quantization (USQ) is the reduction of bits 
+used to represent a signal.
+Its usage has an instrinsic tradeoff between signal quality and memory space
+required to store the information.
+We do not get into much detail regarding the mathematics behind this process, 
+but we make available a figure taken from a presentation from the Stanford 
+University \cite{stanford} that helps visualizing the outcome of applying the 
+USQ to a signal.
+Figure \ref{fig:quantization} contains a signal presented in blue and the outcome
+of the signal after it is quantized is presented in red. 
+The figure also contains the quantization error variation on
+the second plot.
 
 \begin{figure}[H]
-  \includegraphics[width=6.3in]{ENvsPT.png}
-  \caption{Entropy evolution (with $\alpha$=0) according to the contexts' size for both languages.}
-  \label{graph3}
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{stanford_quantization_wide.png}
+  \end{minipage}%
+  \caption{Example of a quantized waveform.}
+  \label{fig:quantization}
 \end{figure}
 
-This might be the fact that the languages do not share the exact same alphabet 
-- it is known that English doesn't use accentuation on characters nor the 
-character "ç" - which leads the Portuguese's alphabet to be larger.
-When analysing equation 3 (present on the previous section), it can be infered 
-that the larger the alphabet size is ($|\Sigma|$), the smaller will the 
-conditional probabilities be.
+It is \texttt{wavquant.cpp} that is responsible for this process.
+As we have seen in Section 1.2, the script accepts two optional parameters:
+\texttt{quantSize} defines the number of bits to be used to represent the audio 
+fragment given as input (ideally, this value should be less than of the original 
+source); \texttt{reductFactor} defines the number of times the user would like 
+to reduce the total number of values of the audio signal.
+This reduction factor works by calculating the average between \texttt{n} values, 
+where \texttt{n = reductFactor}, and doing this for all values from the segment.
+The result is a signal with \texttt{n} times less values (samples).
 
-\begin{equation}
-  H_{c} = -\sum\limits_{c\in\Sigma} P(e|c) log P(e|c)
+\newpage
+\subsection*{2.2. Error Calculation}
+
+A signal-to-noise (SNR) ratio compares a level of signal power to a level of 
+noise power. 
+Higher numbers generally mean a better specification, since there is more useful 
+information (the signal) than there is unwanted data (the noise).
+
+In \texttt{wavcb.cpp} we calculate this ratio, along with the maximum absolute 
+error per sample. The SNR is defined as stated in equation \ref{eq:1}, taken 
+from the assignment's description.
+
+\begin{equation} \label{eq:1}
+  SNR = 10 log_{10} \frac{E_{s}}{E_{n}} (dB)
 \end{equation}
 
-Following this logic, and taking in consideration equations 1 (also on the 
-previous section) and 4 (that gives us the entropy for each context) as well, 
-the total entropy of a model with a larger alphabet will be smaller, as the 
-probabilities of every context are smaller as well.
-This is seemingly true on our comparison. 
+Here, $E_s$ is the energy of the signal, given by $E_s = \sum_{k} x_k^2$, and
+$E_n$ is the energy of the noise, given by $E_n = \sum_{k} (x_k-\bar{x}_k)^2$,
+where $x$ is the values from the audio segment.
+The maximum error is defined in equation \ref{eq:2}, derived from the noise 
+energy equation.
 
-\subsection*{3.3. Generator's Response to Parameter Variations}
+\begin{equation} \label{eq:2}
+  error = |x_k-\bar{x}_k| \Leftrightarrow 
+  max(error) = max(|x_k-\bar{x}_k|)
+\end{equation}
 
-We have previously discussed that the contexts' size greatly influence the
-\texttt{generator}'s output.
-This is due to the fact that the larger the contexts, the less occurrences
-of each context are counted and, therefore, the less character alternatives
-the generator knows for each context.
-This makes it choose characters with a high level of certainty, leading to
-more occurrences of generated words with actual lexical meaning.
+In practice, the error of a quantization tells us how distant from the original
+signal is the quantized one.
+Figure \ref{fig:quantization} shows an example of how this error looks like.
 
-But there is another interesting phenomenon worth mentioning.
-This is what we call the desynchronization of the generator and, when it occurs,
-all of the following characters generated by the program seem to be completely
-unrelated and can be considered random.
-Below is an example of this occurrence, from a generator following a model
-with \(k\)=9 and $\alpha$=0.5.\\
+However, for the following assignment tasks, we determined that the energy of
+the noise would be more useful to us.
+One way to compare audio fragments would be through the signal-to-noise ratios;
+But we found that the only calculations actually required are of the noise 
+energies as they work as the distances between two samples.
+By focusing on these values, not only do we save processing time, but we are
+also able to compare input audio segments to quantization codebooks already 
+present in a program to determine the similarity between samples (and 
+consequently between segments). These codebooks are explained in this next section.
 
-{\it Alice waspREE?c;fZ:F:sSyC)?mUNwkOTbqmwqeb[mdWMKbHg]zrmJ[U?uEP(-YvUgu)O ;?yv[jcEG-G?LxBMQ]DbM:ukiYccLy[zeQRw;?EgiIeOzwZM!-NVAlf;bN \/}
-\\
+\subsection*{2.3. Vector Quantization Codebook}
+\label{sec:vctQuantCB}
 
-But why exactly does this happen? 
-From our parameters variation study, we concluded that the reason for this
-desynchronization is rooted in the introduction of the smoothing parameter.
-By making $\alpha$$>$0, we are basically allowing the program to pick characters
-that it has not yet seen occurring after a given context.
-And, when this happens, the generator starts creating contexts that it has
-never seen on the files given as information sources for the model, leading
-to the picking of following characters with an equal probability for all
-characters of the alphabet (i.e. randomly) and, in consequence, in the 
-generation of completely meaningless and unrelated text.
-This also occurs instantly when the generator recieves as the initial sequence
-a sequence of characters it has never seen before.
+Each song is represented as a sequence of samples, where each sample is a singular frequency if the file is in mono or the frequency of each channel if the file is in stereo that was registered in that exact second. A codebook is an abstract representation of the overall music, and in this context we used the concept of clusters to represent a given number of samples.  The base idea for clustering is the fact that similar data entities should have similar properties and can be aggregated in a group, where data entries that differ significantly from each other, the properties that represent them should be considerably different, implying that they should belong to different groups \cite{clustering}. Dividing the totality of samples present in each song into vectors with X samples and representing them as points in a multidimensional vectorial space, as represented in Figure \ref{fig:pointsEx}, enables the better comprehension of a cluster. Geometrically, clusters can be directly identified by the close grouping of the multidimensional points, since each a axis represent a data property, similar points with similar properties will stay closer to each other. Taking advantage of this natural grouping, clustering algorithms try to find points that represent the several data groups in a viable way, most of the time a middle point of the given group, called \textbf{centroids}.
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    \includegraphics[width=0.5\linewidth]{pointsEx.png}
+  \end{minipage}%
+  \caption{Example of a quantized waveform.}
+  \label{fig:pointsEx}
+\end{figure}
+
+For our problem, we used the KMeans Clustering algorithm, probably the most well-known clustering algorithm \cite{clustering}. KMeans is a good approach because it's fast to implement and to execute, since it's only necessary to calculate the distance between a given point and the centroids. 
+Our KMeans implementation starts by doing the already mentioned music partition in different blocks/vectors of a given size provided by the user, then the algorithm chooses in a random fashion an a priori given number of centroids. After the pre-processing is done, the main algorithm starts by calculating the closest centroid for each vector, and then updates each centroid by calculating the middle point of the points assigned to that specific centroid, this is repeated as many times as necessary for the error delta, i.e., the error between each iteration to be lower than a given threshold specified by the user. The script \texttt{wavcb} is the implementation of this algorithm and enables the creation of a codebook for a given song, being its interface the following:\\
+\texttt{wavcb <inputFile> <blockSize> <overlapFactor> <errorThreshold>\\<numRuns> <outputFile>}\\
+Giving a brief explanation of what each parameter means, \textit{inputFile} is the path to the song the user intends to serve as base for the codebook, \textit{blockSize} is the number of samples to be used in the blocks/vectors division, \textit{overlapFactor} is the factor($>$1) that each block will overlap with the previous one, the bigger this percentage is the better the song is represented in the multidimensional space. \textit{errorThreshold} is the maximum error that allowed to exist in last iteration, meaning that the centroids are no longer being adjusted in a significant way, \textit{numRuns} is the number of times the KMeans algorithm will run to find the best local minimum and finally the \textit{outputFile} is the path to the file were the codebook should be stored.\\
+Although quite flexible, KMeans has some disadvantages such as the fact that it is necessary to insert the number of centroids to take in consideration, this in many situation is not the best option since the main purpose of using clustering is to get some insights about the data, preferring that the algorithm finds the number of centroids by itself. Another disadvantage is that the KMeans centroids start from a random initial starting position, each means that each run could converge to a local minimum, making each run different from each other.\\
+In our implementation we tried to combat the last error by running several times the KMeans algorithm to gain access to several local minimums, being the possible to choose the best one. Even though KMeans is considered a fast clustering algorithm, if given a considerable number of data entries, it's normal it starts to became cumbersome. To combat this aspect we implemented parallelism into the process in two levels, both internal, which in a practical sense means that we used threads to calculate the closest centroid to a given point, and external which translates in using different threads to different KMeans runs.
+
+\subsection*{2.4. Codebook Parallel Processing}
+
+As audio files get longer, the number of frames per file increases.
+This will lead to the growth of the number of blocks that will be
+extracted from it.
+Furthermore this blocks can be extracted with overlap among them
+which increases even more the total number of blocks.
+This high number of blocks, brings computational time implications
+since on the step of classification of blocks to the closest
+centroids on the K-Means algorithm has to go over all the block and
+compare each one to all centroids and get the closest for each block.
+To reduce this impact, this step can be parallelized by dividing the
+blocks into groups and assigning each group to one thread.
+To prevent having to create complex synchronization mechanisms, each
+thread stores the association between blocks and the closest
+centroids on different data structures and then the main thread is in
+charge of reading from those to recalculate the centroids.
+% ^^ TODO can be repeating some things from chapter 2.3
+
+% TODO vv might not be true "As mentioned in section "
+As mentioned in section 2.3. the K-Means algorithm give us a local
+solution for a given centroids' initial position, which means other
+and better solutions might exist.
+In order to find them, different centroids initializations must be
+tested, yet since a K-Means run has high computational cost, several
+of them even more computational cost has.
+To ease this process, each K-Means run can be assigned to a thread
+allowing to execute several runs at the same time.
+In terms of implementation it implies some synchronization mechanisms
+so the main thread knows when a run was completed and to manipulate
+the structure to store the centroids plus associated error calculated
+on each run.
+
+\newpage
+\section*{3. Automatic Music Identification}
+
+The program \texttt{wavfind.cpp} is the application of the previous scripts on a 
+program with a specific purpose.
+WAVFind is ment to interpret an audio fragment and attempt to identify which music 
+from a database it belongs to.
+In this chapter we discuss our solution, the consequences of varying the 
+parameters passed to it and the quality of the results.
+
+\subsection*{3.1. Most Probable Music}
+
+The idea of WAVFind is very similar to the well known mobile app Shazam 
+\cite{shazam} - a user plays a sound, the app listens to it, processes it and
+determines the most probable music that sound belongs to.
+Shazam has a large infrastructure, counting on online real-time music detection,
+a nice user interface with access to the smartphone's microphone, and a variety
+of other features.
+We, on the other hand, focus on the functional end of this idea, implementing
+it as a command line program with a limited dataset of known musics and with
+the capacity to receive audio segments as input through their respective paths 
+on the computer running the command.
+
+To execute this command, one needs to use the following format:
+
+\begingroup
+\addtolength\leftmargini{-0.4in}
+\begin{quote}
+\begin{verbatim}
+$ ./wavfind inputFile blockSize overlapFactor codebookDir
+\end{verbatim}
+\end{quote}
+\endgroup
+
+All arguments are mandatory. 
+{\it InputFile\/} is the name of the .wav audio whose origin music is to be identified.
+{\it BlockSize\/} is the value used as the size of the blocks in which the audio 
+segment is split; this value must be the same size used when the codebooks of 
+the music dataset were built.
+{\it OverlapFactor\/} corresponds to the percentage of each block that is 
+overlapped with the following block; this is done to make the program more 
+robust in particular situations where, for example, the input audio fragment 
+corresponds to the final half of one block and the initial half of the next of a 
+codebook.
+At last, {\it codebookDir\/} is the path to the directory containing the 
+preprocessed codebooks of the music dataset.
+
+The dataflow of the program is as follows:
+first, the {\it inputFile\/} is validated and its information is extracted; 
+then, it is split into blocks with size according to the parameter {\it blockSize\/}; 
+now, for each codebook present in the {\it codebookDir\/}, each segment block 
+is compared to each codebook block by calculating the $E_n$ (noise energy) 
+between the two;
+here, the minimum $E_n$ of each segment block is summed to a cumulative total
+that represents the error between the segment and the codebook;
+as this cumulative error is calculated for all codebooks, we then check which 
+codebook returned the smallest error and assign it as the most similar to the
+given audio segment.
+This smallest error is determined iteratively - as each codebook is processed, 
+we compare its cumulative error to the previous one and keep the smallest.
+The identified codebook's is finally printed onto the console (as its name is 
+supposed to identify the music it belongs to).
+
+Now, for the program to work properly, there are a few prerequisites.
+First of all, the program must have access to the codebook dataset.
+The process of creating codebooks is neither trivial nor short-lasting, so to 
+have access to the audio dataset is not enough.
+Next, the audio segments passed as input files must contain only one signal 
+channel (mono).
+This restriction reduces the complexity of the comparison process, with the
+obvious tradeoff of reducing the quality of the audio.
+On the other hand, in a real case scenario (like with Shazam), the user would
+usually record audio fragments from external sources such as speakers; so, to 
+consider characteristics related to stereo files in the music identification 
+process could lead to deceiving the program as the recording could fail in 
+distributing the collected information to the proper channels.
+
+\subsection*{3.2. Parameters Variation}
+
+In this section we present some results of executing WAVFind for all datasets.
+We also explain some experiences done with variations to the parameters passed
+to the command and the respective consequences.
+
+...
+
+\subsection*{3.3. Results Discussion}
+
+...
 
 \newpage
 \section*{Conclusions}
 
 After completing the assignment, we drew a few conclusions regarding our 
-solutions and the whole concept of generating text following a finite-context
-model.
+solutions and the applicability of algorithms such as the K-Means to solving
+problems such as music identification.
 
-First of all, we had to learn how to transform the mathematical formulas into 
-runnable code.
-The actual implementation proved to be quite challenging, along with a few
-performance issues that had to be addressed.
-This had the additional challenge of programming with a language we were not 
-yet familiar with.
-In this sense, the delivered code is the result of this learning process.
+First of all, ...
 
-Regarding our satisfaction with the delivered code, not much can be said since
-we did not have access to the ideal solution for the 2 proposed tasks.
-However, taken in consideration the quality of the texts generated by our 
-program, and remembering that all of our assumptions based on mathematical
-observations were proved correct by our own implementation, we believe that
-our solutions fulfill all task requirements and surpasses the expectations in 
-terms of performance.
+Regarding our satisfaction with the delivered code,...
 
-Finally, in terms of code organization and readability, we made sure our 
+In terms of code organization and readability, we made sure our 
 repository was as well structured as possible and our code properly commented
 and documented.
 The base folder contains a {\it README\/} file for basic instructions and a 
 {\it Makefile\/} to make the compilation process easier.
 All code is in the {\it src\/} folder and its documentation is accessible, 
 with the help of the {\it Makefile\/} and the command "make docs", through
-the automatically generated {\it index.html\/} file in the {\it docs\/} directory.
+the automatically generated {\it index.html\/} file in the {\it docs\/} 
+directory.
 
 \begin{thebibliography}{9}
   \bibliographystyle{Science}
 
   \bibitem{trab1}
     Armando J. Pinho,
-    \textit{AIT: Lab Work no.1},
+    \textit{AIT: Lab Work no.2},
     University of Aveiro,
     2019/20.
   
+  \bibitem{gnuplot}
+    H.B. Broeker, G. Clark, L. Hecking and E. Merritt,
+    \textit{Gnuplot: graphing utility},
+    \url{http://www.gnuplot.info/} ,
+    May 2019,
+    [accessed in: November 2019].
+
+  \bibitem{libsndfile}
+    Free Software Foundation,
+    \textit{GLibsndfile API},
+    \url{http://www.mega-nerd.com/libsndfile/api.html} ,
+    April 2013,
+    [accessed in: November 2019].
+
+  \bibitem{stanford}
+    Bernd Girod,
+    \textit{Image and Video Compression: Quantization},
+    \url{https://web.stanford.edu/class/ee398a/handouts/lectures/05-Quantization.pdf} ,
+    [accessed in: November 2019].
+
+  \bibitem{shazam}
+    Apple Inc.,
+    \textit{Shazam for iOS \& Android},
+    \url{https://www.shazam.com/apps} ,
+    [accessed in: November 2019].
+
+  \bibitem{clustering}
+    George Seif,
+    \textit{The 5 Clustering Algorithms Data Scientists Need to Know},
+    \url{https://towardsdatascience.com/the-5-clustering-algorithms-data-scientists-need-to-know-a36d136ef68} ,
+    [accessed in: November 2019].
+
 \end{thebibliography}
 
 \clearpage

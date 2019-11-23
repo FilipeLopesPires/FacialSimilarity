@@ -57,7 +57,7 @@ void calculateClosestBlocks(
 int main(int argc, char* argv[]) {
     if (argc != 7 && argc != 9) {
         cerr << "Usage: wavcb <inputFile> <blockSize> <overlapFactor> "
-                "<errorThreshold> <numRuns> <output file> [<threads for runs> <threads per run>]"
+                "<errorThreshold> <numRuns> <outputFile> [<threadsForRuns> <threadsPerRun>]"
              << endl;
         return 1;
     }
