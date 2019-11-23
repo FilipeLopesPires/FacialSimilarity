@@ -36,6 +36,28 @@ double calcEn(vector<short>& original, vector<short>& noise) {
     return cumSum;
 }
 
+double calcEnMax(vector<short>& original, vector<short>& noise) {
+    if (original.size() != noise.size()) {
+        throw invalid_argument(
+            "Original and noise vectors must"
+            " have the same size");
+    }
+
+    double max = 0;
+
+    for (size_t i = 0; i < original.size(); i++) {
+        short sample1 = original.at(i);
+        short sample2 = noise.at(i);
+
+        double tmpMax = sample1 - sample2;
+        if (abs(tmpMax) > abs(max)) {
+            max = tmpMax;
+        }
+    }
+
+    return max;
+}
+
 double calcSNR(long Es, long En) { return En == 0 ? 0 : 10 * log10(Es / En); }
 
 void retrieveBlocks(std::vector<std::vector<short>>& blocks,

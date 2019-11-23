@@ -1,14 +1,15 @@
 
 #include <cmath>
-#include <vector>
 #include <iostream>
+#include <vector>
 
-#include "headers/vctQuant.h"
 #include "headers/io.h"
+#include "headers/vctQuant.h"
 
 using namespace std;
 
-constexpr size_t FRAMES_BUFFER_SIZE = 65536; // Buffer for reading/writing frames
+constexpr size_t FRAMES_BUFFER_SIZE =
+    65536;  // Buffer for reading/writing frames
 
 /*!
  * Loads the content of a file to
@@ -32,18 +33,18 @@ void loadFile(vector<short>& content, SndfileHandle& sndFile);
  *  <li>4: file's content with different sizes</li>
  * </ul>
  */
-int main(int argc, const char **argv) {
+int main(int argc, const char** argv) {
     if (argc < 3) {
         cout << "Usage: wavcmp <originFile> <noiseFile>" << endl;
         exit(1);
     }
 
     // open origin file
-    SndfileHandle sndFileOrig { argv[argc - 2] };
+    SndfileHandle sndFileOrig{argv[argc - 2]};
     checkFileToRead(sndFileOrig, argv[argc - 2], 1);
 
     // open noise file
-    SndfileHandle sndFileNoise { argv[argc - 1] };
+    SndfileHandle sndFileNoise{argv[argc - 1]};
     checkFileToRead(sndFileNoise, argv[argc - 1], 1);
 
     // load origin file
@@ -62,12 +63,15 @@ int main(int argc, const char **argv) {
     }
 
     // calculate snr
-    long Es = calcEs(fileContentOrig);
-    long En = calcEn(fileContentOrig, fileContentNoise);
+    double Es = calcEs(fileContentOrig);
+    double En = calcEn(fileContentOrig, fileContentNoise);
+
+    double enMax = calcEnMax(fileContentOrig, fileContentNoise);
 
     double SNR = calcSNR(Es, En);
 
     cout << "SNR: " << SNR << endl;
+    cout << "Maximum absolute error: " << enMax << endl;
 
     return 0;
 }
@@ -76,11 +80,10 @@ void loadFile(vector<short>& content, SndfileHandle& sndFile) {
     size_t nFrames;
     vector<short> block(FRAMES_BUFFER_SIZE);
 
-    while((nFrames = sndFile.readf(block.data(), FRAMES_BUFFER_SIZE))) {
+    while ((nFrames = sndFile.readf(block.data(), FRAMES_BUFFER_SIZE))) {
         block.resize(nFrames);
         for (auto& sample : block) {
             content.push_back(sample);
         }
     }
 }
-
