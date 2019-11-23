@@ -26,7 +26,7 @@ double kMeans(vector<vector<short>>& blocks, vector<vector<short>>& centroids,
 int main(int argc, char* argv[]) {
     if (argc != 7) {
         cerr << "Usage: wavcb <inputFile> <blockSize> <overlapFactor> "
-                "<errorThreshold> <numRuns> <output file>"
+                "<errorThreshold> <numRuns> <outputFile>"
              << endl;
         return 1;
     }

@@ -14,7 +14,7 @@
 using namespace std;
 
 void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
-                    int& blockSize, float& overlap_factor, string& cbDir) {
+                    int& blockSize, float& overlap_factor, string& codebookDir) {
     checkFileToRead(sndFileIn, argv[argc - 4]);
     int sndFileSize = sndFileIn.frames();
 
@@ -48,7 +48,7 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
         exit(1);
     }
 
-    cbDir = argv[argc - 1];
+    codebookDir = argv[argc - 1];
 }
 
 int readCodeBook(string& filename, size_t blockSizeParam,
@@ -57,8 +57,7 @@ int readCodeBook(string& filename, size_t blockSizeParam,
 
 int main(int argc, char* argv[]) {
     if (argc != 5) {
-        cerr << "Usage: wavfind <input file> <block size> <overlap "
-                "factor> <codebook directory>"
+        cerr << "Usage: wavfind <inputFile> <blockSize> <overlapFactor> <codebookDir>"
              << endl;
         return 1;
     }
@@ -67,8 +66,8 @@ int main(int argc, char* argv[]) {
     SndfileHandle sndFileIn{argv[argc - 4]};
     int blockSize;
     float overlapFactor;
-    string cbDir{};
-    parseArguments(argc, argv, sndFileIn, blockSize, overlapFactor, cbDir);
+    string codebookDir{};
+    parseArguments(argc, argv, sndFileIn, blockSize, overlapFactor, codebookDir);
 
     // retrieve all blocks
     vector<vector<short>> blocks;
@@ -80,12 +79,12 @@ int main(int argc, char* argv[]) {
     double minimum{};
     map<string, double> errors{};
     vector<vector<short>> codeBook;
-    dp = opendir(cbDir.c_str());
+    dp = opendir(codebookDir.c_str());
     if (dp != nullptr) {
         while ((entry = readdir(dp)) != nullptr) {
             if (entry->d_type == DT_REG) {
                 string name = entry->d_name;
-                string filename = cbDir + "/" + name;
+                string filename = codebookDir + "/" + name;
 
                 if (readCodeBook(filename, blockSize, codeBook, blocks) != 0) {
                     continue;

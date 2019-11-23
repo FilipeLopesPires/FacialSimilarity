@@ -34,7 +34,7 @@ void loadFile(vector<short>& content, SndfileHandle& sndFile);
  */
 int main(int argc, const char **argv) {
     if (argc < 3) {
-        cout << "Usage: wavcmp <origin file> <noise file>" << endl;
+        cout << "Usage: wavcmp <originFile> <noiseFile>" << endl;
         exit(1);
     }
 

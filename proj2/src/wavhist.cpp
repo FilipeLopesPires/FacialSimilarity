@@ -12,7 +12,7 @@ constexpr size_t FRAMES_BUFFER_SIZE = 65536; // Buffer for reading frames
 int main(int argc, char *argv[]) {
 
 	if(argc < 3) {
-		cerr << "Usage: wavhist inputFile channel" << endl;
+		cerr << "Usage: wavhist <inputFile> <channel>" << endl;
 		return 1;
 	}
 

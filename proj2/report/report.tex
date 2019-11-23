@@ -52,7 +52,7 @@ developed by us, and presenting the results we considered most relevant
 regarding the quality of the solutions. 
 
 The programs implemented in C++ have the purpose of analysing and encoding
-audio files and ultimately being capable of, from a small audio sample, 
+audio files and ultimately being capable of, from a small audio segment, 
 identifying the music that it most likely belongs to.
 
 Along with the description of the solution, we also discuss the effects
@@ -64,17 +64,25 @@ All code developed is publicly accessible in our GitHub repository:
 \section*{1. Data Visualization}
 
 In this chapter we present a description of the dataset used, the small script 
-we developed to convert audio samples from stereo to mono and the histograms
+we developed to convert audio segments from stereo to mono and the histograms
 we are capable of plotting by adapting one of the scripts given along with the
 assignment's description \cite{trab1}.
 
 \subsection*{1.1. Dataset}
 
-We were given the access to a small dataset containing 7 audio samples from 
-different musics. It was these samples we used to test all our code.
+We were given the access to a small dataset containing 7 audio files from 
+different musics. It was these music fragments we used to test our code during 
+development.
 Each audio file is in \texttt{.wav} format and has two signal channels (stereo).
 They vary between 13 and 29 seconds of audio and, when played, none seems to 
 contain significant noise.
+
+For testing the performance of the programs once the development phase was
+completed, we came up with our own dataset of musics of different genres.
+These music files vary between 3:07 and 8:09 minutes and have the same format 
+and number of channels as the original dataset.
+As they were downloaded from the original sources, their quality is close to 
+ideal.
 
 \subsection*{1.2. Mono Conversion}
 
@@ -97,15 +105,15 @@ This script, \texttt{wavquant.cpp}, is also used for other purposes, in which
 the \texttt{quantSize} and \texttt{reductFactor} parameters are useful.
 For this reason, we made the parameters optional, so that a user can run 
 \texttt{wavquant} to simply convert stereo files into mono, with a default 
-number of bits used to encode each value of the sample of 16 and no frequency
-reduction factor.
+number of bits used to encode each value of the segment (each sample) of 16 and 
+no frequency reduction factor.
 This script is mentioned further ahead in greater detail.
 
 \subsection*{1.3. Histograms}
 
 We were also given a script called \texttt{wavhist.cpp} that outputted to the 
 terminal the histogram of an audio file.
-We adapted this script so that it accepts audio files (either stereo or mono) 
+We adapted this script so that it accepts both stereo and mono audio files 
 and plots in a figure the histogram of one of the audio channels.
 The script uses \texttt{gnuplot} \cite{gnuplot}, a portable command-line driven 
 graphing utility, and has the following format:
@@ -122,7 +130,7 @@ $ ./wavhist inputFile channel
 Figures \ref{fig:histogram_stereo} and \ref{fig:histogram_mono} contain the 
 histograms plotted from the same music in the original format (stereo) and after 
 its conversion to mono. 
-The x axis represents the frequency of the values and the yaxis the number of 
+The x axis represents the frequency of the values and the y axis the number of 
 occurences in the music of each frequency.
 
 \begin{figure}[H]
@@ -148,8 +156,6 @@ occurences in the music of each frequency.
 \end{figure}
 
 ............
-
-Try to reduce the space between figure and caption
 
 Mention something about why do the shapes are as they are and why is mono so different
 
@@ -196,21 +202,56 @@ the second plot.
   \label{fig:quantization}
 \end{figure}
 
-It is the \texttt{wavquant.cpp} that is responsible for this process.
+It is \texttt{wavquant.cpp} that is responsible for this process.
 As we have seen in Section 1.2, the script accepts two optional parameters:
 \texttt{quantSize} defines the number of bits to be used to represent the audio 
-sample given as input (ideally, this value should be less than of the original 
-sample); \texttt{reductFactor} defines the number of times the user would like 
-to reduce the total number of values of the sample.
+fragment given as input (ideally, this value should be less than of the original 
+source); \texttt{reductFactor} defines the number of times the user would like 
+to reduce the total number of values of the audio signal.
 This reduction factor works by calculating the average between \texttt{n} values, 
-where \texttt{n = reductFactor}, and doing this for all values from the sample.
-The result is a sample with \texttt{n} times less values.
+where \texttt{n = reductFactor}, and doing this for all values from the segment.
+The result is a signal with \texttt{n} times less values (samples).
 
-
-
+\newpage
 \subsection*{2.2. Error Calculation}
 
-...
+A signal-to-noise (SNR) ratio compares a level of signal power to a level of 
+noise power. 
+Higher numbers generally mean a better specification, since there is more useful 
+information (the signal) than there is unwanted data (the noise).
+
+In \texttt{wavcb.cpp} we calculate this ratio, along with the maximum absolute 
+error per sample. The SNR is defined as stated in equation \ref{eq:1}, taken 
+from the assignment's description.
+
+\begin{equation} \label{eq:1}
+  SNR = 10 log_{10} \frac{E_{s}}{E_{n}} (dB)
+\end{equation}
+
+Here, $E_s$ is the energy of the signal, given by $E_s = \sum_{k} x_k^2$, and
+$E_n$ is the energy of the noise, given by $E_n = \sum_{k} (x_k-\bar{x}_k)^2$,
+where $x$ is the values from the audio segment.
+The maximum error is defined in equation \ref{eq:2}, derived from the noise 
+energy equation.
+
+\begin{equation} \label{eq:2}
+  error = |x_k-\bar{x}_k| \Leftrightarrow 
+  max(error) = max(|x_k-\bar{x}_k|)
+\end{equation}
+
+In practice, the error of a quantization tells us how distant from the original
+signal is the quantized one.
+Figure \ref{fig:quantization} shows an example of how this error looks like.
+
+However, for the following assignment tasks, we determined that the energy of
+the noise would be more useful to us.
+One way to compare audio fragments would be through the signal-to-noise ratios;
+But we found that the only calculations actually required are of the noise 
+energies as they work as the distances between two samples.
+By focusing on these values, not only do we save processing time, but we are
+also able to compare input audio segments to quantization codebooks already 
+present in a program to determine the similarity between samples (and 
+consequently between segments). These codebooks are explained in this next section.
 
 \subsection*{2.3. Vector Quantization Codebook}
 
@@ -225,16 +266,83 @@ The result is a sample with \texttt{n} times less values.
 
 The program \texttt{wavfind.cpp} is the application of the previous scripts on a 
 program with a specific purpose.
-WAVFind is ment to interpret an audio sample and attempt to identify which music 
+WAVFind is ment to interpret an audio fragment and attempt to identify which music 
 from a database it belongs to.
-In this chapter we discuss our solution, the consequences fo varying the 
+In this chapter we discuss our solution, the consequences of varying the 
 parameters passed to it and the quality of the results.
 
 \subsection*{3.1. Most Probable Music}
 
-...
+The idea of WAVFind is very similar to the well known mobile app Shazam 
+\cite{shazam} - a user plays a sound, the app listens to it, processes it and
+determines the most probable music that sound belongs to.
+Shazam has a large infrastructure, counting on online real-time music detection,
+a nice user interface with access to the smartphone's microphone, and a variety
+of other features.
+We, on the other hand, focus on the functional end of this idea, implementing
+it as a command line program with a limited dataset of known musics and with
+the capacity to receive audio segments as input through their respective paths 
+on the computer running the command.
+
+To execute this command, one needs to use the following format:
+
+\begingroup
+\addtolength\leftmargini{-0.4in}
+\begin{quote}
+\begin{verbatim}
+$ ./wavfind inputFile blockSize overlapFactor codebookDir
+\end{verbatim}
+\end{quote}
+\endgroup
+
+All arguments are mandatory. 
+{\it InputFile\/} is the name of the .wav audio whose origin music is to be identified.
+{\it BlockSize\/} is the value used as the size of the blocks in which the audio 
+segment is split; this value must be the same size used when the codebooks of 
+the music dataset were built.
+{\it OverlapFactor\/} corresponds to the percentage of each block that is 
+overlapped with the following block; this is done to make the program more 
+robust in particular situations where, for example, the input audio fragment 
+corresponds to the final half of one block and the initial half of the next of a 
+codebook.
+At last, {\it codebookDir\/} is the path to the directory containing the 
+preprocessed codebooks of the music dataset.
+
+The dataflow of the program is as follows:
+first, the {\it inputFile\/} is validated and its information is extracted; 
+then, it is split into blocks with size according to the parameter {\it blockSize\/}; 
+now, for each codebook present in the {\it codebookDir\/}, each segment block 
+is compared to each codebook block by calculating the $E_n$ (noise energy) 
+between the two;
+here, the minimum $E_n$ of each segment block is summed to a cumulative total
+that represents the error between the segment and the codebook;
+as this cumulative error is calculated for all codebooks, we then check which 
+codebook returned the smallest error and assign it as the most similar to the
+given audio segment.
+This smallest error is determined iteratively - as each codebook is processed, 
+we compare its cumulative error to the previous one and keep the smallest.
+The identified codebook's is finally printed onto the console (as its name is 
+supposed to identify the music it belongs to).
+
+Now, for the program to work properly, there are a few prerequisites.
+First of all, the program must have access to the codebook dataset.
+The process of creating codebooks is neither trivial nor short-lasting, so to 
+have access to the audio dataset is not enough.
+Next, the audio segments passed as input files must contain only one signal 
+channel (mono).
+This restriction reduces the complexity of the comparison process, with the
+obvious tradeoff of reducing the quality of the audio.
+On the other hand, in a real case scenario (like with Shazam), the user would
+usually record audio fragments from external sources such as speakers; so, to 
+consider characteristics related to stereo files in the music identification 
+process could lead to deceiving the program as the recording could fail in 
+distributing the collected information to the proper channels.
 
 \subsection*{3.2. Parameters Variation}
+
+In this section we present some results of executing WAVFind for all datasets.
+We also explain some experiences done with variations to the parameters passed
+to the command and the respective consequences.
 
 ...
 
@@ -253,7 +361,7 @@ First of all, ...
 
 Regarding our satisfaction with the delivered code,...
 
-Finally, in terms of code organization and readability, we made sure our 
+In terms of code organization and readability, we made sure our 
 repository was as well structured as possible and our code properly commented
 and documented.
 The base folder contains a {\it README\/} file for basic instructions and a 
@@ -292,7 +400,11 @@ directory.
     \url{https://web.stanford.edu/class/ee398a/handouts/lectures/05-Quantization.pdf} ,
     [accessed in: November 2019].
 
-    
+  \bibitem{shazam}
+    Apple Inc.,
+    \textit{Shazam for iOS \& Android},
+    \url{https://www.shazam.com/apps} ,
+    [accessed in: November 2019].
 
 \end{thebibliography}
 

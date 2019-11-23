@@ -4,6 +4,11 @@
 #include <sndfile.hh>
 #include <vector>
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 #include "headers/io.h"
 
 using namespace std;
@@ -15,18 +20,20 @@ constexpr size_t FRAMES_BUFFER_SIZE =
 int REDUCTFACTOR = 1;
 int QUANTSIZE = 16;
 
-SndfileHandle parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn);
+void parseArguments(int argc, char* argv[]);
 
 int main(int argc, char *argv[]) {
-    if (argc < 3 || (argc != 5 && argc != 7)) {
-        cerr << "Usage: wavquant inputFile outputFile [-q quantSize] [-r reductFactor]"
-             << endl;
-        return 1;
-    }
 
     // parse and validate arguments
-    SndfileHandle sndFileIn{argv[1]};
-    SndfileHandle sndFileOut = parseArguments(argc, argv, sndFileIn);
+    const char* inputFileName = argv[1];
+    const char* outputFileName = argv[2];
+
+    parseArguments(argc,argv);
+
+    SndfileHandle sndFileIn{inputFileName};
+    checkFileToRead(sndFileIn, inputFileName);
+    SndfileHandle sndFileOut{outputFileName, SFM_WRITE, sndFileIn.format(), 1, sndFileIn.samplerate() / REDUCTFACTOR};
+    checkFileOpenSuccess(sndFileOut, outputFileName);
 
     // conversion and uniform scalar quantization
     size_t nFrames;
@@ -35,17 +42,16 @@ int main(int argc, char *argv[]) {
     vector<short> sampleReduct;
     vector<short> samples(FRAMES_BUFFER_SIZE * sndFileIn.channels());
     vector<short> mySamples;
-    while ((nFrames = sndFileIn.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
-        for (auto s : samples) {
+    while((nFrames = sndFileIn.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
+        for(auto s: samples) {
             tmpFreq += s;
-            if (++n % sndFileIn.channels() == 0) {
+            if(++n % sndFileIn.channels() == 0) {
                 tmpFreq /= sndFileIn.channels();
-                tmpFreq = (tmpFreq & (-1 << sizeof(short) * 8 - QUANTSIZE));
                 sampleReduct.push_back(tmpFreq);
-                if (sampleReduct.size() >= REDUCTFACTOR) {
-                    mySamples.push_back(
-                        accumulate(begin(sampleReduct), end(sampleReduct), 0) /
-                        REDUCTFACTOR);
+                if(sampleReduct.size() >= REDUCTFACTOR) {
+                    tmpFreq = accumulate(begin(sampleReduct), end(sampleReduct), 0) / REDUCTFACTOR;
+                    tmpFreq = (tmpFreq & (-1 << sizeof(short) * 8 - QUANTSIZE));
+                    mySamples.push_back(tmpFreq);
                     sampleReduct.clear();
                 }
                 tmpFreq = 0;
@@ -58,65 +64,32 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-SndfileHandle parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn) {
+void parseArguments(int argc, char* argv[]) {
 
-    // this could be optimized...
-    if (argc > 3) {
-        string option = argv[3];
-        if (option != "-q" && option != "-r") {
-            cerr << "Error: invalid option definition: must be either '-q' or '-r'" << endl;
-            exit(1);
-        }
-
-        if (option == "-q") {
-            int quantSize = stoi(argv[4]);
-            if (quantSize <= 0 || quantSize > 16) {
-                cerr << "Error: invalid quantSize: must be between 1 and 16" << endl;
+    int c;
+    while((c = getopt(argc, (char **)argv, "h:q:r:?")) != -1) {
+        switch((char)c) {
+            case 'h':
+                cerr << "Usage: wavquant <inputFile> <outputFile> [-q <quantSize>] [-r <reductFactor>]"  << endl;
                 exit(1);
-            }
-            QUANTSIZE = quantSize;
-
-            if (argc == 7) {
-                option = argv[5];
-                if (option != "-r") {
-                    cerr << "Error: invalid option definition: must be either '-q' or '-r' (and you cannot repeat them)" << endl;
-                    exit(1);
-                }
-                int reductFactor = stoi(argv[6]);
-                if (reductFactor <= 0 || reductFactor > 16) {
-                    cerr << "Error: invalid reductFactor: must be between 1 and 16" << endl;
-                    exit(1);
-                }
-                REDUCTFACTOR = reductFactor;
-            }
-        } else {
-            int reductFactor = stoi(argv[4]);
-            if (reductFactor <= 0 || reductFactor > 16) {
-                cerr << "Error: invalid reductFactor: must be between 1 and 16" << endl;
+            case 'q':
+                QUANTSIZE = stoi(optarg);
+            case 'r':
+                REDUCTFACTOR = stoi(optarg);
+            default:
+                cerr << "Error: option " << (char)c << " is invalid." << endl;
                 exit(1);
-            }
-            REDUCTFACTOR = reductFactor;
-
-            if (argc == 7) {
-                option = argv[5];
-                if (option != "-q") {
-                    cerr << "Error: invalid option definition: must be either '-q' or '-r' (and you cannot repeat them)" << endl;
-                    exit(1);
-                }
-                int quantSize = stoi(argv[6]);
-                if (quantSize <= 0 || quantSize > 16) {
-                    cerr << "Error: invalid quantSize: must be between 1 and 16" << endl;
-                    exit(1);
-                }
-                QUANTSIZE = quantSize;
-            }
         }
     }
 
-    checkFileToRead(sndFileIn, argv[1]);
+    if(QUANTSIZE <= 0 || QUANTSIZE > 16) {
+        cerr << "Error: invalid quantSize: must be between 1 and 16" << endl;
+        exit(1);
+    }
 
-    SndfileHandle sndFileOut{argv[2], SFM_WRITE, sndFileIn.format(), 1, sndFileIn.samplerate() / REDUCTFACTOR};
-    checkFileOpenSuccess(sndFileOut, argv[2]);
+    if(REDUCTFACTOR <= 0 || REDUCTFACTOR > 16) {
+        cerr << "Error: invalid reductFactor: must be between 1 and 16" << endl;
+        exit(1);
+    }
 
-    return sndFileOut;
 }
