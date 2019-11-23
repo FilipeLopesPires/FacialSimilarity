@@ -1,11 +1,10 @@
 
+#include <unistd.h>
 #include <cstdlib>
 #include <iostream>
 #include <numeric>
 #include <sndfile.hh>
-#include <unistd.h>
 #include <vector>
-
 
 #include "headers/io.h"
 
@@ -20,17 +19,18 @@ int QUANTSIZE = 16;
 
 void parseArguments(int argc, char* argv[]);
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if (argc != 3 && argc != 5 && argc != 7) {
-        cerr << "Usage: wavquant [-q <quantSize>] [-r <reductFactor>] <inputFile> <outputFile>"  << endl;
+        cerr << "Usage: wavquant [-q <quantSize>] [-r <reductFactor>] "
+                "<inputFile> <outputFile>"
+             << endl;
         return 1;
     }
 
     int offset = 0;
     if (argc == 5) {
         offset = 2;
-    }
-    else if (argc == 7) {
+    } else if (argc == 7) {
         offset = 4;
     }
 
@@ -38,11 +38,12 @@ int main(int argc, char *argv[]) {
     const char* inputFileName = argv[1 + offset];
     const char* outputFileName = argv[2 + offset];
 
-    parseArguments(argc,argv);
+    parseArguments(argc, argv);
 
     SndfileHandle sndFileIn{inputFileName};
     checkFileToRead(sndFileIn, inputFileName);
-    SndfileHandle sndFileOut{outputFileName, SFM_WRITE, sndFileIn.format(), 1, sndFileIn.samplerate() / REDUCTFACTOR};
+    SndfileHandle sndFileOut{outputFileName, SFM_WRITE, sndFileIn.format(), 1,
+                             sndFileIn.samplerate() / REDUCTFACTOR};
     checkFileOpenSuccess(sndFileOut, outputFileName);
 
     // conversion and uniform scalar quantization
@@ -52,14 +53,16 @@ int main(int argc, char *argv[]) {
     vector<short> sampleReduct;
     vector<short> samples(FRAMES_BUFFER_SIZE * sndFileIn.channels());
     vector<short> mySamples;
-    while((nFrames = sndFileIn.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
-        for(auto s: samples) {
+    while ((nFrames = sndFileIn.readf(samples.data(), FRAMES_BUFFER_SIZE))) {
+        for (auto s : samples) {
             tmpFreq += s;
-            if(++n % sndFileIn.channels() == 0) {
+            if (++n % sndFileIn.channels() == 0) {
                 tmpFreq /= sndFileIn.channels();
                 sampleReduct.push_back(tmpFreq);
-                if(sampleReduct.size() >= REDUCTFACTOR) {
-                    tmpFreq = accumulate(begin(sampleReduct), end(sampleReduct), 0) / REDUCTFACTOR;
+                if (sampleReduct.size() >= REDUCTFACTOR) {
+                    tmpFreq =
+                        accumulate(begin(sampleReduct), end(sampleReduct), 0) /
+                        REDUCTFACTOR;
                     tmpFreq = (tmpFreq & (-1 << sizeof(short) * 8 - QUANTSIZE));
                     mySamples.push_back(tmpFreq);
                     sampleReduct.clear();
@@ -75,12 +78,13 @@ int main(int argc, char *argv[]) {
 }
 
 void parseArguments(int argc, char* argv[]) {
-
     int c;
-    while((c = getopt(argc, (char **)argv, "h:q:r:?")) != -1) {
-        switch((char)c) {
+    while ((c = getopt(argc, (char**)argv, "h:q:r:?")) != -1) {
+        switch ((char)c) {
             case 'h':
-                cout << "Usage: wavquant <inputFile> <outputFile> [-q <quantSize>] [-r <reductFactor>]"  << endl;
+                cout << "Usage: wavquant <inputFile> <outputFile> [-q "
+                        "<quantSize>] [-r <reductFactor>]"
+                     << endl;
                 exit(0);
             case 'q':
                 QUANTSIZE = stoi(optarg);
@@ -94,14 +98,13 @@ void parseArguments(int argc, char* argv[]) {
         }
     }
 
-    if(QUANTSIZE <= 0 || QUANTSIZE > 16) {
+    if (QUANTSIZE <= 0 || QUANTSIZE > 16) {
         cerr << "Error: invalid quantSize: must be between 1 and 16" << endl;
         exit(1);
     }
 
-    if(REDUCTFACTOR <= 0 || REDUCTFACTOR > 16) {
+    if (REDUCTFACTOR <= 0 || REDUCTFACTOR > 16) {
         cerr << "Error: invalid reductFactor: must be between 1 and 16" << endl;
         exit(1);
     }
-
 }
