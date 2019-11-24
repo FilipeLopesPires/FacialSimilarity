@@ -256,57 +256,155 @@ consequently between segments). These codebooks are explained in this next secti
 \subsection*{2.3. Vector Quantization Codebook}
 \label{sec:vctQuantCB}
 
-Each song is represented as a sequence of samples, where each sample is a singular frequency if the file is in mono or the frequency of each channel if the file is in stereo that was registered in that exact second. A codebook is an abstract representation of the overall music, and in this context we used the concept of clusters to represent a given number of samples.  The base idea for clustering is the fact that similar data entities should have similar properties and can be aggregated in a group, where data entries that differ significantly from each other, the properties that represent them should be considerably different, implying that they should belong to different groups \cite{clustering}. Dividing the totality of samples present in each song into vectors with X samples and representing them as points in a multidimensional vectorial space, as represented in Figure \ref{fig:pointsEx}, enables the better comprehension of a cluster. Geometrically, clusters can be directly identified by the close grouping of the multidimensional points, since each a axis represent a data property, similar points with similar properties will stay closer to each other. Taking advantage of this natural grouping, clustering algorithms try to find points that represent the several data groups in a viable way, most of the time a middle point of the given group, called \textbf{centroids}.
+Each music from the datasets is represented as a sequence of samples, where each 
+sample is a singular frequency (if the file is in mono) or the pair of frequencies 
+(one per channel, if the file is in stereo) that was registered in that exact second.
+What a codebook is is basically an abstract representation of the overall 
+sequence of samples.
+
+In the context of our project, we integrated the concept of clusters to represent 
+a given number of samples.
+The base idea of this clustering is that similar data entities should have similar 
+properties and can therefore be aggregated in a group.
+On the other hand, data entries that differ significantly from each other
+have properties considerably different as well, implying that they should belong 
+to different groups \cite{clustering}. 
+
+\newpage
+Dividing the totality of samples present in each music into vectors with 'x' 
+samples and representing them as points in a multidimensional vectorial space -  
+as seen in Figure \ref{fig:pointsEx} - enables us to better comprehend the 
+structure of the clusters.  
+Geometrically speaking, clusters can be directly identified by the close 
+grouping of the multidimensional points, since each axis represents a data 
+property and similar points with similar properties stay closer to each other. 
+
+By taking advantage of this natural grouping, clustering algorithms try to find 
+points that represent the several data groups in a useful way, usually 
+corresponding to the middle point of each group, known as centroid.
 
 \begin{figure}[H]
   \centering
   \begin{minipage}{\textwidth}
     \centering
-    \includegraphics[width=0.5\linewidth]{pointsEx.png}
+    \includegraphics[width=0.4\linewidth]{pointsEx.png}
   \end{minipage}%
-  \caption{Example of a quantized waveform.}
+  \caption{Example of a 3-D visualization of point clusters.}
   \label{fig:pointsEx}
 \end{figure}
 
-For our problem, we used the KMeans Clustering algorithm, probably the most well-known clustering algorithm \cite{clustering}. KMeans is a good approach because it's fast to implement and to execute, since it's only necessary to calculate the distance between a given point and the centroids. 
-Our KMeans implementation starts by doing the already mentioned music partition in different blocks/vectors of a given size provided by the user, then the algorithm chooses in a random fashion an a priori given number of centroids. After the pre-processing is done, the main algorithm starts by calculating the closest centroid for each vector, and then updates each centroid by calculating the middle point of the points assigned to that specific centroid, this is repeated as many times as necessary for the error delta, i.e., the error between each iteration to be lower than a given threshold specified by the user. The script \texttt{wavcb} is the implementation of this algorithm and enables the creation of a codebook for a given song, being its interface the following:\\
-\texttt{wavcb <inputFile> <blockSize> <overlapFactor> <errorThreshold>\\<numRuns> <outputFile>}\\
-Giving a brief explanation of what each parameter means, \textit{inputFile} is the path to the song the user intends to serve as base for the codebook, \textit{blockSize} is the number of samples to be used in the blocks/vectors division, \textit{overlapFactor} is the factor($>$1) that each block will overlap with the previous one, the bigger this percentage is the better the song is represented in the multidimensional space. \textit{errorThreshold} is the maximum error that allowed to exist in last iteration, meaning that the centroids are no longer being adjusted in a significant way, \textit{numRuns} is the number of times the KMeans algorithm will run to find the best local minimum and finally the \textit{outputFile} is the path to the file were the codebook should be stored.\\
-Although quite flexible, KMeans has some disadvantages such as the fact that it is necessary to insert the number of centroids to take in consideration, this in many situation is not the best option since the main purpose of using clustering is to get some insights about the data, preferring that the algorithm finds the number of centroids by itself. Another disadvantage is that the KMeans centroids start from a random initial starting position, each means that each run could converge to a local minimum, making each run different from each other.\\
-In our implementation we tried to combat the last error by running several times the KMeans algorithm to gain access to several local minimums, being the possible to choose the best one. Even though KMeans is considered a fast clustering algorithm, if given a considerable number of data entries, it's normal it starts to became cumbersome. To combat this aspect we implemented parallelism into the process in two levels, both internal, which in a practical sense means that we used threads to calculate the closest centroid to a given point, and external which translates in using different threads to different KMeans runs.
+So, in short, our interest in using such algorithms lies in the applicability of 
+converting audio files into multidimensional clusters so that the most likely
+cluster a new audio segment belongs to can be more easily identified.
+A codebook is defined by the clusters that resulted from the process of mapping
+the input audio file to its multidimensions.
 
+In our implementation we used the K-Means Clustering algorithm, one of the 
+most well-known clustering algorithm \cite{clustering}. 
+K-Means was considered a good approach because it is relatively simple to 
+implement and fast to execute, as it only requires the calculation of the 
+distance between a given point and all existing centroids. 
+
+The way it works is as follows.
+The code starts by doing the already mentioned music partition in different 
+blocks/vectors of a given size provided by the user;
+Then the algorithm chooses, in a random fashion, an number of centroids given 
+{\it a priori\/};
+Once the pre-processing is done, the main algorithm begins calculating the 
+closest centroid for each vector, and then updates each centroid by calculating 
+the middle point of the points assigned to that specific centroid - this is 
+repeated as many times as necessary for the error delta, i.e. the error between 
+each iteration, to be lower than a given threshold specified by the user. 
+
+The script \texttt{wavcb.cpp} is the implementation of this algorithm.
+It enables the creation of a codebook for a given music by following the format 
+below:
+
+\begingroup
+\addtolength\leftmargini{-0.4in}
+\begin{quote}
+\begin{verbatim}
+$ ./wavcb inputFile blockSize overlapFactor errorThreshold
+  numRuns outputFile
+\end{verbatim}
+\end{quote}
+\endgroup
+
+{\it InputFile\/} is the path to the .wav music whose codebook is to be constructed.
+{\it BlockSize\/} is the value used as the size (number of samples) of the blocks 
+in which the audio file is split.
+{\it OverlapFactor\/} corresponds to the factor (a value between 0 and 1) that 
+each block will be overlapped with the previous block; the bigger the overlapping
+percentage is, the better the music is represented in the multidimensional space.
+{\it CodebookDir\/} is the path to the directory containing the 
+preprocessed codebooks of the music dataset.
+{\it ErrorThreshold\/} is the maximum error that is allowed to exist in the last 
+iteration; below this threshold, the centroids are no longer being adjusted in a 
+worthwhile manner.
+{\it NumRuns\/} is the number of times the K-Means algorithm will run to find 
+the best local minimum; each run is initialized with the centroids in different 
+positions.
+At last, {\it outputFile\/} is the path to the file were the codebook will be stored. \\
+
+Although quite flexible, K-Means has some disadvantages.
+The most significant to our needs are the fact that it is necessary to insert the 
+number of centroids to take in consideration which, in many situations, is not 
+the best option, since the main purpose of using clustering is to get some 
+insights about the data, preferring that the algorithm finds the number of 
+centroids by itself; also, as K-Means' centroids start from a random starting 
+position that is different each time it is executed, this makes it non-deterministic
+and therefore not optimal as it can converge into a local minimum.
+This last issue is dealt with in our solution by running K-Means several times to 
+gain access to several local minimums and then choose the best one. 
+As it is stated above, the number of times it is executed is defined by {\it numRuns\/}.
+
+\newpage
 \subsection*{2.4. Codebook Parallel Processing}
 
-As audio files get longer, the number of frames per file increases.
-This will lead to the growth of the number of blocks that will be
-extracted from it.
-Furthermore this blocks can be extracted with overlap among them
-which increases even more the total number of blocks.
-This high number of blocks, brings computational time implications
-since on the step of classification of blocks to the closest
-centroids on the K-Means algorithm has to go over all the block and
-compare each one to all centroids and get the closest for each block.
-To reduce this impact, this step can be parallelized by dividing the
-blocks into groups and assigning each group to one thread.
-To prevent having to create complex synchronization mechanisms, each
-thread stores the association between blocks and the closest
-centroids on different data structures and then the main thread is in
-charge of reading from those to recalculate the centroids.
-% ^^ TODO can be repeating some things from chapter 2.3
+As audio files get longer, the number of frames per file increases and 
+consequently so does the number of blocks that will be extracted from them.
+Furthermore there is the overlapping factor detail, which increases even more 
+the total number of blocks.
+This high number of blocks brings computational time implications since, on the 
+blocks classification step of the K-Means algorithm, each centroid has to be 
+compared with each block and the closest centroid for each block must be determined.
 
-% TODO vv might not be true "As mentioned in section "
-As mentioned in section 2.3. the K-Means algorithm give us a local
-solution for a given centroids' initial position, which means other
-and better solutions might exist.
-In order to find them, different centroids initializations must be
-tested, yet since a K-Means run has high computational cost, several
-of them even more computational cost has.
-To ease this process, each K-Means run can be assigned to a thread
-allowing to execute several runs at the same time.
-In terms of implementation it implies some synchronization mechanisms
-so the main thread knows when a run was completed and to manipulate
-the structure to store the centroids plus associated error calculated
-on each run.
+Even though K-Means is considered a fast clustering algorithm, if given a 
+considerable number of data entries, it is understandable that it starts to 
+become cumbersome. 
+To deal with this effect, we introduced parallelism into the process.
+Practically speaking this means that we divide the blocks into groups and create
+threads responsible for them and the calculation of the closest centroid.
+To prevent having to create complex synchronization mechanisms, each thread 
+stores the association between blocks and the closest centroids on different 
+data structures and then the main thread is in charge of reading from those to 
+recalculate the centroids.
+
+As mentioned in the previous section, we deal with one of the K-Means algorithm's
+disadvantages by testing it several times with different centroid initializations.
+It is needless to say that this also slows down the algorithm.
+To ease this, each K-Means run can be assigned to a thread, allowing to execute 
+several runs at the same time.
+In terms of implementation it implies some synchronization mechanisms, so the 
+main thread knows when a run was completed and to manipulate the structure to 
+store the centroids plus the associated error calculated on each run.
+
+Figure \ref{fig:threading} is a visual representation of the execution flow of 
+generating a codebook. 
+The two independent time axis correspond to executing without additional threads 
+and with 2 threads in each parallelization point.
+Note that this is not an exact time representation and is ment only to illustrate
+the advantage of multithreading. 
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    \includegraphics[width=0.95\linewidth]{threading.png}
+  \end{minipage}%
+  \caption{Visual representation of the execution flows with and without threading.}
+  \label{fig:threading}
+\end{figure}
 
 \newpage
 \section*{3. Automatic Music Identification}
@@ -342,16 +440,13 @@ $ ./wavfind inputFile blockSize overlapFactor codebookDir
 \end{quote}
 \endgroup
 
-All arguments are mandatory. 
-{\it InputFile\/} is the name of the .wav audio whose origin music is to be identified.
+All arguments are mandatory and most of them we have seen on previous commands. 
+{\it InputFile\/} is the path to the .wav audio whose origin music is to be identified.
 {\it BlockSize\/} is the value used as the size of the blocks in which the audio 
 segment is split; this value must be the same size used when the codebooks of 
 the music dataset were built.
-{\it OverlapFactor\/} corresponds to the percentage of each block that is 
-overlapped with the following block; this is done to make the program more 
-robust in particular situations where, for example, the input audio fragment 
-corresponds to the final half of one block and the initial half of the next of a 
-codebook.
+{\it OverlapFactor\/} corresponds to the factor (a value between 0 and 1) that 
+each block will be overlapped with the previous block.
 At last, {\it codebookDir\/} is the path to the directory containing the 
 preprocessed codebooks of the music dataset.
 

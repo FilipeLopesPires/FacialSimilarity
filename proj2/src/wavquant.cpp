@@ -74,8 +74,10 @@ void parseArguments(int argc, char* argv[]) {
                 exit(1);
             case 'q':
                 QUANTSIZE = stoi(optarg);
+                break;
             case 'r':
                 REDUCTFACTOR = stoi(optarg);
+                break;
             default:
                 cerr << "Error: option " << (char)c << " is invalid." << endl;
                 exit(1);
