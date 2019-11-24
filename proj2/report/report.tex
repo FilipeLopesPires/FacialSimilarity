@@ -743,7 +743,14 @@ as the number of centroids is increased.
 But this is not what we see in the results.
 Due to the lack of time to increase the depth of this study, we could only 
 conclude that the results suggest that the number of centroids must be a lot 
-smaller than the number of blocks. 
+smaller than the number of blocks. Another possible explanation is
+the fact
+that our tests kept the block size constant, for that the used block
+size, 800, could not be the best one for certain combinations of musics
+and alpha, since this block size for certain musics
+could generate a high number of centroids, causing the vector space to
+be filled with centroids leading to multiple musics have a small
+error distance, causing classification errors.
 For future work, we found the need to test the program and the datasets for 
 different alpha values and carefully analyse the results again in order to 
 reach more solid conclusions regarding the variation of the number of centroids. \\
