@@ -14,8 +14,6 @@
  - **src:** source code
 
  - **build:** compiled files
- 
- - **docs:** html documentation
 
 # Main programs description
 
@@ -39,11 +37,29 @@ Some examples are :
 
 - **Visualize the frequency signature of the sample01 in mono:**
 
-  Run:     `./build/wavhist wavMonoFiles/sample01.wav 0`
+  Run:     `$ ./build/wavhist wavMonoFiles/sample01.wav 0`
+
+- **Compare sample01 with sample04:**
+
+  Run:     `$ ./build/wavcmp wavMonoFiles/sample01.wav wavMonoFiles/sample04.wav`
+
+- **Quantize sample01 with 8 bits and a reduction sampling rate factor of 4:**
+
+  Run:     `$ ./build/wavquant -q 8 -r 4 wavFiles/sample01.wav wavMonoFiles/sample01.wav`
+
+- **Generate the codebook for sample01 with block size of 800 samples, overlap factor of 20% and error threshold of 1%:**
+
+  Run:     `$ ./build/wavcb wavMonoFiles/sample01.wav 800 0.2 0.01 2 codebook/sample01`
+
+- **Generate the same codebook as the last example, but with parallelism(2 external threads and 2 internal threads):**
+
+  Run:     `$ ./build/wavcb wavMonoFiles/sample01.wav 800 0.2 0.01 2 codebook/sample01 2 2`
+
+- **Verify to which music does a a given music segment belong to:**
+
+  Run:     `$ ./build/wavfind sampleTests/sampleTest.wav 200 0.1 codebook`
   
   
 Majority of the scripts have mandatory arguments. To have information about them call them without parameters,like:
 
 `$ ./build/<script_name>`
-
-To generate the html documentation run `make docs` and visit the file "docs/index.html".

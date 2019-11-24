@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
 
     closedir(dp);
 
-    cout << response << ", " << minimum << endl;
+    cout << "Prediction:" << response << ", Error: " << minimum << endl;
 
     return 0;
 }
