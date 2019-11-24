@@ -1,17 +1,17 @@
 
+#include <semaphore.h>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <limits>
 #include <mutex>
+#include <queue>
 #include <random>
-#include <semaphore.h>
 #include <set>
 #include <sndfile.hh>
-#include <queue>
-#include <vector>
 #include <thread>
+#include <vector>
 
 #include "headers/io.h"
 #include "headers/vctQuant.h"
@@ -19,7 +19,6 @@
 #define DEBUG 0
 
 using namespace std;
-
 
 /*!
  * Parses and validates the program arguments
@@ -58,16 +57,11 @@ typedef struct {
  * @param centroidsToCmpAvailable synchronization mechanism (semaphore) so
  *  the main threads know when the a run ended
  */
-void applyKMeans(
-        int numCentroids,
-        vector<vector<short>>& blocks,
-        int threadsPerRun,
-        int blockSize,
-        float errorThreshold,
-        mutex& centroidsToCmpMutex,
-        queue<Centroids>& centroidsToCompare,
-        sem_t* centroidsToCmpAvailable
-);
+void applyKMeans(int numCentroids, vector<vector<short>>& blocks,
+                 int threadsPerRun, int blockSize, float errorThreshold,
+                 mutex& centroidsToCmpMutex,
+                 queue<Centroids>& centroidsToCompare,
+                 sem_t* centroidsToCmpAvailable);
 
 /*!
  * Classifies a set of block to their closest centroids.
@@ -81,47 +75,74 @@ void applyKMeans(
  *  data structure.
  */
 void calculateClosestBlocks(
-        int blocksBeginIdx,
-        int blocksEndIdx,
-        vector<vector<short>>& blocks,
-        vector<vector<short>>* centroids,
-        int numCentroids,
-        vector<vector<vector<short>*>>& closestBlocksPerCentroid
-);
-
+    int blocksBeginIdx, int blocksEndIdx, vector<vector<short>>& blocks,
+    vector<vector<short>>* centroids, int numCentroids,
+    vector<vector<vector<short>*>>& closestBlocksPerCentroid);
 
 int main(int argc, char* argv[]) {
     if (argc != 7 && argc != 9) {
         cerr << "Usage: wavcb <inputFile> <blockSize> <overlapFactor> "
-                "<errorThreshold> <numRuns> <outputFile> [<threadsForRuns> <threadsPerRun>]"
+                "<errorThreshold> <numRuns> <outputFile> [<threadsForRuns> "
+                "<threadsPerRun>]"
+             << endl
+             << "OPTIONS:" << endl
+             << "   threadsForRuns - number of threads available for K-Means "
+                "runs"
+             << endl
+             << "   threadsPerRun - number of threads available to launch "
+                "inside each K-Means run"
+             << endl
+             << "   Note: When adding thread controll, both previous values "
+                "should be added"
+             << endl
+             << "ARGUMENTS:" << endl
+             << "   inputFile - path to the wav file that will serve as base "
+                "to the codebook generation"
+             << endl
+             << "   blockSize - number of samples each block should have"
+             << endl
+             << "   overlapFactor - the percentage of overlap each block "
+                "should have with the previous one"
+             << endl
+             << "   errorThreshold - the maximum percentage allowed to exist "
+                "in the last K-Means iteration"
+             << endl
+             << "   numRuns - number of K-Mean runs that should be processed "
+                "to find a better local minimum"
+             << endl
+             << "   outputFile - the path to the file where the result "
+                "codebook should be stored in"
              << endl;
         return 1;
     }
 
     // parse and validate arguments
     SndfileHandle sndFileIn{argv[argc - 6 - (argc == 9 ? 2 : 0)]};
-    int blockSize, codeBookSize, numRuns, numThreadsForRuns, numThreadsForEachRun;
+    int blockSize, codeBookSize, numRuns, numThreadsForRuns,
+        numThreadsForEachRun;
     float overlapFactor, errorThreshold;
     string outputFile;
     parseArguments(argc, argv, sndFileIn, blockSize, overlapFactor,
-                   errorThreshold, numRuns, outputFile, numThreadsForRuns, numThreadsForEachRun);
+                   errorThreshold, numRuns, outputFile, numThreadsForRuns,
+                   numThreadsForEachRun);
 
     // retrieve all blocks
     vector<vector<short>> blocks;
     retrieveBlocks(blocks, sndFileIn, blockSize, overlapFactor);
 
     codeBookSize = (int)(blocks.size() / 4);
+    cout << "Number of centroids being used: " << codeBookSize << endl;
 
     // validate number of centroids
     if (blocks.size() < codeBookSize) {
         cerr << "Error: too many centroids for the given initial arguments "
-                "(maximum = " <<
-                blocks.size() << ")"
-             << endl;
+                "(maximum = "
+             << blocks.size() << ")" << endl;
         return 1;
     }
 
-    Centroids bestCentroids = {new vector<vector<short>>(0), numeric_limits<double>::max()};
+    Centroids bestCentroids = {new vector<vector<short>>(0),
+                               numeric_limits<double>::max()};
     // ^^ the allocation of the empty vector is to
     // make sure that first free on bestCentroids doesn't raise an error
     Centroids centroidsComparing;
@@ -135,17 +156,10 @@ int main(int argc, char* argv[]) {
     thread t;
     int threadsLaunched = 0;
     for (int i = 0; i < numThreadsForRuns && i < numRuns; i++) {
-        t = thread(
-                applyKMeans,
-                codeBookSize,
-                std::ref(blocks),
-                numThreadsForEachRun,
-                blockSize,
-                errorThreshold,
-                std::ref(centroidsToCmpMutex),
-                std::ref(centroidsToCompare),
-                &centroidsToCmpAvailable
-        );
+        t = thread(applyKMeans, codeBookSize, std::ref(blocks),
+                   numThreadsForEachRun, blockSize, errorThreshold,
+                   std::ref(centroidsToCmpMutex), std::ref(centroidsToCompare),
+                   &centroidsToCmpAvailable);
         t.detach();
         threadsLaunched++;
     }
@@ -156,29 +170,22 @@ int main(int argc, char* argv[]) {
         runsEndedCount++;
 
         if (threadsLaunched < numRuns) {
-            t = thread(
-                    applyKMeans,
-                    codeBookSize,
-                    std::ref(blocks),
-                    numThreadsForEachRun,
-                    blockSize,
-                    errorThreshold,
-                    std::ref(centroidsToCmpMutex),
-                    std::ref(centroidsToCompare),
-                    &centroidsToCmpAvailable
-            );
+            t = thread(applyKMeans, codeBookSize, std::ref(blocks),
+                       numThreadsForEachRun, blockSize, errorThreshold,
+                       std::ref(centroidsToCmpMutex),
+                       std::ref(centroidsToCompare), &centroidsToCmpAvailable);
             t.detach();
             threadsLaunched++;
         }
 
         centroidsToCmpMutex.lock();
         centroidsComparing = centroidsToCompare.front();
-        cout << "solution found with error " << centroidsComparing.error << endl;
+        cout << "solution found with error " << centroidsComparing.error
+             << endl;
         if (centroidsComparing.error < bestCentroids.error) {
             free(bestCentroids.data);
             bestCentroids = centroidsComparing;
-        }
-        else {
+        } else {
             free(centroidsComparing.data);
         }
         centroidsToCompare.pop();
@@ -192,17 +199,11 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-void applyKMeans(
-        int numCentroids,
-        vector<vector<short>>& blocks,
-        int threadsPerRun,
-        int blockSize,
-        float errorThreshold,
-        mutex& centroidsToCmpMutex,
-        queue<Centroids>& centroidsToCompare,
-        sem_t* centroidsToCmpAvailable
-) {
-
+void applyKMeans(int numCentroids, vector<vector<short>>& blocks,
+                 int threadsPerRun, int blockSize, float errorThreshold,
+                 mutex& centroidsToCmpMutex,
+                 queue<Centroids>& centroidsToCompare,
+                 sem_t* centroidsToCmpAvailable) {
     // initialize centroids
     vector<vector<short>>* centroids = new vector<vector<short>>();
     {
@@ -224,8 +225,9 @@ void applyKMeans(
         }
     }
 
-    int numBlocksPerThread = ceil(blocks.size() / (double) threadsPerRun);
-    vector<vector<vector<vector<short>*>>> closestBlocksPerCentroidPerThread(threadsPerRun);
+    int numBlocksPerThread = ceil(blocks.size() / (double)threadsPerRun);
+    vector<vector<vector<vector<short>*>>> closestBlocksPerCentroidPerThread(
+        threadsPerRun);
     for (int i = 0; i < threadsPerRun; i++) {
         for (int j = 0; j < numCentroids; j++) {
             closestBlocksPerCentroidPerThread[i].emplace_back();
@@ -237,8 +239,10 @@ void applyKMeans(
     do {
         lastError = currentError;
 
-        for (auto& closestBlocksPerCentroid : closestBlocksPerCentroidPerThread) {
-            for (vector<vector<short>*>& closestBlocksForCentroid : closestBlocksPerCentroid) {
+        for (auto& closestBlocksPerCentroid :
+             closestBlocksPerCentroidPerThread) {
+            for (vector<vector<short>*>& closestBlocksForCentroid :
+                 closestBlocksPerCentroid) {
                 closestBlocksForCentroid.clear();
             }
         }
@@ -250,39 +254,29 @@ void applyKMeans(
 
                 if (i == threadsPerRun - 1) {
                     end = blocks.size();
-                }
-                else {
+                } else {
                     end = begin + numBlocksPerThread;
                 }
 
-                threads[i] = thread(
-                        calculateClosestBlocks,
-                        begin,
-                        end,
-                        std::ref(blocks),
-                        centroids,
-                        numCentroids,
-                        std::ref(closestBlocksPerCentroidPerThread[i])
-                );
+                threads[i] =
+                    thread(calculateClosestBlocks, begin, end, std::ref(blocks),
+                           centroids, numCentroids,
+                           std::ref(closestBlocksPerCentroidPerThread[i]));
             }
 
             for (int i = 0; i < threadsPerRun; i++) {
                 threads[i].join();
             }
-        }
-        else { // if only one thread is used to classify the blocks, use the main thread
-            calculateClosestBlocks(
-                    0,
-                    blocks.size(),
-                    blocks,
-                    centroids,
-                    numCentroids,
-                    closestBlocksPerCentroidPerThread[0]);
+        } else {  // if only one thread is used to classify the blocks, use the
+                  // main thread
+            calculateClosestBlocks(0, blocks.size(), blocks, centroids,
+                                   numCentroids,
+                                   closestBlocksPerCentroidPerThread[0]);
         }
 
         // update centroids
         double sums_blocks[blockSize];
-        for(size_t i = 0; i < numCentroids; i++) {
+        for (size_t i = 0; i < numCentroids; i++) {
             // reset variables
             size_t closestBlocksCount = 0;
             for (size_t j = 0; j < blockSize; j++) {
@@ -291,10 +285,12 @@ void applyKMeans(
 
             // sum the blocks
             for (size_t threadIdx = 0; threadIdx < threadsPerRun; threadIdx++) {
-                for (vector<short>* block : closestBlocksPerCentroidPerThread[threadIdx][i]) {
+                for (vector<short>* block :
+                     closestBlocksPerCentroidPerThread[threadIdx][i]) {
                     closestBlocksCount++;
 
-                    for (size_t blockIdx = 0; blockIdx < blockSize; blockIdx++) {
+                    for (size_t blockIdx = 0; blockIdx < blockSize;
+                         blockIdx++) {
                         sums_blocks[blockIdx] += block->at(blockIdx);
                     }
                 }
@@ -305,10 +301,10 @@ void applyKMeans(
                 for (size_t idx = 0; idx < blockSize; idx++) {
                     centroids->at(i)[idx] = sums_blocks[idx];
                 }
-            }
-            else if (closestBlocksCount > 1) {
-                for(int idx=0; idx<blockSize;idx++){
-                    centroids->at(i)[idx] = sums_blocks[idx] / closestBlocksCount;
+            } else if (closestBlocksCount > 1) {
+                for (int idx = 0; idx < blockSize; idx++) {
+                    centroids->at(i)[idx] =
+                        sums_blocks[idx] / closestBlocksCount;
                 }
             }
         }
@@ -324,13 +320,9 @@ void applyKMeans(
 }
 
 void calculateClosestBlocks(
-        int blocksBeginIdx,
-        int blocksEndIdx,
-        vector<vector<short>>& blocks,
-        vector<vector<short>>* centroids,
-        int numCentroids,
-        vector<vector<vector<short>*>>& closestBlocksPerCentroid
-        ) {
+    int blocksBeginIdx, int blocksEndIdx, vector<vector<short>>& blocks,
+    vector<vector<short>>* centroids, int numCentroids,
+    vector<vector<vector<short>*>>& closestBlocksPerCentroid) {
     double smallestLocalError, error;
     size_t localCentroidIdx;
     for (int i = blocksBeginIdx; i < blocksEndIdx; i++) {
@@ -471,15 +463,16 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
         try {
             numThreadsForEachRun = stoi(argv[argc - 1]);
         } catch (...) {
-            cerr << "Error: numThreadsForEachRun must be a valid number" << endl;
+            cerr << "Error: numThreadsForEachRun must be a valid number"
+                 << endl;
             exit(1);
         }
         if (numThreadsForEachRun <= 0) {
-            cerr << "Error: numThreadsForEachRun must be larger than zero" << endl;
+            cerr << "Error: numThreadsForEachRun must be larger than zero"
+                 << endl;
             exit(1);
         }
-    }
-    else {
+    } else {
         numThreadsForRuns = numThreadsForEachRun = 1;
     }
 }

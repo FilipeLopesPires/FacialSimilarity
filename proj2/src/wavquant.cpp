@@ -23,6 +23,20 @@ int main(int argc, char* argv[]) {
     if (argc != 3 && argc != 5 && argc != 7) {
         cerr << "Usage: wavquant [-q <quantSize>] [-r <reductFactor>] "
                 "<inputFile> <outputFile>"
+             << endl
+             << "OPTIONS:" << endl
+             << "   quantSize - number of bits that should be used when "
+                "quantizing "
+                "the values, being 1 the minimun and 16 the maximum"
+             << endl
+             << "   reductFactor - number of times the sampling rate must be "
+                "reduced to, 1 means no reduction, 2 means reduced to half, ..."
+             << endl
+             << "ARGUMENTS:" << endl
+             << "   inputFile - path to the wav file that will be converted"
+             << endl
+             << "   outputFile - path to the file where the output should be "
+                "stored"
              << endl;
         return 1;
     }
@@ -86,9 +100,28 @@ void parseArguments(int argc, char* argv[]) {
     while ((c = getopt(argc, (char**)argv, "h:q:r:?")) != -1) {
         switch ((char)c) {
             case 'h':
-                cout << "Usage: wavquant [-q <quantSize>] [-r <reductFactor>] "
-                        "<inputFile> <outputFile>"
-                     << endl;
+                cerr
+                    << "Usage: wavquant [-q <quantSize>] [-r <reductFactor>] "
+                       "<inputFile> <outputFile>"
+                    << endl
+                    << "OPTIONS:" << endl
+                    << "   quantSize - number of bits that should be used when "
+                       "quantizing "
+                       "the values, being 1 the minimun and 16 the maximum"
+                    << endl
+                    << "   reductFactor - number of times the sampling rate "
+                       "must be "
+                       "reduced to, 1 means no reduction, 2 means reduced to "
+                       "half, ..."
+                    << endl
+                    << "ARGUMENTS:" << endl
+                    << "   inputFile - path to the wav file that will be "
+                       "converted"
+                    << endl
+                    << "   outputFile - path to the file where the output "
+                       "should be "
+                       "stored"
+                    << endl;
                 exit(0);
             case 'q':
                 QUANTSIZE = stoi(optarg);

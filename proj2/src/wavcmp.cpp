@@ -35,7 +35,14 @@ void loadFile(vector<short>& content, SndfileHandle& sndFile);
  */
 int main(int argc, const char** argv) {
     if (argc < 3) {
-        cout << "Usage: wavcmp <originFile> <noiseFile>" << endl;
+        cout << "Usage: wavcmp <inputFile1> <inputFile2>" << endl
+             << "ARGUMENTS:" << endl
+             << "   inputFile1 - path to the wav file that will serve as 1st "
+                "element of comparisson"
+             << endl
+             << "   inputFile2 - path to the wav file that will serve as 2nd "
+                "element of comparisson"
+             << endl;
         exit(1);
     }
 

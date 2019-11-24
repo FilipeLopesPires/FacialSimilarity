@@ -5,3 +5,6 @@ all:
 
 clean:
 	rm -rf build
+
+docs:
+	doxygen Doxyfile

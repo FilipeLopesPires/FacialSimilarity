@@ -4,12 +4,6 @@ cmake_minimum_required(VERSION 2.8)
 
 SET (CMAKE_CXX_STANDARD 17)
 
-add_executable (wavcp
-        src/wavcp.cpp
-        src/headers/io.h
-        src/io.cpp)
-target_link_libraries (wavcp sndfile)
-
 add_executable (wavhist
         src/wavhist.cpp
         src/headers/io.h
