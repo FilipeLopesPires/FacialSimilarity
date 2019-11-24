@@ -2,6 +2,8 @@
 #include <sndfile.hh>
 #include <vector>
 
+#include "headers/io.h"
+
 using namespace std;
 
 constexpr size_t FRAMES_BUFFER_SIZE =
@@ -14,20 +16,7 @@ int main(int argc, char *argv[]) {
     }
 
     SndfileHandle sndFileIn{argv[argc - 2]};
-    if (sndFileIn.error()) {
-        cerr << "Error: invalid inputFile" << endl;
-        return 1;
-    }
-
-    if ((sndFileIn.format() & SF_FORMAT_TYPEMASK) != SF_FORMAT_WAV) {
-        cerr << "Error: file is not in WAV format" << endl;
-        return 1;
-    }
-
-    if ((sndFileIn.format() & SF_FORMAT_SUBMASK) != SF_FORMAT_PCM_16) {
-        cerr << "Error: file is not in PCM_16 format" << endl;
-        return 1;
-    }
+    checkFileToRead(sndFileIn, argv[argc - 2]);
 
     cout << "Input file has:" << endl;
     cout << '\t' << sndFileIn.frames() << " frames" << endl;
@@ -36,20 +25,13 @@ int main(int argc, char *argv[]) {
 
     SndfileHandle sndFileOut{argv[argc - 1], SFM_WRITE, sndFileIn.format(), 1,
                              sndFileIn.samplerate()};
-    if (sndFileOut.error()) {
-        cerr << "Error: invalid outputFile" << endl;
-        return 1;
-    }
-
-    // size_t nFrames;
-    // vector<short> samples(FRAMES_BUFFER_SIZE * sndFileIn.channels());
-    // while ((nFrames = sndFileIn.readf(samples.data(), FRAMES_BUFFER_SIZE)))
-    //     sndFileOut.writef(samples.data(), nFrames);
+    checkFileOpenSuccess(sndFileOut, argv[argc - 1]);
 
     size_t nFrames;
     size_t n{};
     short tmpFreq{};
 
+    // read from in, write to out
     vector<short> samples(FRAMES_BUFFER_SIZE * sndFileIn.channels());
     vector<short> mySamples;
     while ((nFrames = sndFileIn.readf(samples.data(), FRAMES_BUFFER_SIZE))) {

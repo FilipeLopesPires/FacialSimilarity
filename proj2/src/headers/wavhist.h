@@ -2,6 +2,7 @@
 #define WAVHIST_H
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
 #include <sndfile.hh>
