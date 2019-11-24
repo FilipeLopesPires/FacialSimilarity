@@ -564,13 +564,14 @@ In this section we present some results of executing WAVFind for a few samples
 from the datasets, explaining the experiences done with variations to the 
 parameters passed to the command and their consequences.
 
-The first experience conducted regarded the effect of the overlapping factor on
-the accuracy of the results.
+The first experiment conducted regarded the effects of the overlapping factor 
+and of the blocks' size on the accuracy of the results.
 For this particular study, the use of the larger dataset did not bring any 
 advantages so we used only the samples from the initial dataset.
 The applied method focused on fixing all the parameters at meaningful values and
-varying the overlapping factor so that conclusions could be retrieved from the
-results of testing the identification capabilities of WAVFind.
+varying either the overlapping factor or the block size so that conclusions 
+could be retrieved from the results of testing the identification capabilities 
+of WAVFind.
 
 The way we tested the samples was through a shell script \texttt{evaluateCodebooks.sh}
 that randomly chooses one of the samples and also randomly chooses a small portion
@@ -581,8 +582,8 @@ It is up for the user to manually check whether the guesses were correct or not.
 
 The audio files were first preprocessed and converted to mono files with a 
 quantization of 8 bits and no reduction factor.
-The codebooks were built with blocks of size 800, an error threshold of 0.01 and
-with K-Means being run twice.
+The first codebooks were built with blocks of size 800, an error threshold of 
+0.01 and with K-Means being run twice.
 Five codebook folders were created, each containing the codebooks of all audio
 segments of the initial dataset, but created with different overlapping factors:
 0.00, 0.10, 0.25, 0.50 and 0.75. 
@@ -607,7 +608,65 @@ The results are presented in Table \ref{tab:overlapFactor}.
   \label{tab:overlapFactor}
 \end{table}
 
-Our second study was dedicated to find .................................. //
+The second group of codebooks were built with an overlapping factor of 0.1, an 
+error threshold of 0.01 and with K-Means being run twice.
+Five codebook folders were created, each containing the codebooks of all audio
+segments of the initial dataset, but created with different block sizes:
+50, 100, 400, 800, 1600. 
+\texttt{EvaluateCodebooks.sh} was once again executed 10 times for each codebook
+folder, and each execution ran 10 tests.
+The average values of the 10 executions were then calculated.
+The results are presented in Table \ref{tab:blockSize}.
+
+\begin{table}[H]
+  \begin{center}
+    \begin{tabular}{c|c}
+      \textbf{Block Size} & \textbf{Score}\\
+      \hline
+      50 & /10\\
+      100 & /10\\
+      400 & 6/10\\
+      800 & 9/10\\
+      1600 & 9/10\\
+    \end{tabular}
+  \end{center}
+  \caption{Test results on varying the blocks' sizes.}
+  \label{tab:blockSize}
+\end{table}
+
+Our second study was dedicated to finding the best number of centroids in relation
+to the total number of blocks for the best performance of WAVFind.
+Since testing several number of centroids every time we need to generate a
+codebook for an audio file is too computationally expensive, we ha to find a 
+different way of testing the variation of this aspect.
+To do this, we introduced an auxiliar parameter, which we called alpha, that is 
+present in the assignment of a value to the number of centroids 
+$numCentroids = alpha x len(block)$, where {\it len(blocks)\/} is the number of
+samples in a block.
+This implies that the longer the audio files are, the more centroids are needed
+on the K-Means algorithm for the music identification process.
+
+The audio files were first preprocessed and converted to mono files with a 
+quantization of 8 bits and no reduction factor.
+The generated codebooks (from the initial dataset) were built with blocks of 
+size 800, an overlapping factor of 0.3, an error threshold of 0.01 and with 
+K-Means being run twice.
+.................................
+
+\begin{table}[H]
+  \begin{center}
+    \begin{tabular}{c|c}
+      \textbf{Alpha} & \textbf{Score}\\
+      \hline
+      0.2 & 7/10\\
+      0.4 & 6/10\\
+      0.6 & 5/10\\
+      0.8 & 5/10\\
+    \end{tabular}
+  \end{center}
+  \caption{Test results on varying the number of centroids (through alpha).}
+  \label{tab:blockSize}
+\end{table}
 
 The last study was related to multithreading and the benefits of parallelism.
 The goal was to build codebooks for musics using different strategies and
@@ -632,25 +691,16 @@ of threads distributed with blocks for clustering.
       \textbf{Number of Additional Threads} & \textbf{Execution Time}\\
       \hline
       Main Thread Only & 40 min. 06 sec.\\
-      1, 4 & 29 min. 54 sec.\\
-      2, 2 & 27 min. 36 sec.\\
-      2, 1 & 31 min. 25 sec.\\
       1, 2 & 33 min. 03 sec.\\
+      1, 4 & 29 min. 54 sec.\\
+      2, 1 & 31 min. 25 sec.\\
+      2, 2 & 27 min. 36 sec.\\
+      2, 3 & 21 min. 22 sec.\\
     \end{tabular}
   \end{center}
   \caption{Test results on varying the number of threads during codebook construction.}
   \label{tab:multithreading}
 \end{table}
-
-The results are not so easy to interpret, as we must take in consideration that
-multithreading also depends on the number of available processing cores in the 
-hardware executing our code.
-However, it is possible to see that, on average, multithreading will be faster
-than using one thread only.
-This is not linear, i.e. more threads does not necessarily mean more speed, but
-there is a clear decrease in execution time from the first alternative to the 
-remaining.
-...............
 
 \subsection*{3.3. Results Discussion}
 
@@ -658,21 +708,76 @@ In this section we analyse the results of the previous studies done on the
 developed programs and reach some conclusions regarding the optimal parameters.
 
 From the results of the first study, we were able to conclude that introducing 
-an overlapping between blocks does indeed benefit the program's accuracy.
-On the other hand, a high value does not always mean a better result.
+an overlapping between blocks does benefit the program's accuracy.
+However, a high value does not always mean a better result.
 Taking in consideration the increase in execution time with higher overlapping 
-factors, we concluded that 0.25 was a good balance between effectiveness and speed. \\
+factors, we concluded that 0.25 was a good balance between effectiveness and speed.
+
+As for the block size, ................\\
+
+Our second study gives us a good estimation of the ideal percentage of centroids
+in relation to the number of blocks of the audio file given as input to WAVFind.
+But one needs to take a close look at the results to understand them ........... \\
+
+The results on multithreading are not so easy to interpret, as we must take in 
+consideration that the performance also depends on the number of available 
+processing cores in the hardware executing our code, i.e. computers with less
+available cores than the number of threads given will not benefit from them as much.
+However, it is possible to see that, on average, multithreading will be faster
+than using one thread only.
+This is not linear, i.e. more threads does not necessarily mean more speed, but
+there is a clear decrease in execution time from the first alternative to the 
+remaining.
+
+In addition, the results seem to suggest that the external threads (where we 
+assign one thread per K-Means run) seem to be more effective than the internal
+threads (where we distribute the blocks amongst threads for clustering).
+It is supposed to be like so, as the internal threads only improve block 
+classification, but the centroids remain updated sequentially.
+
+Another conclusion we believe to be true and is verified by the results is that
+the best alternative is to combine both forms of multithreading in order to get
+the advantages of both. \\
+
+We'd like to mention that all of the studies were conducted simultaneously,
+distributing the tasks amongst our group.
+This means that, for each study, the values for the parameters kept static were
+chosen according to personal estimations, with the group consensus and within
+reasonable boundaries.
+Also, since they were not made sequentially, the combination of the best values
+of all studies does not necessarily mean that we achieve the best combination for
+the most accurate program; rather, the studies only deliver us good guidelines
+in case we desired to actually deploy the program.
 
 \newpage
 \section*{Conclusions}
 
 After completing the assignment, we drew a few conclusions regarding our 
 solutions and the applicability of algorithms such as the K-Means to solving
-problems such as music identification.
+problems like music identification.
 
-First of all, ...
+First of all, the existance of initial code with a few features already 
+implemented was very helpful during the initial stages of development, as they 
+served as the basis of our manipulations of the audio files.
 
-Regarding our satisfaction with the delivered code,...
+Also, it was very rewarding to develop our own K-Means implementation, without 
+the use of external Python libraries. 
+Not only did this made its manipulation and control easier, but it also made us 
+understand far better the way it actually works.
+
+The introduction of multithreading in our solutions was very interesting as well,
+as it was the first time we were able to compare two forms of distributing work
+amongst threads and see their individual and joint effects on the solution's 
+performance.
+
+Regarding our satisfaction with the delivered code, we considered fairly well 
+structured, although this time the code was not based on object-oriented classes
+as it was purely scripting programming.
+For the final versions, each script does what it is supposed to with great 
+flexibility and ease of use.
+The overall performance of the final program WAVFind is very positive for both
+datasets, rounding the 90\% of accuracy with the parameters chosen with 
+consideration to the results collected from our studies.
 
 In terms of code organization and readability, we made sure our 
 repository was as well structured as possible and our code properly commented
