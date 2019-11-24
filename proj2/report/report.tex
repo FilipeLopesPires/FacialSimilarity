@@ -88,8 +88,8 @@ ideal.
 
 One of the tasks proposed was to create a script that converts stereo audio 
 files into mono.
-This was fairly straightforward to do, as it only required for us to read the v
-alues from all signal channels and calculate the average of each.
+This was fairly straightforward to do, as it only required for us to read the values 
+from all signal channels and calculate the average of each.
 The script is executed in the format presented below, once built:
 
 \begingroup
@@ -101,7 +101,7 @@ $ ./wavquant [-q quantSize] [-r reductFactor] inputFile outputFile
 \end{quote}
 \endgroup
 
-This script, \texttt{wavquant.cpp}, is also used for other purposes, in which 
+This script, \texttt{wavquant}, is also used for other purposes, in which 
 the \texttt{quantSize} and \texttt{reductFactor} parameters are useful.
 For this reason, we made the parameters optional, so that a user can run 
 \texttt{wavquant} to simply convert stereo files into mono, with a default 
@@ -111,12 +111,12 @@ This script is mentioned further ahead in greater detail.
 
 \subsection*{1.3. Histograms}
 
-We were also given a script \texttt{wavhist.cpp} that outputted to the terminal 
+We were also given a script \texttt{wavhist} that outputted to the terminal 
 the histogram of an audio file.
 We adapted it so that it accepts both stereo and mono audio files and plots in 
 a figure the histogram of one of the audio channels with the help of 
 \texttt{gnuplot} \cite{gnuplot}, a portable command-line driven graphing utility. 
-The resulting WAVHist script has the following command interface:
+The resulting \texttt{wavhist} script has the following command interface:
 
 \begingroup
 \addtolength\leftmargini{-0.4in}
@@ -165,8 +165,7 @@ value in the x axis has one and only one y value -, so for this gap to occur
 close frequencies must have very different counts. 
 When converting to mono, it is natural that this gap disappear, since it is 
 necessary to take both sample channels and obtain their average.
-If for one channel the value is in the top curve and for the other it's on the 
-bottom curve, their average will be placed in the middle.
+If for one channel the value is a common frequency (top curve) and for the other it's a not so common frequency (bottom curve) several times, their average will be placed in the middle.
 If this happens enough times, the gap is closed with the average values. 
 
 \newpage
@@ -224,8 +223,7 @@ present in the original signal.
 
 Theoretically speaking, it is possible to encounter $2^{b}$ values/levels, being 
 {\it b\/} the number of bits used to quantize the signal.
-However, in reality this number is not always observed since the original signal 
-can have values that generate every level. 
+However, in reality this number is not always observed since the original signal may not have values that generate every level. 
 
 In relation to the Figures \ref{fig:8_2} and \ref{fig:8_4}, which represent the 
 reduction sampling rate factor behavior over a mono signal, quantized with 8 bits 
@@ -236,7 +234,7 @@ which aggregates as many samples the user indicated, i.e. if the user gave 4 as
 the reduction factor the algorithm will then aggregate every 4 samples, creating 
 a 4:1 ratio and decreasing the sampling rate to 25\% of the original. 
 This in turn will imply that the number of frequency count values will decrease,
-since there are less values but also due to the aggregation: if there are very 
+because there are less values and also due to the aggregation: if there are very 
 common frequencies, those occurrences end up distributed between other frequencies. \\
 
 The C++ scripts mentioned in this chapter all use \texttt{libsndfile}, a C 
@@ -249,7 +247,7 @@ audio files for more complex tasks.
 
 Once we were capable of visualizing the data, we proceeded to actually doing 
 something useful with it.
-In this chapter we explain the implementation of the program \texttt{wavquant.cpp},
+In this chapter we explain the implementation of the program \texttt{wavquant},
 responsible for reducing the number of bits used to represent each audio sample.
 The implementation of the formulas presented on the assignment's description for
 the signal-to-noise ratio and the energies of the signals and noises is described
@@ -266,7 +264,7 @@ but we make available a figure taken from a presentation from the Stanford
 University \cite{stanford} that helps visualizing the outcome of applying the 
 USQ to a signal.
 Figure \ref{fig:quantization} contains a signal presented in blue and the outcome
-of the signal after it is quantized is presented in red. 
+of the signal after it is quantized in red. 
 The figure also contains the quantization error variation on
 the second plot.
 
@@ -280,15 +278,15 @@ the second plot.
   \label{fig:quantization}
 \end{figure}
 
-It is \texttt{wavquant.cpp} that is responsible for this process.
+It is \texttt{wavquant} that is responsible for this process.
 As we have seen in Section 1.2, the script accepts two optional parameters:
-\texttt{quantSize} defines the number of bits to be used to represent the audio 
+\texttt{quantSize} defines the number of bits to be used to represent each sample of the audio 
 fragment given as input (ideally, this value should be less than of the original 
 source); \texttt{reductFactor} defines the number of times the user would like 
-to reduce the total number of values of the audio signal.
+to reduce the total number of samples of the audio signal.
 This reduction factor works by calculating the average between \texttt{n} values, 
 where \texttt{n = reductFactor}, and doing this for all values from the segment.
-The result is a signal with \texttt{n} times less values (samples).
+The result is a signal with \texttt{n} times less samples.
 
 \newpage
 \subsection*{2.2. Error Calculation}
@@ -298,7 +296,7 @@ noise power.
 Higher numbers generally mean a better specification, since there is more useful 
 information (the signal) than there is unwanted data (the noise).
 
-In \texttt{wavcb.cpp} we calculate this ratio, along with the maximum absolute 
+In \texttt{wavcmp} we calculate this ratio, along with the maximum absolute 
 error per sample. The SNR is defined as stated in equation \ref{eq:1}, taken 
 from the assignment's description.
 
@@ -317,7 +315,7 @@ energy equation.
   max(error) = max(|x_k-\bar{x}_k|)
 \end{equation}
 
-In practice, the error of a quantization tells us how distant from the original
+Similarly, when quantizing a song, the error of a quantization (calculated following the previously presented formulas) tells us how distant from the original
 signal is the quantized one.
 Figure \ref{fig:quantization} shows an example of how this error looks like.
 
@@ -337,7 +335,7 @@ consequently between segments). These codebooks are explained in this next secti
 Each music from the datasets is represented as a sequence of samples, where each 
 sample is a singular frequency (if the file is in mono) or the pair of frequencies 
 (one per channel, if the file is in stereo) that was registered in that exact second.
-What a codebook is is basically an abstract representation of the overall 
+Basically, a codebook is an abstract representation of the overall 
 sequence of samples.
 
 In the context of our project, we integrated the concept of clusters to represent 
@@ -394,7 +392,7 @@ the middle point of the points assigned to that specific centroid - this is
 repeated as many times as necessary for the error delta, i.e. the error between 
 each iteration, to be lower than a given threshold specified by the user. 
 
-The script \texttt{wavcb.cpp} is the implementation of this algorithm.
+The script \texttt{wavcb} is the implementation of this algorithm.
 It enables the creation of a codebook for a given music by following the format 
 below:
 
@@ -403,7 +401,7 @@ below:
 \begin{quote}
 \begin{verbatim}
 $ ./wavcb inputFile blockSize overlapFactor errorThreshold
-  numRuns outputFile
+  numRuns outputFile [threadsForRuns threadsPerRun]
 \end{verbatim}
 \end{quote}
 \endgroup
@@ -414,8 +412,6 @@ in which the audio file is split.
 {\it OverlapFactor\/} corresponds to the factor (a value between 0 and 1) that 
 each block will be overlapped with the previous block; the bigger the overlapping
 percentage is, the better the music is represented in the multidimensional space.
-{\it CodebookDir\/} is the path to the directory containing the 
-preprocessed codebooks of the music dataset.
 {\it ErrorThreshold\/} is the maximum error that is allowed to exist in the last 
 iteration; below this threshold, the centroids are no longer being adjusted in a 
 worthwhile manner.
@@ -423,6 +419,7 @@ worthwhile manner.
 the best local minimum; each run is initialized with the centroids in different 
 positions.
 At last, {\it outputFile\/} is the path to the file were the codebook will be stored. \\
+Optionally there is the option of inserting parallelism control, defining the number of threads used to run the algorithm runs with  {\it ThreadsForRuns\/} and the number of threads used inside each run with {\it ThreadsPerRun\/}.\\
 
 Although quite flexible, K-Means has some disadvantages.
 The most significant to our needs are the fact that it is necessary to insert the 
@@ -439,7 +436,7 @@ As it is stated above, the number of times it is executed is defined by {\it num
 \newpage
 \subsection*{2.4. Codebook Parallel Processing}
 
-As audio files get longer, the number of frames per file increases and 
+As audio files get longer, the number of samples per file increases and 
 consequently so does the number of blocks that will be extracted from them.
 Furthermore there is the overlapping factor detail, which increases even more 
 the total number of blocks.
@@ -459,19 +456,18 @@ data structures and then the main thread is in charge of reading from those to
 recalculate the centroids.
 
 As mentioned in the previous section, we deal with one of the K-Means algorithm's
-disadvantages by testing it several times with different centroid initializations.
+disadvantages by running the algorithm several times with different centroid initializations.
 It is needless to say that this also slows down the algorithm.
 To ease this, each K-Means run can be assigned to a thread, allowing to execute 
 several runs at the same time.
 In terms of implementation it implies some synchronization mechanisms, so the 
 main thread knows when a run was completed and to manipulate the structure to 
 store the centroids plus the associated error calculated on each run.
-
 Figure \ref{fig:threading} is a visual representation of the execution flow of 
 generating a codebook. 
 The two independent time axis correspond to executing without additional threads 
 and with 2 threads in each parallelization point.
-Note that this is not an exact time representation and is ment only to illustrate
+Note that this is not an exact time representation and is meant only to illustrate
 the advantage of multithreading. 
 
 \begin{figure}[H]
@@ -487,16 +483,14 @@ the advantage of multithreading.
 \newpage
 \section*{3. Automatic Music Identification}
 
-The program \texttt{wavfind.cpp} is the application of the previous scripts on a 
-program with a specific purpose.
-WAVFind is meant to interpret a mono audio sample and attempt to identify which music 
+\texttt{wavfind} is meant to interpret a mono audio sample and attempt to identify which music 
 from a database it belongs to.
 In this chapter we discuss our solution, the consequences of varying the 
 parameters passed to it and the quality of the results.
 
 \subsection*{3.1. Most Probable Music}
 
-The idea of WAVFind is very similar to the well known mobile app Shazam 
+The idea of \texttt{wavfind} is very similar to the well known mobile app Shazam 
 \cite{shazam} - a user plays a sound, the app listens to it, processes it and
 determines the most probable music that sound belongs to.
 Shazam has a large infrastructure, counting on online real-time music detection,
@@ -522,7 +516,7 @@ All arguments are mandatory and most of them we have seen on previous commands.
 {\it InputFile\/} is the path to the .wav audio whose origin music is to be identified.
 {\it BlockSize\/} is the value used as the size of the blocks in which the audio 
 segment is split; this value must be the same size used when the codebooks of 
-the music dataset were built.
+the music dataset were built to obtain a better accuracy.
 {\it OverlapFactor\/} corresponds to the factor (a value between 0 and 1) that 
 each block will be overlapped with the previous block.
 At last, {\it codebookDir\/} is the path to the directory containing the 
@@ -544,6 +538,7 @@ we compare its cumulative error to the previous one and keep the smallest.
 The identified codebook's is finally printed onto the console (as its name is 
 supposed to identify the music it belongs to).
 
+\newpage
 Now, for the program to work properly, there are a few prerequisites.
 First of all, the program must have access to the codebook dataset.
 The process of creating codebooks is neither trivial nor short-lasting, so to 
@@ -558,9 +553,11 @@ consider characteristics related to stereo files in the music identification
 process could lead to deceiving the program as the recording could fail in 
 distributing the collected information to the proper channels.
 
-\subsection*{3.2. Parameters Variation}
 
-In this section we present some results of executing WAVFind for a few samples
+\section*{4. Parameter Studies and Results Discussion}
+\subsection*{4.1. Parameters Variation}
+
+In this section we present some results of executing \texttt{wavfind} and \texttt{wavcb} for a few samples
 from the datasets, explaining the experiences done with variations to the 
 parameters passed to the command and their consequences.
 
@@ -571,12 +568,12 @@ advantages so we used only the samples from the initial dataset.
 The applied method focused on fixing all the parameters at meaningful values and
 varying either the overlapping factor or the block size so that conclusions 
 could be retrieved from the results of testing the identification capabilities 
-of WAVFind.
+of \texttt{wavfind}.
 
 The way we tested the samples was through a shell script \texttt{evaluateCodebooks.sh}
 that randomly chooses one of the samples and also randomly chooses a small portion
-of that file and then executes \texttt{wavfind.cpp} for that portion and returns
-the correct answer along side with WAVFind's guess (it repeats this process as 
+of that file and then executes \texttt{wavfind} for that portion and returns
+the correct answer along side with \texttt{wavfind}'s guess (it repeats this process as 
 many times the user wishes). 
 It is up for the user to manually check whether the guesses were correct or not.
 
@@ -587,7 +584,7 @@ The first codebooks were built with blocks of size 800, an error threshold of
 Five codebook folders were created, each containing the codebooks of all audio
 segments of the initial dataset, but created with different overlapping factors:
 0.00, 0.10, 0.25, 0.50 and 0.75. 
-\texttt{EvaluateCodebooks.sh} was executed 10 times for each codebook folder,
+\texttt{evaluateCodebooks.sh} was executed 10 times for each codebook folder,
 and each execution ran 10 tests.
 The average values of the 10 executions were then calculated.
 The results are presented in Table \ref{tab:overlapFactor}.
@@ -613,7 +610,7 @@ error threshold of 0.01 and with K-Means being run twice.
 Five codebook folders were created, each containing the codebooks of all audio
 segments of the initial dataset, but created with different block sizes:
 50, 100, 400, 800, 1600. 
-\texttt{EvaluateCodebooks.sh} was once again executed 10 times for each codebook
+\texttt{evaluateCodebooks.sh} was once again executed 10 times for each codebook
 folder, and each execution ran 10 tests.
 The average values of the 10 executions were then calculated.
 The results are presented in Table \ref{tab:blockSize}.
@@ -623,8 +620,8 @@ The results are presented in Table \ref{tab:blockSize}.
     \begin{tabular}{c|c}
       \textbf{Block Size} & \textbf{Score}\\
       \hline
-      50 & /10\\
-      100 & /10\\
+      50 & 5/10\\
+      100 & 6/10\\
       400 & 6/10\\
       800 & 9/10\\
       1600 & 9/10\\
@@ -635,7 +632,7 @@ The results are presented in Table \ref{tab:blockSize}.
 \end{table}
 
 Our second study was dedicated to finding the best number of centroids in relation
-to the total number of blocks for the best performance of WAVFind.
+to the total number of blocks for the best performance of \texttt{wavfind}.
 Since the definition of the number of centroids is directly related to the number
 of blocks and is not a parameter chosen by the user executing our commands,
 we had to find another way of testing the variation of this aspect.
@@ -653,7 +650,7 @@ factor of 0.3, an error threshold of 0.01 and with K-Means being run twice.
 Four codebook folders were created, each containing the codebooks of all audio
 segments of the initial dataset, but created with different alpha values:
 50, 100, 400, 800, 1600.
-\texttt{EvaluateCodebooks.sh} was used one more time, this time executed only 
+\texttt{evaluateCodebooks.sh} was used one more time, this time executed only 
 once but running 100 tests (in practice, this worked the same way, as in the end 
 we rounded the results to the same scale).
 The results are presented in Table \ref{tab:numcentroids}.
@@ -680,7 +677,7 @@ It is important to state that, due to the shortage of time for conducting this
 test for all available musics, we focused on one music from the larger dataset.
 The chosen music was {\it Don't Worry Be Happy\/}, by Bob Marley, with a disk 
 space usage of 51.1MB, converted to mono, quantized with 8 bits with a reduction 
-factor of 5.
+factor of 4.
 The remaining parameters were once again kept at fixed values, with the blocks'
 size equal to 800, the overlapping factor at 0.1, an error threshold of 0.01 and
 the K-Means algorithm executed twice.
@@ -707,7 +704,7 @@ of threads distributed with blocks for clustering.
   \label{tab:multithreading}
 \end{table}
 
-\subsection*{3.3. Results Discussion}
+\subsection*{4.2. Results Discussion}
 
 In this section we analyse the results of the previous studies done on the 
 developed programs and reach some conclusions regarding the optimal parameters.
@@ -728,7 +725,7 @@ Above this value, the gains in performance were not relevant enough for the
 increase in execution time. \\
 
 Our second study gives us a good estimation of the ideal percentage of centroids
-in relation to the number of blocks of the audio file given as input to WAVFind.
+in relation to the number of blocks of the audio file given as input to \texttt{wavfind}.
 But one needs to take a close look at the results to understand them ........... \\
 
 The results on multithreading are not so easy to interpret, as we must take in 
@@ -737,15 +734,14 @@ processing cores in the hardware executing our code, i.e. computers with less
 available cores than the number of threads given will not benefit from them as much.
 However, it is possible to see that, on average, multithreading will be faster
 than using one thread only.
-This is not linear, i.e. more threads does not necessarily mean more speed, but
-there is a clear decrease in execution time from the first alternative to the 
-remaining.
+This is not linear, since the centroid update still need to be calculated sequentially and without the help of parallelization, but
+there is a clear execution time difference between the non-parallel alternative and the rest.
 
 In addition, the results seem to suggest that the external threads (where we 
 assign one thread per K-Means run) seem to be more effective than the internal
 threads (where we distribute the blocks amongst threads for clustering).
 It is supposed to be like so, as the internal threads only improve block 
-classification, but the centroids remain updated sequentially.
+classification, but the centroids still need to be updated sequentially.
 
 Another conclusion we believe to be true and is verified by the results is that
 the best alternative is to combine both forms of multithreading in order to get
@@ -787,7 +783,7 @@ structured, although this time the code was not based on object-oriented classes
 as it was purely scripting programming.
 For the final versions, each script does what it is supposed to with great 
 flexibility and ease of use.
-The overall performance of the final program WAVFind is very positive for both
+The overall performance of the final program \texttt{wavfind} is very positive for both
 datasets, rounding the 90\% of accuracy with the parameters chosen with 
 consideration to the results collected from our studies.
 
@@ -796,10 +792,7 @@ repository was as well structured as possible and our code properly commented
 and documented.
 The base folder contains a {\it README\/} file for basic instructions and a 
 {\it Makefile\/} to make the compilation process easier.
-All code is in the {\it src\/} folder and its documentation is accessible, 
-with the help of the {\it Makefile\/} and the command "make docs", through
-the automatically generated {\it index.html\/} file in the {\it docs\/} 
-directory.
+All code is in the {\it src\/} folder.
 
 \newpage
 \begin{thebibliography}{9}
