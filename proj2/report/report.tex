@@ -114,15 +114,13 @@ This script is mentioned further ahead in greater detail.
 We were also given a script called \texttt{wavhist.cpp} that outputted to the 
 terminal the histogram of an audio file.
 We adapted this script so that it accepts both stereo and mono audio files 
-and plots in a figure the histogram of one of the audio channels.
-The script uses \texttt{gnuplot} \cite{gnuplot}, a portable command-line driven 
-graphing utility, and has the following format:
+and plots in a figure the histogram of one of the audio channels with the help of \texttt{gnuplot} \cite{gnuplot}, a portable command-line driven graphing utility. The resulting WAVHist script has the following interface:
 
 \begingroup
 \addtolength\leftmargini{-0.4in}
 \begin{quote}
 \begin{verbatim}
-$ ./wavhist inputFile channel
+$ ./wavhist <inputFile> <channel>
 \end{verbatim}
 \end{quote}
 \endgroup
@@ -143,7 +141,7 @@ occurences in the music of each frequency.
     \centering
     \includegraphics[width=\linewidth]{sample01_stereo_1.png}
   \end{minipage}
-  \caption{Histogram of music\_name in the original format - channels 0 and 1.}
+  \caption{Histogram of sample01 in the original format - channels 0 and 1.}
   \label{fig:histogram_stereo}
   
   \centering
@@ -151,15 +149,48 @@ occurences in the music of each frequency.
     \centering
     \includegraphics[width=\linewidth]{sample01_16_1.png}
   \end{minipage}%
-  \caption{{Histogram of music\_name after its conversion to mono (1 channel only).}}
+  \caption{{Histogram of sample01 after its conversion to mono (1 channel only).}}
   \label{fig:histogram_mono}
 \end{figure}
 
-............
+It's clearly visible that the mono conversion affected the way the music file was represented maintaining the fidelity to the original song. Analyzing Figures \ref{fig:histogram_stereo} and \ref{fig:histogram_mono} the first first thing we see is the disappearance of the gap represented in both channels of the stereo signal. In the first place, the gap exists because the song has that frequency registry, to note that each value in the x axis as one and only one y value, so to obtain this gap close frequencies have very different counts. When converting to mono is natural that this gap disappear, since to obtain a mono signal from a stereo one, it's necessary to take both left and right sample and obtain the average, obtaining then just ine value where there were two.
 
-Mention something about why do the shapes are as they are and why is mono so different
+Another interesting occurrence observed from the Figures \ref{fig:histogram_stereo} and \ref{fig:histogram_mono} is that in the mono signal, the number of occurrences decrease a little bit. This once again is explained by the mono conversion process, since each two samples will be aggregated in only one, all the frequencies that occur very frequently have a high probability of being pared with another frequency, spreading the frequency counts in a more controlled fashion.
 
-............
+\begin{figure}[H]
+  \begin{minipage}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{sample01_8_1.png}
+    \caption{{8 bits, no reduction}}
+    \label{fig:8_no}
+  \end{minipage}
+  \begin{minipage}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{sample01_1_1.png}
+    \caption{{1 bit, no reduction}}
+    \label{fig:1_no}
+  \end{minipage}
+\end{figure}
+\begin{figure}[H]
+  \begin{minipage}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{sample01_8_2.png}
+    \caption{{8 bits, 2 reduction}}
+    \label{fig:8_2}
+  \end{minipage}
+  \begin{minipage}{.5\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{sample01_8_4.png}
+    \caption{{8 bits, 4 reduction}}
+    \label{fig:8_4}
+  \end{minipage}
+\end{figure}
+
+Figures \ref{fig:8_no}, \ref{fig:1_no}, \ref{fig:8_2} and \ref{fig:8_4} depict two different studies, the first two a quantization bit size study and the last two a reduction of the sampling rate study. Figure \ref{fig:8_no} and \ref{fig:1_no} represent the histograms of the music \texttt{sample01} quantized with 8 and 1 bits, respectively and without reduction of the sampling rate. 
+
+A clear takeaway from the figure is that the Figure \ref{fig:8_no} has a lot more frequencies than the Figure \ref{fig:1_no}, which has only two values and the frequency count values in the Figure \ref{fig:1_no} are considerably higher. This behavior is expected since when quantizing a signal we intend to decrease the number of bits necessary to represent each value, discarding the less significant values; for that reason it's expected that when using 1 bit to quantize the signal, there should be 2 resulting values, one in the case the most significant bit is 1 and another if the bit is 0, and between them they should contain all the samples present in the original signal. Theoretically it's possible to encounter $2^{X}$ values/levels, being \texttt{X} the number of bits used to quantize the signal, but in reality this number is not always observed since to original signal can have values that generate every level.
+
+In relation to the Figures \ref{fig:8_2} and \ref{fig:8_4} which represent the reduction sampling rate factor behavior over a mono signal, quantized with 8 bits of the \texttt{sample01} music, it's visible that the higher the reduction the lower the count values become. This directly related to the sampling reduction algorithm implementation, which aggregates as many samples the user indicated, i.e., if the user gave 4 as the reduction factor, the algorithm will then aggregate every 4 samples, creating a 4:1 ratio and decreasing the sampling rate 25\%. This in turn will obviously imply that the number of frequency count values to decrease since there are less values and also due to the aggregation, if there are frequencies very common, those occurrences end up distributed between other frequencies because they were aggregated.   
 
 The C++ scripts mentioned in this chapter all use \texttt{libsndfile}, a C 
 library used for reading and writing files containing sampled sound \cite{libsndfile}.
@@ -392,6 +423,13 @@ In this section we present some results of executing WAVFind for all datasets.
 We also explain some experiences done with variations to the parameters passed
 to the command and the respective consequences.
 
+...
+BobMarleySong(51,1MB) --- Quantized: 8 bits; 4 reduct factor\\
+NoThreads: 40 minutes 6 seconds\\
+1\_4: 29 minutes 54 seconds\\
+2\_2: 27 minutes 36 seconds\\
+2\_1: 31 minutes 25 seconds\\
+1\_2: 33 minutes 3 seconds\\
 ...
 
 \subsection*{3.3. Results Discussion}
