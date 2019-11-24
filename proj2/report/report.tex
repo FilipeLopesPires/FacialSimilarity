@@ -598,7 +598,7 @@ The results are presented in Table \ref{tab:overlapFactor}.
       0.10 & 8/10\\
       0.25 & 9/10\\
       0.50 & 9/10\\
-      0.75 & 9/10\\
+      0.75 & 10/10\\
     \end{tabular}
   \end{center}
   \caption{Test results on varying the overlapping factor between blocks.}
@@ -620,8 +620,8 @@ The results are presented in Table \ref{tab:blockSize}.
     \begin{tabular}{c|c}
       \textbf{Block Size} & \textbf{Score}\\
       \hline
-      50 & 5/10\\
-      100 & 6/10\\
+      50 & 3/10\\
+      100 & 5/10\\
       400 & 6/10\\
       800 & 9/10\\
       1600 & 9/10\\
@@ -649,8 +649,8 @@ The generated codebooks were built with blocks of size 800, an overlapping
 factor of 0.3, an error threshold of 0.01 and with K-Means being run twice.
 Four codebook folders were created, each containing the codebooks of all audio
 segments of the initial dataset, but created with different alpha values:
-50, 100, 400, 800, 1600.
-\texttt{evaluateCodebooks.sh} was used one more time, this time executed only 
+0.2, 0.4, 0.6, 0.8.
+\texttt{EvaluateCodebooks.sh} was used one more time, this time executed only 
 once but running 100 tests (in practice, this worked the same way, as in the end 
 we rounded the results to the same scale).
 The results are presented in Table \ref{tab:numcentroids}.
@@ -709,11 +709,13 @@ of threads distributed with blocks for clustering.
 In this section we analyse the results of the previous studies done on the 
 developed programs and reach some conclusions regarding the optimal parameters.
 
-From the results of the first study, we were able to conclude that introducing 
-an overlapping between blocks does benefit the program's accuracy.
+From the results of the first study, we concluded that introducing an overlapping 
+between blocks does benefit the program's accuracy.
 However, a high value does not always mean a better result.
-Taking in consideration the increase in execution time with higher overlapping 
-factors, we concluded that 0.25 was a good balance between effectiveness and speed. \\
+Considering the increase in execution time with higher overlapping factors, we 
+saw that 0.25 was a good balance between effectiveness and speed.
+Although 0.75 had a 10/10 score, it took too long to return the results so we 
+considered it not advisable for usability reasons.\\
 
 As for the block size, we understood that blocks too small makes it harder to 
 define well delimited clusters (as there are less dimensions to characterize the
@@ -724,12 +726,27 @@ between these two perspectives, which was a value around 800.
 Above this value, the gains in performance were not relevant enough for the 
 increase in execution time. \\
 
-Our second study gives us a good estimation of the ideal percentage of centroids
-in relation to the number of blocks of the audio file given as input to \texttt{wavfind}.
-But one needs to take a close look at the results to understand them ........... \\
+Our second study was the toughest of them all.
+What we intended from it was to achieve a good estimation of the ideal percentage
+of centroids in relation to the number of blocks of the audio files.
+However, we found a contradiction on the results we were not entirely able to 
+comprehend.
+One possible explanation for the reduction in accuracy with higher alpha values
+is the existence of the overfitting phenomenon. 
+However, in this particular case, overfitting should not be an issue.
+Although not presented on the results table, we saw that codebooks with more
+centroids classify better the musics (in terms of errors), as the errors decrease
+as the number of centroids is increased.
+But this is not what we see in the results.
+Due to the lack of time to increase the depth of this study, we could only 
+conclude that the results suggest that the number of centroids must be a lot 
+smaller than the number of blocks. 
+For future work, we found the need to test the program and the datasets for 
+different alpha values and carefully analyse the results again in order to 
+reach more solid conclusions regarding the variation of the number of centroids. \\
 
-The results on multithreading are not so easy to interpret, as we must take in 
-consideration that the performance also depends on the number of available 
+The results on multithreading were a bit difficult to interpret, as we must take 
+in consideration that the performance also depends on the number of available 
 processing cores in the hardware executing our code, i.e. computers with less
 available cores than the number of threads given will not benefit from them as much.
 However, it is possible to see that, on average, multithreading will be faster
@@ -745,8 +762,9 @@ classification, but the centroids still need to be updated sequentially.
 
 Another conclusion we believe to be true and is verified by the results is that
 the best alternative is to combine both forms of multithreading in order to get
-the advantages of both. \\
+the advantages of both.
 
+\newpage
 We'd like to mention that all of the studies were conducted simultaneously,
 distributing the tasks amongst our group.
 This means that, for each study, the values for the parameters kept static were
@@ -757,7 +775,6 @@ of all studies does not necessarily mean that we achieve the best combination fo
 the most accurate program; rather, the studies only deliver us good guidelines
 in case we desired to actually deploy the program.
 
-\newpage
 \section*{Conclusions}
 
 After completing the assignment, we drew a few conclusions regarding our 
