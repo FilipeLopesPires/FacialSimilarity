@@ -11,7 +11,14 @@ constexpr size_t FRAMES_BUFFER_SIZE = 65536;  // Buffer for reading frames
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
-        cerr << "Usage: wavhist <inputFile> <channel>" << endl;
+        cerr << "Usage: wavhist <inputFile> <channel>" << endl
+             << "ARGUMENTS:" << endl
+             << "   inputFile - path to the wav file that will serve as base "
+                "for the histogram"
+             << endl
+             << "   channel - the channel that will be represented, 0/1 to "
+                "stereo or 0 to mono"
+             << endl;
         return 1;
     }
 
@@ -36,6 +43,7 @@ int main(int argc, char *argv[]) {
     hist.fwrite(channel, "histogram.txt");
     //; set yrange [0:45000];replot;
     system("gnuplot -p -e \"plot 'histogram.txt'\"");
+    system("rm histogram.txt");
 
     return 0;
 }

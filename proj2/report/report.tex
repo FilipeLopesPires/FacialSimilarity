@@ -636,22 +636,27 @@ The results are presented in Table \ref{tab:blockSize}.
 
 Our second study was dedicated to finding the best number of centroids in relation
 to the total number of blocks for the best performance of WAVFind.
-Since testing several number of centroids every time we need to generate a
-codebook for an audio file is too computationally expensive, we ha to find a 
-different way of testing the variation of this aspect.
+Since the definition of the number of centroids is directly related to the number
+of blocks and is not a parameter chosen by the user executing our commands,
+we had to find another way of testing the variation of this aspect.
+
 To do this, we introduced an auxiliar parameter, which we called alpha, that is 
 present in the assignment of a value to the number of centroids 
-$numCentroids = alpha x len(block)$, where {\it len(blocks)\/} is the number of
-samples in a block.
+$numCentroids = alpha . len(blocks)$, where {\it len(blocks)\/} is the total 
+number of blocks.
 This implies that the longer the audio files are, the more centroids are needed
 on the K-Means algorithm for the music identification process.
 
-The audio files were first preprocessed and converted to mono files with a 
-quantization of 8 bits and no reduction factor.
-The generated codebooks (from the initial dataset) were built with blocks of 
-size 800, an overlapping factor of 0.3, an error threshold of 0.01 and with 
-K-Means being run twice.
-.................................
+The audio files were first preprocessed just like in the previous study.
+The generated codebooks were built with blocks of size 800, an overlapping 
+factor of 0.3, an error threshold of 0.01 and with K-Means being run twice.
+Four codebook folders were created, each containing the codebooks of all audio
+segments of the initial dataset, but created with different alpha values:
+50, 100, 400, 800, 1600.
+\texttt{EvaluateCodebooks.sh} was used one more time, this time executed only 
+once but running 100 tests (in practice, this worked the same way, as in the end 
+we rounded the results to the same scale).
+The results are presented in Table \ref{tab:numcentroids}.
 
 \begin{table}[H]
   \begin{center}
@@ -665,7 +670,7 @@ K-Means being run twice.
     \end{tabular}
   \end{center}
   \caption{Test results on varying the number of centroids (through alpha).}
-  \label{tab:blockSize}
+  \label{tab:numcentroids}
 \end{table}
 
 The last study was related to multithreading and the benefits of parallelism.
@@ -711,9 +716,16 @@ From the results of the first study, we were able to conclude that introducing
 an overlapping between blocks does benefit the program's accuracy.
 However, a high value does not always mean a better result.
 Taking in consideration the increase in execution time with higher overlapping 
-factors, we concluded that 0.25 was a good balance between effectiveness and speed.
+factors, we concluded that 0.25 was a good balance between effectiveness and speed. \\
 
-As for the block size, ................\\
+As for the block size, we understood that blocks too small makes it harder to 
+define well delimited clusters (as there are less dimensions to characterize the
+points), reducing the accuracy of the algorithm.
+Basically we have another case of a tradeoff between execution speed and accuracy.
+With this in mind, we found what we believe to be an approximation to a balance
+between these two perspectives, which was a value around 800. 
+Above this value, the gains in performance were not relevant enough for the 
+increase in execution time. \\
 
 Our second study gives us a good estimation of the ideal percentage of centroids
 in relation to the number of blocks of the audio file given as input to WAVFind.
@@ -789,6 +801,7 @@ with the help of the {\it Makefile\/} and the command "make docs", through
 the automatically generated {\it index.html\/} file in the {\it docs\/} 
 directory.
 
+\newpage
 \begin{thebibliography}{9}
   \bibliographystyle{Science}
 

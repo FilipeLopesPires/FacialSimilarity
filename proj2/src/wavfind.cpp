@@ -14,7 +14,8 @@
 using namespace std;
 
 void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
-                    int& blockSize, float& overlap_factor, string& codebookDir) {
+                    int& blockSize, float& overlap_factor,
+                    string& codebookDir) {
     checkFileToRead(sndFileIn, argv[argc - 4], 1);
     int sndFileSize = sndFileIn.frames();
 
@@ -42,7 +43,7 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
         cerr << "Error: overlap factor must be a valid number" << endl;
         exit(1);
     }
-    if (overlap_factor < 0 || overlap_factor > 1) {
+    if (overlap_factor <= 0 || overlap_factor > 1) {
         cerr << "Error: overlap factor must be a number between 0 and 1"
              << endl;
         exit(1);
@@ -61,7 +62,20 @@ int readCodeBook(string& filename, size_t blockSizeParam,
 
 int main(int argc, char* argv[]) {
     if (argc != 5) {
-        cerr << "Usage: wavfind <inputFile> <blockSize> <overlapFactor> <codebookDir>"
+        cerr << "Usage: wavfind <inputFile> <blockSize> <overlapFactor> "
+                "<codebookDir>"
+             << endl
+             << "ARGUMENTS:" << endl
+             << "   inputFile - path to the wav file that will serve as query "
+                "music segment"
+             << endl
+             << "   blockSize - number of samples each block should have"
+             << endl
+             << "   overlapFactor - the percentage of overlap each block "
+                "should have with the previous one"
+             << endl
+             << "   codebookDir - the path o the folder where the codebook "
+                "database is located"
              << endl;
         return 1;
     }
@@ -71,7 +85,8 @@ int main(int argc, char* argv[]) {
     int blockSize;
     float overlapFactor;
     string codebookDir{};
-    parseArguments(argc, argv, sndFileIn, blockSize, overlapFactor, codebookDir);
+    parseArguments(argc, argv, sndFileIn, blockSize, overlapFactor,
+                   codebookDir);
 
     // retrieve all blocks
     vector<vector<short>> blocks;
@@ -86,7 +101,7 @@ int main(int argc, char* argv[]) {
     dp = opendir(codebookDir.c_str());
     if (dp != nullptr) {
         while ((entry = readdir(dp)) != nullptr) {
-            if (entry->d_type == DT_REG) { // regular file
+            if (entry->d_type == DT_REG) {  // regular file
                 string name = entry->d_name;
                 string filename = codebookDir + "/" + name;
 
@@ -107,7 +122,7 @@ int main(int argc, char* argv[]) {
 
     closedir(dp);
 
-    cout << response << ", " << minimum << endl;
+    cout << "Prediction:" << response << ", Error: " << minimum << endl;
 
     return 0;
 }
