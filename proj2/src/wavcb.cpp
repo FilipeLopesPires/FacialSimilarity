@@ -91,26 +91,28 @@ void calculateClosestBlocks(
 
 
 int main(int argc, char* argv[]) {
-    if (argc != 7 && argc != 9) {
-        cerr << "Usage: wavcb <inputFile> <blockSize> <overlapFactor> "
+    if (argc != 8 && argc != 10) {
+        cerr << "Usage: wavcb alpha <inputFile> <blockSize> <overlapFactor> "
                 "<errorThreshold> <numRuns> <outputFile> [<threadsForRuns> <threadsPerRun>]"
              << endl;
         return 1;
     }
 
     // parse and validate arguments
-    SndfileHandle sndFileIn{argv[argc - 6 - (argc == 9 ? 2 : 0)]};
+    SndfileHandle sndFileIn{argv[argc - 6 - (argc == 10 ? 2 : 0)]};
     int blockSize, codeBookSize, numRuns, numThreadsForRuns, numThreadsForEachRun;
     float overlapFactor, errorThreshold;
     string outputFile;
     parseArguments(argc, argv, sndFileIn, blockSize, overlapFactor,
                    errorThreshold, numRuns, outputFile, numThreadsForRuns, numThreadsForEachRun);
 
+    float alpha = stof(argv[argc - 7 - (argc == 10 ? 2 : 0)]);
+
     // retrieve all blocks
     vector<vector<short>> blocks;
     retrieveBlocks(blocks, sndFileIn, blockSize, overlapFactor);
 
-    codeBookSize = (int)(blocks.size() / 4);
+    codeBookSize = (int)(blocks.size() * alpha);
 
     // validate number of centroids
     if (blocks.size() < codeBookSize) {
@@ -394,7 +396,7 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
                     int& blockSize, float& overlapFactor, float& errorThreshold,
                     int& numRuns, string& outputFile, int& numThreadsForRuns,
                     int& numThreadsForEachRun) {
-    int argsOffset = argc == 9 ? 2 : 0;
+    int argsOffset = argc == 10 ? 2 : 0;
 
     // validate input file
     checkFileToRead(sndFileIn, argv[argc - 6 - argsOffset], 1);
@@ -456,7 +458,7 @@ void parseArguments(int argc, char* argv[], SndfileHandle& sndFileIn,
 
     outputFile = argv[argc - 1 - argsOffset];
 
-    if (argc == 9) {
+    if (argc == 10) {
         try {
             numThreadsForRuns = stoi(argv[argc - 2]);
         } catch (...) {
