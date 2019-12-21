@@ -1,0 +1,15 @@
+#!/bin/csh
+#
+# NCCD3 x y1 y2 y3
+#
+set x  = $1
+set y1 = $2
+set y2 = $3
+set y3 = $4
+set ImgCondComp = "../bin/ImgCondComp -q 32"
+
+set Cy   = `$ImgCondComp -tc ctx1 -t $y1 -t $y2 -t $y3 | grep "Total target" | cut -d" " -f4`
+set Cylx = `$ImgCondComp -rc ctx1 -tc ctx1 -r $x -t $y1 -t $y2 -t $y3 | grep "Total target" | cut -d" " -f4`
+
+echo "scale = 4; $Cylx / $Cy" | bc -l
+

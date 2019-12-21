@@ -1,0 +1,31 @@
+#!/bin/csh
+
+set totalErrors = 0
+foreach s (`seq 1 40`)
+	set tarSubject = `printf "%02d" $s`
+	echo -n "$tarSubject : "
+	set errors = 0
+	foreach version (04 05 06 07 08 09 10)
+		set tar = ../orl_faces/s$tarSubject/$version.pgm
+		set minScore = 1000
+		foreach r (`seq 1 40`)
+			set refSubject = `printf "%02d" $r`
+			set ref1 = ../orl_faces/s$refSubject/01.pgm
+			set ref2 = ../orl_faces/s$refSubject/02.pgm
+			set ref3 = ../orl_faces/s$refSubject/03.pgm
+			set score = `NCCD3 $tar $ref1 $ref2 $ref3`
+			if(`echo "$score < $minScore" | bc -l`) then
+				set minScore = $score
+				set minSubject = $refSubject
+			endif
+		end
+		echo -n "$minSubject "
+		if($minSubject != $tarSubject) then
+			@ errors++
+		endif
+	end
+	@ totalErrors += $errors
+	echo "-> $errors"
+end
+echo "Total errors: $totalErrors"
+

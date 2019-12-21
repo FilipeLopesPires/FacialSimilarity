@@ -1,0 +1,200 @@
+\documentclass[12pt]{article}
+
+\usepackage{scicite,times,graphicx,float,hyperref}
+\usepackage[skip=0pt]{caption}
+
+\topmargin -1.0cm
+\oddsidemargin 0.0cm
+\textwidth 16cm 
+\textheight 23cm
+\footskip 1.0cm
+
+\newenvironment{sciabstract}{%
+\begin{quote} \bf}
+{\end{quote}}
+
+\newcounter{lastnote}
+\newenvironment{scilastnote}{%
+  \setcounter{lastnote}{\value{enumiv}}%
+  \addtocounter{lastnote}{+1}%
+  \begin{list}%
+  {\arabic{lastnote}.}
+  {\setlength{\leftmargin}{.22in}}
+  {\setlength{\labelsep}{.5em}}
+}
+{\end{list}}
+
+\title{Lab Work 3} 
+
+\author
+{André Pedrosa [85098], Filipe Pires [85122], João Alegria [85048]\\
+\\
+Algorithmic Information Theory\\
+\normalsize{Department of Electronics, Telecommunications and Informatics}\\
+\normalsize{University of Aveiro}\\
+} 
+
+\date{\today{}}
+
+%%%%%%%%%%%%%%%%% END OF PREAMBLE %%%%%%%%%%%%%%%%
+
+\begin{document} 
+
+\baselineskip18pt
+
+\maketitle 
+
+\section*{Introduction}
+
+This report aims to describe the work developed for the third and final assignment
+of the course of 'Algorithmic Information Theory', explaining all scripts
+developed by us and presenting the results we considered most relevant 
+regarding the quality of the solutions. 
+
+The programs implemented in Shell have the purpose of ...................
+
+Along with the description of the solutions, we also discuss .................
+All code developed is publicly accessible in our GitHub repository:
+\url{https://github.com/joao-alegria/TAI} .
+\newpage
+
+\section*{1. Lorem ipsum ...}
+
+In this chapter we present a ................\cite{trab3}.
+
+\subsection*{1.1. Lorem ipsum ...}
+
+Lorem ipsum ...
+
+% \begingroup
+% \addtolength\leftmargini{-0.4in}
+% \begin{quote}
+% \begin{verbatim}
+% $ ./wavquant [-q quantSize] [-r reductFactor] inputFile outputFile
+% \end{verbatim}
+% \end{quote}
+% \endgroup
+
+% \begin{figure}[H]
+%   \centering
+%   \begin{minipage}{.5\textwidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{sample01_stereo_0.png}
+%   \end{minipage}%
+%   \begin{minipage}{.5\textwidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{sample01_stereo_1.png}
+%   \end{minipage}
+%   \caption{Histogram of sample01.wav in the original format - channels 0 and 1.}
+%   \label{fig:histogram_stereo}
+  
+%   \centering
+%   \begin{minipage}{.5\textwidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{sample01_16_1.png}
+%   \end{minipage}%
+%   \caption{Histogram of sample01.wav after its conversion to mono (1 channel only).}
+%   \label{fig:histogram_mono}
+% \end{figure}
+
+\section*{2. Lorem ipsum ...}
+
+Lorem ipsum ...
+
+\subsection*{2.1. Lorem ipsum ...}
+
+Lorem ipsum ...
+
+% \begin{figure}[H]
+%   \centering
+%   \begin{minipage}{\textwidth}
+%     \centering
+%     \includegraphics[width=\linewidth]{stanford_quantization_wide.png}
+%   \end{minipage}%
+%   \caption{Example of a quantized waveform.}
+%   \label{fig:quantization}
+% \end{figure}
+
+
+% \begin{equation} \label{eq:1}
+%   SNR = 10 log_{10} \frac{E_{s}}{E_{n}} (dB)
+% \end{equation}
+
+\section*{3. Lorem ipsum ...}
+
+Lorem ipsum ...
+
+\subsection*{3.1. Lorem ipsum ...}
+
+Lorem ipsum ...
+
+\section*{4. Lorem ipsum ...}
+
+Lorem ipsum ...
+
+\subsection*{4.1. Lorem ipsum ...}
+
+% \begin{table}[H]
+%   \begin{center}
+%     \begin{tabular}{c|c}
+%       \textbf{Overlapping Factor} & \textbf{Score}\\
+%       \hline
+%       0.00 & 6/10\\
+%       0.10 & 8/10\\
+%       0.25 & 9/10\\
+%       0.50 & 9/10\\
+%       0.75 & 10/10\\
+%     \end{tabular}
+%   \end{center}
+%   \caption{Test results on varying the overlapping factor between blocks.}
+%   \label{tab:overlapFactor}
+% \end{table}
+
+\section*{Conclusions}
+
+After completing the assignment, we drew a few conclusions regarding our 
+solutions and ..................
+
+Lorem ipsum ...
+
+In terms of code organization and readability, we made sure our 
+repository was as well structured as possible and our code properly commented
+and documented.
+The base folder contains a {\it README\/} file for basic instructions.
+All code is in the {\it src\/} folder.
+
+\newpage
+\begin{thebibliography}{9}
+  \bibliographystyle{Science}
+
+  \bibitem{trab3}
+    Armando J. Pinho,
+    \textit{AIT: Lab Work no.3},
+    University of Aveiro,
+    2019/20.
+  
+\end{thebibliography}
+
+\clearpage
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

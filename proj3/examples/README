@@ -1,0 +1,57 @@
+//------------------------------------------------------------------------------
+//
+// Copyright 2017 University of Aveiro, Portugal, All Rights Reserved.
+//
+// These programs are supplied free of charge for research purposes only,
+// and may not be sold or incorporated into any commercial product. There is
+// ABSOLUTELY NO WARRANTY of any sort, nor any undertaking that they are
+// fit for ANY PURPOSE WHATSOEVER. Use them at your own risk. If you do
+// happen to find a bug, or have modifications to suggest, please report
+// the same to Armando J. Pinho, ap@ua.pt. The copyright notice above
+// and this statement of conditions must remain an integral part of each
+// and every copy made of these files.
+//
+// Armando J. Pinho (ap@ua.pt)
+// IEETA / DETI / University of Aveiro
+// 2017
+//
+//------------------------------------------------------------------------------
+
+The files "ctx1" and "ctx2" contain examples of 2D context templates. These
+files contain an integer with the size of the context, followed by that number
+of relative coordinate pairs, in the form of "row col". The "0 0" coordinate
+corresponds to the pixel being compressed. These coordinates are followed by
+a "n/d" entry representing the "alpha" of the probability estimator, in the
+form numerator/denominator. Hence, "1/10" denotes an alpha of 0.1
+
+From within the "examples" dir, try to run:
+
+../bin/ImgCondComp -rc ctx1 -r 01.pgm -t 06.pgm
+
+This will give the number of bits needed to represent image "06.pgm" (i.e.,
+the target), when image "01.pgm" is given as reference and the context
+used by the references is described in file "ctx1".
+
+The command
+
+../bin/ImgCondComp -rc ctx1 -tc ctx2 -r 01.pgm -t 06.pgm
+
+will give the number of bits needed to represent image "06.pgm" when image
+"01.pgm" is given as reference, the context used by the reference model is
+in file "ctx1" and the context used by the target model is in file "ctx2".
+
+The command
+
+../bin/ImgCondComp -tc ctx1 -t 06.pgm
+
+will give the number of bits needed to represent image "06.pgm" using the
+the context described in file "ctx1".
+
+The command
+
+TEST123
+
+will run a classification example on the 40 subjects, using the first three
+images of each subject as reference and testing on the remaining seven images.
+It measures similarity using the NCCD (Normalized Conditional Compression Distance).
+
