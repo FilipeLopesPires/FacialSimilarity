@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# arguments
+#  1 -> inputFile
+#  2 -> outputFile
+
 _zip() {
     zip -q $2 $1 && mv $2.zip $2
 }
