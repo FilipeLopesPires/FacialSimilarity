@@ -1,61 +1,48 @@
-#! /bin/bash
+#!/bin/bash
 
 standard=( 01.pgm 02.pgm 03.pgm )
 tests=( 04.pgm 05.pgm 06.pgm 07.pgm 08.pgm 09.pgm 10.pgm  )
 
-compressor=( zip gzip lzma xz bzip2 pax 7z shar zpaq )
+inputFolder="processedFaces"
 
-compress() {
-    if [ "$2" = "zip" ]; then 
-        $2 -q tmp $1
-        mv tmp.zip tmp
-    fi
-    if [ "$2" = "lzma" ] || [ "$2" = "gzip" ] || [ "$2" = "xz" ] || [ "$2" = "bzip2" ]; then
-        $2 -c $1 > tmp
-    fi
-    if [ "$2" = "pax" ]; then
-        $2 -wf tmp $1
-    fi
-    if [ $2 = "shar" ]; then
-        $2 -q $1 > tmp
-    fi
-    if [ $2 = "7z" ]; then
-        $2 a tmp $1 1>/dev/null
-        mv tmp.7z tmp
-    fi
-    if [ $2 = "zpaq" ]; then
-        $2 a tmp $1 &>/dev/null
-        mv tmp.zpaq tmp
-    fi
-}
+if ! [[ -d $inputFolder ]] ; then
+    echo "ERROR directory $inputFolder not found"
+    exit 1
+fi
 
-inputfolder="processedFaces"
-for comp in $compressor; do
-    for subjectt in $inputfolder/*; do
-        if [ -d $subjectt ]; then
-            for tst in "${tests[@]}"; do
-                echo "Testing:" $subjectt"/"$tst
-                minimumValue=1000000000
-                minimumSub=""
-                localMinimum=1000000000
-                for subjects in $inputfolder/*; do
-                    if [ -d $subjects ]; then
-                        for std in "${standard[@]}"; do
-                            convert $(echo $subjectt"/"$tst) $(echo $subjects"/"$std) -append tmp.pgm
-                            compress tmp.pgm $comp
-                            localMinimum=$(stat --printf="%s" tmp)
-                            if [[ $localMinimum -lt $minimumValue ]]; then
-                                minimumValue=$localMinimum
-                                minimumSub=$subjects
-                            fi
-                        done
+source compressors.sh
+source mergers.sh
+
+for comp in ${compressors[@]} ; do
+    for testSubjects in $inputFolder/* ; do
+        for tst in ${tests[@]} ; do
+            echo "Testing:" $testSubjects/$tst
+            minNCD=1
+            minSub=""
+            for goldStdSubjects in $inputFolder/* ; do
+                for std in ${standard[@]} ; do
+                    append $goldStdSubjects/$std $testSubjects/$tst /tmp/both
+
+                    $comp /tmp/both /tmp/both_compressed
+                    $comp $testSubjects/$tst /tmp/testing_compressed
+                    $comp $goldStdSubjects/$std /tmp/standard_compressed
+
+                    bothSize=$(stat --printf="%s" /tmp/both_compressed)
+                    testingSize=$(stat --printf="%s" /tmp/testing_compressed)
+                    standardSize=$(stat --printf="%s" /tmp/standard_compressed)
+
+                    max=$((testingSize > standardSize ? testingSize : standardSize))
+                    min=$((testingSize < standardSize ? testingSize : standardSize))
+
+                    NCD=$(echo "scale = 4; ($bothSize - $min) / $max" | bc -l)
+
+                    if (( $(echo "${NCD#-} < ${minNCD#-}" | bc -l) )) ; then  # TODO does this need a abs()?
+                        minNCD=$NCD
+                        minSub=$goldStdSubjects
                     fi
                 done
-                echo -e "Result:" $minimumSub"\n"
             done
-        fi
+            echo -e "Result:" $minSub"\n"
+        done
     done
 done
-
-rm tmp
-rm tmp.pgm
