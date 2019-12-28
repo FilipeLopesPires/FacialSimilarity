@@ -2,6 +2,7 @@
 
 standard=( 01.pgm 02.pgm 03.pgm )
 tests=( 04.pgm 05.pgm 06.pgm 07.pgm 08.pgm 09.pgm 10.pgm  )
+# convert 01.pgm 06.pgm -fx 'j%2 ? u : v' tmp.pgm
 
 inputfolder="processedFaces"
 for subjectt in $inputfolder/*; do

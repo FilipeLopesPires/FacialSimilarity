@@ -11,7 +11,7 @@ for subject in $inputfolder/*; do
             mkdir $(echo $outfolder$(echo $subject | cut -d "/" -f2))
         fi
         for file in $subject/*; do
-            convert $file -resize 46x56 $outfolder$(echo $file | cut -d "/" -f2,3)
+            convert $file -colors 16 -resize 46x56 $outfolder$(echo $file | cut -d "/" -f2,3)
         done
     fi
 done
