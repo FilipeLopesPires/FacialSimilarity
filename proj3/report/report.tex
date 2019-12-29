@@ -46,22 +46,34 @@ Algorithmic Information Theory\\
 \maketitle 
 
 \section{Introduction}
-This report aims to describe the work developed for the third and final assignment
-of the course of 'Algorithmic Information Theory', explaining all scripts
-developed by us and presenting the results we considered most relevant Dataset
-regarding the quality of the solutions. 
+This report aims to describe the work developed for the third and final assignment of the course of 'Algorithmic Information Theory', explaining all scripts
+developed by us and presenting the results we considered most relevant regarding the quality of the solutions. 
 
-The programs implemented in Shell have the purpose of ...................Dataset
-Dataset
-Along with the description of the solutions, we also discuss .................
-All code developed is publicly accessible in our GitHub repository:Dataset
-\url{https://github.com/joao-alegria/TAI} .Dataset
+The programs implemented in Shell have the purpose of measuring similarity of images using a compression-based strategy and automatically identify human faces.
+Along with the description of the solutions, we also discuss the characteristics and the preprocessing done to the available dataset, the data compression 
+algorithms used and the tests executed.
+All code developed is publicly accessible in our GitHub repository: 
+
+\url{https://github.com/joao-alegria/TAI}.
 \newpage
 
 \section{Image Classification}
-The challenge we are tackling in this paper is the one presented in \cite{trab3}, which is basically a image classification problem with a special approach. Instead of doing the process chosen by most people in charge of solving similar problems, consisting in using some from of feature extraction or some kind of feature learning commonly achieved through some type of machine learning algorithm, the launched challenge aims to reach a similar goal taking only in consideration the notion of algorithmic information.
 
-Algorithmic information, also known as algorithmic entropy or Kolmogorov complexity, is the measure of information in a given data portion based on the theoretical algorithm that would be necessary to create that same data portion. Being a quite abstract definition, an example can clarify the concept: taking in consideration the string A="0101010101" and string B="0010100110", it is much simpler to define string A than string B, since for A we can simple say that it is the string "01" repeated 5 times, where for string B it's harder and we probably need to say the entire string to describe it. This means that in reality string A as less information than string B. To achieve the algorithmic information of each one, the thought process is the same but now the string descriptions are made with algorithms, where the string can be defined be the following algorithms:
+When dealing with image processing problems that require object identification, the usual environment calls for a classification approach, as the objects to 
+be identified belong to specific classes with clear and separable characteristics.
+The challenge we are faced with \cite{trab3} is a special approach for the image classification problem of facial recognition or identification.
+It is special in the sense that it does not aim to explore the usual strategies based on feature extraction, rather it is meant to rely on data compression 
+methods and the notion of algorithmic information.
+Algorithmic information, also known as algorithmic entropy or Kolmogorov complexity, is the measure of information in a given data portion based on the 
+theoretical algorithm that would be required to recreate that same data portion. 
+
+As this is an abstract definition, an example can clarify the concept: 
+considering strings A="0101010101" and B="0010100110", for instance, one can easily reach the conclusion that string A is far easier to define than string B,
+since for A we can simply define it as the smaller string "01" repeated 5 times; string B, on the other hand, the process is not as simple and we probably will
+require the entire string to describe it.
+What this means is that A has less information than B. 
+To achieve the so called algorithmic information of each one, the thought process is the same but now the string descriptions are achieved through algorithms;
+for our examples, the algorithms that define strings A and B are the following: 
 
 \vspace{0.2in}
 \begin{minipage}{0.45\textwidth}
@@ -80,15 +92,25 @@ Algorithmic information, also known as algorithmic entropy or Kolmogorov complex
 \end{minipage}
 \vspace{0.2in}
 
-Which by a quick iteration analysis its obvious that \texttt{stringA()} is less complex than \texttt{stringB()}, needing only 5 iterations compared with 10 iterations, respectively, confirming that string B has more information than string A. This can be directly correlated with data compression, since compressors take advantage of the data repetition as dispensable data, and thereby compress the information by removing repetition but storing an indicator of that repetition.
+By a quick analysis, it is obvious that \textit{stringA()} is less complex than \textit{stringB()}, iterating only 5 times, contrasting with the 10 iterations 
+of the second; hence confirming that string B has more information than string A. 
+This can be directly correlated with data compression, since compressors take advantage of the data repetition to reduce space usage, and thereby compress the 
+information by storing the data that appears frequently and the indicators of the places where those repetitions occur.
 
-With this concepts defined it's more clear how the image classification will be done. Using the Normalized Information Distance defined by:
+With this in mind, one can proceed to understand how the image classification will be done. 
+Using the Normalized Information Distance defined by equation \ref{eq:1}, where \textit{K(x)} and \textit{K(x|y)} define the Kolmogorov complexity of the 
+string $x$ and of the string $x$ given string $y$. 
 
-\begin{equation}
+\begin{equation} \label{eq:1}
   NID(x,y) = \frac{max\{K(x|y),K(y|x)\}}{max\{K(x),K(y)\}}
 \end{equation}
+\newpage
 
-Where \textit{K(x)} defines the Kolmogorov complexity of the string x and \textit{K(x|y)} defines the Kolmogorov complexity of the string x given string y. Unfortunately, because the Kolmogorov complexity is non-computable this formula is only theoretical since there is no algorithm that can compute any string complexity every time. For that reason compressors are used to achieve approximations of the formula result. The studied approximations are Normalized Compression Distance(NCD) and Normalized Conditional Compression Distance(NCCD) that will be further detailed in the following subsections.
+Unfortunately, because the Kolmogorov complexity is non-computable, this formula is only theoretical and we are sure there is no algorithm that can compute 
+any string complexity. 
+Nevertheless, compressors approximate the formula's results very closely, if used correctly. 
+So we used two of the most frequently used approximations of \texttt{NID} to determine the compression distance between images and, with these distances, 
+calculate the closest images, i.e. the most similar ones, and hopefully classify them as belonging to the group of images that represent the same face.
 
 \subsection{NCD Approximation}
 ....
@@ -96,19 +118,44 @@ Where \textit{K(x)} defines the Kolmogorov complexity of the string x and \texti
 \subsection{NCCD Approximation}
 ....
 
+\newpage
 \section{Dataset}
-Lorem ipsum ...
 
-% \begin{figure}[H]
-%   \centering
-%   \begin{minipage}{\textwidth}
-%     \centering
-%     \includegraphics[width=\linewidth]{stanford_quantization_wide.png}
-%   \end{minipage}%
-%   \caption{Example of a quantized waveform.}
-%   \label{fig:quantization}
-% \end{figure}
+Like in all experimental work, specially in image processing, a considerably large dataset is required for any results to be significant and any conclusions to be solid.
+Also, when benchmarking an algorithm, it is recommended that standard test datasets are used for researchers to be able to directly compare the results. 
+Taking this in consideration, we downloaded AT\&T "The Database of Faces" (formerly "The ORL Database of Faces") and used it to test our code.
 
+The image database contains 10 different images of each of the 40 distinct subjects.
+For some subjects the images were taken at different times, between April 1992 and April 1994, with varying lighting conditions and different facial expressions.
+Most faces are in an upright position in frontal view, with a slight left-right rotation.
+All 400 images were taken in black \& white at the Olivetti Research Laboratory in Cambridge, UK.
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{faces_example.png}
+  \end{minipage}%
+  \caption{Image taken from the assignment description \cite{trab3}. Examples from the ORL face dataset. In the first row, ten face images corresponding to the same subject (s01). In the second row, the first face image of subjects s02 to s11.}
+  \label{fig:quantization}
+\end{figure}
+
+To speedup the processing of each image, we applied 2 transformations to each element of the dataset.
+The first consisted in a simple image reduction from 112 $\times$ 92 px to 56 $\times$ 46 px, ensuring that proportions remained the same.
+The second was a quantization process from 8 bits per pixel gray level to 4 bits only.
+These modifications were accomplished using ImageMagick \cite{imgmagick}, a command-line program to create, edit, compose, or convert bitmap images.
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{.2\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{preprocessing_example.png}
+  \end{minipage}%
+  \caption{Example from subject s01 of the ORL face dataset, before and after preprocessing.}
+  \label{fig:quantization}
+\end{figure}
+
+\newpage
 \section{Experiment}
 Lorem ipsum ...
 
@@ -141,6 +188,12 @@ All code is in the {\it src\/} folder.
     \textit{AIT: Lab Work no.3},
     University of Aveiro,
     2019/20.
+  
+  \bibitem{imgmagick}
+    ImageMagick Studio LLC,
+    \textit{ImageMagick},
+    \url{https://imagemagick.org/index.php},
+    accessed in December 2019.
   
 \end{thebibliography}
 
