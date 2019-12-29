@@ -45,7 +45,8 @@ Algorithmic Information Theory\\
 
 \maketitle 
 
-\section{Introduction}
+\section{Introduction} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 This report aims to describe the work developed for the third and final assignment of the course of 'Algorithmic Information Theory', explaining all scripts
 developed by us and presenting the results we considered most relevant regarding the quality of the solutions. 
 
@@ -57,7 +58,7 @@ All code developed is publicly accessible in our GitHub repository:
 \url{https://github.com/joao-alegria/TAI}.
 \newpage
 
-\section{Image Classification}
+\section{Image Classification} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 When dealing with image processing problems that require object identification, the usual environment calls for a classification approach, as the objects to 
 be identified belong to specific classes with clear and separable characteristics.
@@ -112,14 +113,33 @@ Nevertheless, compressors approximate the formula's results very closely, if use
 So we used two of the most frequently used approximations of \texttt{NID} to determine the compression distance between images and, with these distances, 
 calculate the closest images, i.e. the most similar ones, and hopefully classify them as belonging to the group of images that represent the same face.
 
-\subsection{NCD Approximation}
-....
+\subsection{NCD Approximation} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{NCCD Approximation}
-....
+By using known general purpose compressors, such as gzip, lzma, tar, ..., the Kolmogorov complexity can be estimated by the number of bits the resulting compressed file has. 
+This approximation is expressed by equation \ref{eq:2}, where \textit{C(x)} and \textit{C(x,y)} represent the number of bits the compression of $x$ and of 
+$x$ and $y$ concatenated contain, respectively.
+The $xy$ concatenation can be performed in several ways, the most common being to simply perform an union on both; other more complex operations can also be done, 
+such as interlacing the two data sources. 
+
+\begin{equation}\label{eq:2}
+  NCD(x,y) = \frac{C(x,y)-min\{C(x), C(y)\}}{max\{C(x),C(y)\}}
+\end{equation}
+
+Following the formula, results close to 0 indicate similarity and close to 1 dissimilarity. The only restriction to this approach is that the compressor used must follow the condition $C(x,x) \simeq C(x)$, without that the results of NCD may not be reliable nor true. 
+
+
+\subsection{NCCD Approximation} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This approach is yet another approximation to the NID formula, this time using conditional compressors to achieve their estimation. Conditional compressors are normally implemented with finite-context models and take in consideration the previous occurring terms to compress the new term. This is a more direct approximation of the NID and, in general, generate better results than the NCD. Defined by:
+
+\begin{equation}\label{eq:3}
+  NCCD(x,y) = \frac{max\{C(x|y), C(y|x)\}}{max\{C(x), C(y)\}}
+\end{equation}
+
+Where \textit{C(x)} defines once again the number of bits the compression of the object x by a given conditional compressor and $C(x|y)$ represents the number of bits the compression of x needs given that y occurred previously ($C(y|x)$ has the same logic). Due to the consitional aspect of this approach, \textit{C(x)} can be a special case of $C(x|y)$ were y is equal to the empty string, causing that $C(x) = C(x|\epsilon)$.
 
 \newpage
-\section{Dataset}
+\section{Dataset} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Like in all experimental work, specially in image processing, a considerably large dataset is required for any results to be significant and any conclusions to be solid.
 Also, when benchmarking an algorithm, it is recommended that standard test datasets are used for researchers to be able to directly compare the results. 
@@ -156,17 +176,17 @@ These modifications were accomplished using ImageMagick \cite{imgmagick}, a comm
 \end{figure}
 
 \newpage
-\section{Experiment}
+\section{Experiment} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Lorem ipsum ...
 
-\subsection{Tested Compressors}
+\subsection{Tested Compressors}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 .......
 
-\section{Results \& Discussion}
+\section{Results \& Discussion} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Lorem ipsum ...
 
 
-\section{Conclusions}
+\section{Conclusions} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 After completing the assignment, we drew a few conclusions regarding our 
 solutions and ..................
@@ -180,7 +200,7 @@ The base folder contains a {\it README\/} file for basic instructions.
 All code is in the {\it src\/} folder.
 
 \newpage
-\begin{thebibliography}{9}
+\begin{thebibliography}{9} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \bibliographystyle{Science}
 
   \bibitem{trab3}
