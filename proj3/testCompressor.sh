@@ -2,7 +2,6 @@
 
 standard=( 01.pgm 02.pgm 03.pgm )
 tests=( 04.pgm 05.pgm 06.pgm 07.pgm 08.pgm 09.pgm 10.pgm  )
-# convert 01.pgm 06.pgm -fx 'j%2 ? u : v' tmp.pgm
 
 inputFolder="processedFaces"
 
@@ -17,7 +16,7 @@ source mergers.sh
 for comp in ${compressors[@]} ; do
     for testSubjects in $inputFolder/* ; do
         for tst in ${tests[@]} ; do
-            echo "Testing:" $testSubjects/$tst
+            echo -n "Testing:" $testSubjects/$tst
             minNCD=1
             minSub=""
             for goldStdSubjects in $inputFolder/* ; do
@@ -43,7 +42,7 @@ for comp in ${compressors[@]} ; do
                     fi
                 done
             done
-            echo -e "Result:" $minSub"\n"
+            echo ";Result:" $minSub
         done
     done
 done
