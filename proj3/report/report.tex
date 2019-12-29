@@ -2,6 +2,7 @@
 
 \usepackage{scicite,times,graphicx,float,hyperref}
 \usepackage[skip=0pt]{caption}
+\usepackage[utf8]{inputenc}
 
 \topmargin -1.0cm
 \oddsidemargin 0.0cm
@@ -58,7 +59,36 @@ All code developed is publicly accessible in our GitHub repository:Dataset
 \newpage
 
 \section{Image Classification}
-In this chapter we present a ................\cite{trab3}.
+The challenge we are tackling in this paper is the one presented in \cite{trab3}, which is basically a image classification problem with a special approach. Instead of doing the process chosen by most people in charge of solving similar problems, consisting in using some from of feature extraction or some kind of feature learning commonly achieved through some type of machine learning algorithm, the launched challenge aims to reach a similar goal taking only in consideration the notion of algorithmic information.
+
+Algorithmic information, also known as algorithmic entropy or Kolmogorov complexity, is the measure of information in a given data portion based on the theoretical algorithm that would be necessary to create that same data portion. Being a quite abstract definition, an example can clarify the concept: taking in consideration the string A="0101010101" and string B="0010100110", it is much simpler to define string A than string B, since for A we can simple say that it is the string "01" repeated 5 times, where for string B it's harder and we probably need to say the entire string to describe it. This means that in reality string A as less information than string B. To achieve the algorithmic information of each one, the thought process is the same but now the string descriptions are made with algorithms, where the string can be defined be the following algorithms:
+
+\vspace{0.2in}
+\begin{minipage}{0.45\textwidth}
+  \begin{verbatim}
+    def stringA():
+      for i in range(5):
+        print("01", end="")
+  \end{verbatim}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+  \begin{verbatim}
+    def stringB():
+      for letter in "0010100110":
+        print(letter, end="")
+  \end{verbatim}
+\end{minipage}
+\vspace{0.2in}
+
+Which by a quick iteration analysis its obvious that \texttt{stringA()} is less complex than \texttt{stringB()}, needing only 5 iterations compared with 10 iterations, respectively, confirming that string B has more information than string A. This can be directly correlated with data compression, since compressors take advantage of the data repetition as dispensable data, and thereby compress the information by removing repetition but storing an indicator of that repetition.
+
+With this concepts defined it's more clear how the image classification will be done. Using the Normalized Information Distance defined by:
+
+\begin{equation}
+  NID(x,y) = \frac{max\{K(x|y),K(y|x)\}}{max\{K(x),K(y)\}}
+\end{equation}
+
+Where \textit{K(x)} defines the Kolmogorov complexity of the string x and \textit{K(x|y)} defines the Kolmogorov complexity of the string x given string y. Unfortunately, because the Kolmogorov complexity is non-computable this formula is only theoretical since there is no algorithm that can compute any string complexity every time. For that reason compressors are used to achieve approximations of the formula result. The studied approximations are Normalized Compression Distance(NCD) and Normalized Conditional Compression Distance(NCCD) that will be further detailed in the following subsections.
 
 \subsection{NCD Approximation}
 ....
