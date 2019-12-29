@@ -1,7 +1,8 @@
 #!/bin/bash
 
 if [[ $# -ne 1 ]] ; then
-    echo "ERROR invalid number of arguments $#, should be 1"
+    echo "ERROR invalid number of arguments $#"
+    echo "usage: checkCompressors.sh <fileToCompress>"
     exit 1
 elif ! [[ -f $1 ]] ; then
     echo "ERROR $1 file not found"
