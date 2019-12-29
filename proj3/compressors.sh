@@ -25,7 +25,7 @@ _bzip2() {
 }
 
 _7z() {
-    7z a $2 $1 &> /dev/null
+    7z a $2 $1 &> /dev/null && mv $2.7z $2
 }
 
 # _shar() {
@@ -37,7 +37,7 @@ _zpaq() {
 }
 
 _ppmd() {
-    7z a $2 $1 -m0=PPMd &> /dev/null
+    7z a $2 $1 -m0=PPMd &> /dev/null && mv $2.7z $2
 }
 
 # compressors=( _zip _gzip _lzma _pax _bzip2 _7z _shar _zpaq _ppmd )

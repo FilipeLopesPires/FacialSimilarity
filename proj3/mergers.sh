@@ -17,4 +17,4 @@ interlace() {
     convert $1 $2 -fx 'j%2 ? u : v' $3
 }
 
-mergers=( append average )
+mergers=( append average interlace )
