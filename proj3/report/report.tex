@@ -82,7 +82,7 @@ Algorithmic information, also known as algorithmic entropy or Kolmogorov complex
 
 Which by a quick iteration analysis its obvious that \texttt{stringA()} is less complex than \texttt{stringB()}, needing only 5 iterations compared with 10 iterations, respectively, confirming that string B has more information than string A. This can be directly correlated with data compression, since compressors take advantage of the data repetition as dispensable data, and thereby compress the information by removing repetition but storing an indicator of that repetition.
 
-With this concepts defined it's more clear how the image classification will be done. Using the Normalized Information Distance defined by:
+With this concepts defined it's more clear how the image classification will be done. Using the Normalized Information Distance(NID) defined by:
 
 \begin{equation}
   NID(x,y) = \frac{max\{K(x|y),K(y|x)\}}{max\{K(x),K(y)\}}
@@ -91,11 +91,24 @@ With this concepts defined it's more clear how the image classification will be 
 Where \textit{K(x)} defines the Kolmogorov complexity of the string x and \textit{K(x|y)} defines the Kolmogorov complexity of the string x given string y. Unfortunately, because the Kolmogorov complexity is non-computable this formula is only theoretical since there is no algorithm that can compute any string complexity every time. For that reason compressors are used to achieve approximations of the formula result. The studied approximations are Normalized Compression Distance(NCD) and Normalized Conditional Compression Distance(NCCD) that will be further detailed in the following subsections.
 
 \subsection{NCD Approximation}
-....
+This approximation, which follows the Formula \ref{ncd} is frequently used to replace the NID. By using known general purpose compressors, such as gzip, lzma, tar, ..., the Kolmogorov complexity can be estimated by the number of bits the resulting compressed file has. 
+
+\begin{equation}\label{ncd}
+  NCD(x,y) = \frac{C(x,y)-min\{C(x), C(y)\}}{max\{C(x),C(y)\}}
+\end{equation}
+
+In Formula \ref{ncd}, \textit{C(x)} represents the number of bits the compression of x contains and \textit{C(x,y)} represents the number of bits the compression of x and y concatenated. This concatenation can be performed by several ways, the most common is to simply perform an union on both, but can be as complex as interlacing the two data sources. Following the formula, results close to 0 indicate similarity and close to 1 dissimilarity. The only restriction to this approach is that the compressor used must follow the condition $C(x,x) \simeq C(x)$, without that the results of NCD may not be reliable nor true. 
 
 \subsection{NCCD Approximation}
-....
+This approach is yet another approximation to the NID formula, this time using conditional compressors to achieve their estimation. Conditional compressors are normally implemented with finite-context models and take in consideration the previous occurring terms to compress the new term. This is a more direct approximation of the NID and, in general, generate better results than the NCD. Defined by:
 
+\begin{equation}
+  NCCD(x,y) = \frac{max\{C(x|y), C(y|x)\}}{max\{C(x), C(y)\}}
+\end{equation}
+
+Where \textit{C(x)} defines once again the number of bits the compression of the object x by a given conditional compressor and $C(x|y)$ represents the number of bits the compression of x needs given that y occurred previously ($C(y|x)$ has the same logic). Due to the consitional aspect of this approach, \textit{C(x)} can be a special case of $C(x|y)$ were y is equal to the empty string, causing that $C(x) = C(x|\epsilon)$.
+
+\newpage
 \section{Dataset}
 Lorem ipsum ...
 
