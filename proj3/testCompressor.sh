@@ -10,18 +10,23 @@ if ! [[ -d $inputFolder ]] ; then
     exit 1
 fi
 
+if  [[ $# -lt 1 ]] ; then
+    echo "ERROR: insert type of merge(append, interlace, average)"
+    exit 1
+fi
+
 source compressors.sh
 source mergers.sh
-
+echo "TstPic, TstSub, Result"
 for comp in ${compressors[@]} ; do
     for testSubjects in $inputFolder/* ; do
         for tst in ${tests[@]} ; do
-            echo -n "Testing:" $testSubjects/$tst
+            echo -n $tst","$(echo $testSubjects | cut -d "/" -f2)
             minNCD=1
             minSub=""
             for goldStdSubjects in $inputFolder/* ; do
                 for std in ${standard[@]} ; do
-                    append $goldStdSubjects/$std $testSubjects/$tst /tmp/both
+                    $1 $goldStdSubjects/$std $testSubjects/$tst /tmp/both
 
                     $comp /tmp/both /tmp/both_compressed
                     $comp $testSubjects/$tst /tmp/testing_compressed
@@ -42,7 +47,7 @@ for comp in ${compressors[@]} ; do
                     fi
                 done
             done
-            echo ";Result:" $minSub
+            echo ","$(echo $minSub | cut -d "/" -f2)
         done
     done
 done
