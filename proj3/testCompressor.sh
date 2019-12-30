@@ -17,6 +17,18 @@ fi
 
 source compressors.sh
 source mergers.sh
+
+for comp in ${compressors[@]} ; do
+    for goldStdSubjects in $inputFolder/* ; do
+        mkdir --parents /tmp/goldStdCompressed/$comp/$goldStdSubjects
+        for std in ${standard[@]} ; do
+            $comp $goldStdSubjects/$std /tmp/goldStdCompressed/$comp/$goldStdSubjects/$std 2> /dev/null
+        done
+    done
+done
+
+rand=$RANDOM
+
 echo "TstPic, TstSub, Result"
 for comp in ${compressors[@]} ; do
     echo $comp
@@ -27,22 +39,21 @@ for comp in ${compressors[@]} ; do
             minSub=""
             for goldStdSubjects in $inputFolder/* ; do
                 for std in ${standard[@]} ; do
-                    $1 $goldStdSubjects/$std $testSubjects/$tst /tmp/both
+                    $1 $goldStdSubjects/$std $testSubjects/$tst /tmp/both$rand
 
-                    $comp /tmp/both /tmp/both_compressed
-                    $comp $testSubjects/$tst /tmp/testing_compressed
-                    $comp $goldStdSubjects/$std /tmp/standard_compressed
+                    $comp /tmp/both$rand /tmp/both_compressed$rand
+                    $comp $testSubjects/$tst /tmp/testing_compressed$rand
 
-                    bothSize=$(stat --printf="%s" /tmp/both_compressed)
-                    testingSize=$(stat --printf="%s" /tmp/testing_compressed)
-                    standardSize=$(stat --printf="%s" /tmp/standard_compressed)
+                    bothSize=$(stat --printf="%s" /tmp/both_compressed$rand)
+                    testingSize=$(stat --printf="%s" /tmp/testing_compressed$rand)
+                    standardSize=$(stat --printf="%s" /tmp/goldStdCompressed/$comp/$goldStdSubjects/$std)
 
                     max=$((testingSize > standardSize ? testingSize : standardSize))
                     min=$((testingSize < standardSize ? testingSize : standardSize))
 
                     NCD=$(echo "scale = 4; ($bothSize - $min) / $max" | bc -l)
 
-                    if (( $(echo "${NCD#-} < ${minNCD#-}" | bc -l) )) ; then  # TODO does this need a abs()?
+                    if (( $(echo "${NCD#-} < ${minNCD#-}" | bc -l) )) ; then
                         minNCD=$NCD
                         minSub=$goldStdSubjects
                     fi
