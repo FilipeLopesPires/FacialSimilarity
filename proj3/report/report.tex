@@ -60,7 +60,7 @@ All code developed is publicly accessible in our GitHub repository:
 \url{https://github.com/joao-alegria/TAI}.
 \newpage
 
-\section{Image Classification} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Image Classification} \label{classification} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 When dealing with image processing problems that require object identification, the usual environment calls for a classification approach, as the objects to 
 be identified belong to specific classes with clear and separable characteristics.
@@ -276,7 +276,7 @@ interlace operations will result in the exact same image as the original; this i
 \end{figure}
 
 Back to the experiment's script, its execution workflow follows the pseudo-code presented next, where \texttt{concat} corresponds to the chosen operation passed 
-to the script and \texttt{compress} corresponds to the compression action executed by the current compressor of the first loop.
+to the script and \texttt{compress} corresponds to the compression action executed by the current compressor of the first loop, defined in \texttt{compressors.sh}.
 
 \begin{verbatim}
   for each compressor, do:
@@ -300,6 +300,9 @@ The output of each script execution was written to disk in different files.
 Then, to determine the performance of each compressor using each of the concatenation alternatives, we developed and executed a second script 
 \texttt{calculateAccuracy.sh} that reads the output files, computes the accuracies and writes them on the console for analysis. 
 
+Along with the instructions for this assignment and the programs already developed, an additional script was provided to us to test NCCD, \texttt{TEST123}.
+To determine the performance of this solution, we developed \texttt{nccdAccuracy.sh} that does the same as \texttt{calculateAccuracy.sh} but for NCCD's output.
+
 \section{Results \& Discussion} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The results of the first phase were quite promising, with some compressors achieving accuracy percentages of over 70\%.
@@ -309,31 +312,63 @@ Table \ref{tab:1} presents the performance of NCD using each compressor and each
 \centering
 \begin{tabular}{@{}c|cccccc@{}}
                    & \textbf{\texttt{zip}} & \textbf{\texttt{gzip}} & \textbf{\texttt{lzma}} & \textbf{\texttt{bzip2}} & \textbf{\texttt{zpaq}} & \textbf{\texttt{ppmd}}\\ \midrule
-\textbf{Append}    & 0.707     & 0.725     & 0.271     & 0.507     & 0.060     & 0.657 \\
-\textbf{Interlace} & 0.     & 0.     & 0.     & 0.     & 0.     & 0. \\ 
-\textbf{Average}   & 0.021     & 0.021     & 0.014     & 0.042     & 0.089     & 0.025 \\ 
+\textbf{Append}    & 0.707     & \textbf{0.725}   & 0.271           & 0.507     & 0.060           & 0.657 \\
+\textbf{Interlace} & 0.100     & 0.560            & \textbf{0.682}  & 0.578     & 0.021           & 0.025 \\ 
+\textbf{Average}   & 0.021     & 0.021            & 0.014           & 0.042     & \textbf{0.089}  & 0.025 \\ 
 \end{tabular}
 \vspace{5pt}
 \caption{Accuracy for each compressor using different concatenation operations.}
 \label{tab:1}
 \end{table}
 
-.................................................
+The best compressor using the concatenation type "append" was \texttt{gzip}, using "interlace" was \texttt{lzma} and using "average" was \texttt{zpaq}.
+However, the average operation presented extremely low accuracies, failing to classify the faces over 90\% of the time.
+Our understanding is that, ...........................
+% explain why average is so bad
 
-\section{Conclusions} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Now, the reason why append presents better results than interlace is that ....................
+% explain why append is better
 
-After completing the assignment, we drew a few conclusions regarding our 
-solutions and ..................
+But these results are very much dependent on the compression algorithms used, as one can see by the difference of accuracies amongst compressors using the same operation.
+The fact that \texttt{lzma} ............... might have been very much beneficial when faced with an interlace-type concatenation.
+The inverse seems to have happened to \texttt{zip}, possibly because ..................
+% explain the big difference of accuracy between concatenation types for zip and lzma
 
-Lorem ipsum ...
+Because "append" presented the highest performance on almost all compressors, we decided to discard the other two operators for the remaining of the experiment.
+Because \texttt{gzip} showed the best accuracy and presented itself as the most robust standard compressor (taking in consideration that its accuracy was also
+amongst the highest using "interlace"), we decided to proceed to the next phase with this compressor.
+\newline 
 
-In terms of code organization and readability, we made sure our 
-repository was as well structured as possible and our code properly commented
-and documented.
-The base folder contains a {\it README\/} file for basic instructions.
-All code is in the {\it src\/} folder.
+To calculate the performance of NCCD, we executed \texttt{nccdAccuracy.sh} after running \texttt{TEST123} for all dataset images.
+The accuracy of this solution was \textbf{0.617}, about 10\% worst than the best alternative of NCD.
+Theoretically, NCCD should deliver better results than NCD, since the algorithm is a more direct approximation to NID, discussed in chapter \ref{classification},
+and a conditional compressor would benefit very much from processing faces, as they have many visual patterns to be explored.
+And this is verified when compared to NCD with most of the tested compressors.
+But, although surprising, it is not too hard to believe that NCD with \texttt{gzip} compression surpassed NCCD when compared in terms of accuracy for face 
+identification, as the difference is significant but not exaggerated.
 
 \newpage
+\section{Conclusions} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+After completing the assignment, we drew a few conclusions regarding the topics here explored and our endeavor to deliver work of quality.
+
+The first aspect worth mentioning is how refreshing was the idea of tackling a classification problem through an unconventional strategy.
+The connection between the studied concepts and the project's goals were quite captivating.
+
+The implementation was also interesting, since we decided to adopt Shell scripting and were able to work in close contact with the compression commands.
+Exploring the characteristics and capabilities of compressors we use on an almost daily bases will be very useful for future tasks requiring compression algorithms.
+
+Finally, the levels of accuracy that the solutions achieved were quite impressive to us.
+Since we were used to developing machine learning approaches for problems relatively similar to this, we expected to see poor results from a solution that did 
+not interpret the data in the conventional way.
+We were very much satisfied with the final results and the delivered work, as it accomplishes all objectives of the assignment.
+
+In terms of code organization and readability, we made sure our repository was as well structured as possible and our code properly commented.
+The base folder contains a \textit{README} file for basic instructions.
+The \textit{src} and \textit{examples} folders contain the code and other resources made available for the project (not developed by us), our scripts are on the base folder.
+The dataset is present in \textit{orl\_faces}, and the preprocessed images in \textit{processedFaces}.
+The folder \textit{experiments} contains the results of our studies and the scripts to calculate the performance of the solutions.
+
 \begin{thebibliography}{9} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \bibliographystyle{Science}
 
