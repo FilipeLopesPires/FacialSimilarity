@@ -19,6 +19,7 @@ source compressors.sh
 source mergers.sh
 echo "TstPic, TstSub, Result"
 for comp in ${compressors[@]} ; do
+    echo $comp
     for testSubjects in $inputFolder/* ; do
         for tst in ${tests[@]} ; do
             echo -n $tst","$(echo $testSubjects | cut -d "/" -f2)

@@ -3,6 +3,7 @@
 \usepackage{scicite,times,graphicx,float,hyperref}
 \usepackage[skip=0pt]{caption}
 \usepackage[utf8]{inputenc}
+\usepackage{enumitem}
 
 \topmargin -1.0cm
 \oddsidemargin 0.0cm
@@ -115,9 +116,10 @@ calculate the closest images, i.e. the most similar ones, and hopefully classify
 
 \subsection{NCD Approximation} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-By using known general purpose compressors, such as gzip, lzma, tar, ..., the Kolmogorov complexity can be estimated by the number of bits the resulting compressed file has. 
-This approximation is expressed by equation \ref{eq:2}, where \textit{C(x)} and \textit{C(x,y)} represent the number of bits the compression of $x$ and of 
-$x$ and $y$ concatenated contain, respectively.
+By using known general purpose compressors, such as gzip, lzma or tar, the Kolmogorov complexity can be estimated by the number of bits the resulting 
+compressed file has. 
+This approximation is called Normalized Compression Distance (NCD) and is expressed by equation \ref{eq:2}, where \textit{C(x)} and \textit{C(x,y)} represent 
+the number of bits the compression of $x$ and of $x$ and $y$ concatenated contain, respectively.
 The $xy$ concatenation can be performed in several ways, the most common being to simply perform an union on both; other more complex operations can also be done, 
 such as interlacing the two data sources. 
 
@@ -125,18 +127,25 @@ such as interlacing the two data sources.
   NCD(x,y) = \frac{C(x,y)-min\{C(x), C(y)\}}{max\{C(x),C(y)\}}
 \end{equation}
 
-Following the formula, results close to 0 indicate similarity and close to 1 dissimilarity. The only restriction to this approach is that the compressor used must follow the condition $C(x,x) \simeq C(x)$, without that the results of NCD may not be reliable nor true. 
-
+Following the formula, results close to 0 indicate similarity and close to 1 dissimilarity. 
+The only restriction to this approach is that the compressor used must follow the condition $C(x,x) \simeq C(x)$.
+If this is not verified, the results of NCD are not reliable. 
 
 \subsection{NCCD Approximation} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-This approach is yet another approximation to the NID formula, this time using conditional compressors to achieve their estimation. Conditional compressors are normally implemented with finite-context models and take in consideration the previous occurring terms to compress the new term. This is a more direct approximation of the NID and, in general, generate better results than the NCD. Defined by:
+The second approximation is called Normalized Conditional Compression Distance, expressed by equation \ref{eq:3}.
+The difference between NCD and NCCD is that the later uses conditional compressors to achieve its estimations. 
+Conditional compressors are normally implemented with finite-context models and take in consideration the previous occurring terms to compress the new term. 
+This is a more direct approximation of the NID and, in general, generates better results than the NCD.
 
 \begin{equation}\label{eq:3}
   NCCD(x,y) = \frac{max\{C(x|y), C(y|x)\}}{max\{C(x), C(y)\}}
 \end{equation}
 
-Where \textit{C(x)} defines once again the number of bits the compression of the object x by a given conditional compressor and $C(x|y)$ represents the number of bits the compression of x needs given that y occurred previously ($C(y|x)$ has the same logic). Due to the consitional aspect of this approach, \textit{C(x)} can be a special case of $C(x|y)$ were y is equal to the empty string, causing that $C(x) = C(x|\epsilon)$.
+\textit{C(x)} has the same meaning as before and \textit{C(x|y)} represents the number of bits the compression of $x$ needs given that $y$ occurred 
+($C(y|x)$ follows the same logic). 
+Due to the conditional aspect of this approach, \textit{C(x)} can be a special case of \textit{C(x|y)} were $y$ is equal to the empty string, making true the
+statement $C(x) = C(x|\epsilon)$.
 
 \newpage
 \section{Dataset} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -157,7 +166,7 @@ All 400 images were taken in black \& white at the Olivetti Research Laboratory 
     \includegraphics[width=\linewidth]{faces_example.png}
   \end{minipage}%
   \caption{Image taken from the assignment description \cite{trab3}. Examples from the ORL face dataset. In the first row, ten face images corresponding to the same subject (s01). In the second row, the first face image of subjects s02 to s11.}
-  \label{fig:quantization}
+  \label{fig:1}
 \end{figure}
 
 To speedup the processing of each image, we applied 2 transformations to each element of the dataset.
@@ -172,19 +181,123 @@ These modifications were accomplished using ImageMagick \cite{imgmagick}, a comm
     \includegraphics[width=\linewidth]{preprocessing_example.png}
   \end{minipage}%
   \caption{Example from subject s01 of the ORL face dataset, before and after preprocessing.}
-  \label{fig:quantization}
+  \label{fig:2}
 \end{figure}
 
 \newpage
 \section{Experiment} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Lorem ipsum ...
 
-\subsection{Tested Compressors}%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-.......
+Once the dataset was ready, we composed an experiment to determine which commonly used compressors provided the best results for our intents.
+The conducted study had 2 phases: the first where we tested several data compressors using NCD and compared the precisions of the face identification 
+program using each of the compressors; the second where we tested a conditional compressor using NCCD and compared the best results of the first phase with 
+those of this test.
+
+\subsection{Compressor Validation} \label{validation} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Before conducting our experiment, we needed to make sure the compressor candidates were valid.
+This was done by verifying for each compressor \textit{C} if condition $C(x,x) \simeq C(x)$ was true.
+The concatenation used in this verification uses the only valid operation for this situation, the "append" operation, which is explained in section \ref{pipeline}.
+
+The script \texttt{checkCompressor.sh} was a script developed to help us manually verifying each compressor.
+For each candidate, we compressed an example image and the concatenation of itself, and then ran this script.
+What it does is collect the outcomes of the compressions and print them to the console side by side for us to quickly detect which break the condition.
+
+From the compressors put to test, the ones we considered invalid were \texttt{pax} and \texttt{shar}, with a difference between \textit{C(x)} and \textit{C(x,x)}
+of over 50\% for an example image as $x$, while the others were less than 40\%.
+Although 40\% is still a very significant difference, we decided to keep most of the standard compressors as reaching a difference close to 0\% was already
+known to be really difficult to find.
+
+\subsection{Tested Compressors} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Zip is a compression and file packaging utility for many operating systems, like Unix, VMS, MSDOS, etc..  It is analogous to a combination of the Unix commands 
+tar and compress and is compatible with PKZIP (Phil Katz's ZIP for MSDOS systems). It performs a lossless compression that can achieve 3:1/2:1 ratios in text files. 
+The standard compression method is \texttt{deflate}, which uses a combination of LZSS and Huffman coding.
+
+Gzip is a single-file/stream lossless data compression utility. This compression algorithm uses Lempel-Ziv coding (LZ77) to achieve its reduction factors. 
+Gzip will only attempt to compress regular files. In particular, it will ignore symbolic links. Typically, text such as source code or English is reduced by 60-70\%. 
+Compression is generally much better than that achieved by LZW, Huffman coding, or adaptive Huffman coding.
+
+The Lempel–Ziv–Markov chain algorithm, aslo known as LZMA, is an algorithm used to perform lossless data compression. 
+Developed by Igor Pavlov, was first used in the 7z format of the 7-Zip archiver. 
+This algorithm uses a dictionary compression scheme somewhat similar to the LZ77 algorithm published by Abraham Lempel and Jacob Ziv in 1977 and features a high 
+compression ratio (generally higher than bzip2).
+
+Bzip2 is a free and open-source file compression program that uses the Burrows–Wheeler algorithm. 
+It only compresses single files and is not a file archiver. 
+This algorithm compresses most files more effectively than the older LZW and Deflate compression algorithms, but is considerably slower. 
+LZMA is generally more space-efficient than bzip2 at the expense of even slower compression speed, while having much faster decompression.
+
+ZPAQ is an open source command line archiver for Windows and Linux. 
+It uses an append-only format which can be rolled back to an earlier state to retrieve older versions. 
+It supports fast incremental update by adding only files whose last-modified date has changed since the previous update. 
+It compresses using deduplication and several algorithms (LZ77, BWT, and context mixing) depending on the data type and the selected compression level.
+
+Ppmd, or Prediction by partial matching is an adaptive statistical data compression technique based on context modeling and prediction. 
+PPM models use a set of previous symbols in the uncompressed symbol stream to predict the next symbol in the stream. 
+PPM algorithms can also be used to cluster data into predicted groupings in cluster analysis.
+\newline
+
+The conditional compressor used to test NCCD was given \textit{a priori} for this assignment.
+It is based on finite context modeling and it is implemented in C++ and specialized to compress images with the help of OpenCV.
+
+\subsection{Study Pipeline} \label{pipeline} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The experiment's pipeline is structured as an iterative process, built in \texttt{testCompressor.sh}.
+This script receives as its only parameter the operation to be used to concatenate images.
+As the concatenation can be done in more than one way, we executed the experiment for 3 different types of concatenations:
+\vspace{-10pt}
+\begin{itemize}[noitemsep]
+  \item Append - this operation unites the two images one above the other (duplicating the height of the resulting image).
+  \item Interlace - interpolated horizontal stripes of both images are stacked together (in this operation half of the data of each image is not used).
+  \item Average - for each pixel position, the average of the gray value of both images at that position is calculated and added to the new image in the same position.
+\end{itemize}
+\vspace{-10pt}
+
+\newpage
+These image manipulations were also done with the help of ImageMagick.
+Examples of these operations can be seen in Figure \ref{fig:3}, where the first 2 faces correspond to the first images of subjects s01 and s02, and the 
+3 remaining images correspond to the concatenation using append, interlace and average respectively.
+Note that, to verify the condition discussed in section \ref{validation}, the concatenation is done for the same image, so using either the average or the 
+interlace operations will result in the exact same image as the original; this is why we used the append operation in that context.
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{.8\textwidth}
+    \centering
+    \includegraphics[width=\linewidth]{operations_example.png}
+  \end{minipage}%
+  \caption{Concatenation examples applied to subjects s01 and s02 using different operations.}
+  \label{fig:3}
+\end{figure}
+
+Back to the experiment's script, its execution workflow follows the pseudo-code presented next, where \texttt{concat} corresponds to the chosen operation passed 
+to the script and \texttt{compress} corresponds to the compression action executed by the current compressor of the first loop.
+
+\begin{verbatim}
+  for each compressor, do:
+    for each subject, do:
+      minNCD = 1
+      for each testImg, do:
+        for each goldStdImg, do:
+          tmp = concat(testImg,goldStdImg)
+          cTmp = compress(tmp)
+          cT = compress(testImg)
+          cGS = compress(goldStdImg)
+          maxS = getMaxSize(cTmp,cT,cGS)
+          minS = getMinSize(cTmp,cT,cGS)
+          NCD = (size(cTmp) - minS) / maxS
+          if NCD < minNCD:
+            minNCD = NCD
+\end{verbatim}
+
+\newpage
+The output of each script execution was written to disk in different files.
+Then, to determine the accuracy of each compressor using each of the concatenation alternatives, we executed a second script \texttt{.........} that reads the 
+output files, computes the performance metrics and writes them on the console for analysis.
 
 \section{Results \& Discussion} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-Lorem ipsum ...
 
+Lorem ipsum ...
 
 \section{Conclusions} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
