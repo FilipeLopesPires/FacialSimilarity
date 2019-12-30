@@ -4,6 +4,7 @@
 \usepackage[skip=0pt]{caption}
 \usepackage[utf8]{inputenc}
 \usepackage{enumitem}
+\usepackage{booktabs}
 
 \topmargin -1.0cm
 \oddsidemargin 0.0cm
@@ -173,6 +174,7 @@ To speedup the processing of each image, we applied 2 transformations to each el
 The first consisted in a simple image reduction from 112 $\times$ 92 px to 56 $\times$ 46 px, ensuring that proportions remained the same.
 The second was a quantization process from 8 bits per pixel gray level to 4 bits only.
 These modifications were accomplished using ImageMagick \cite{imgmagick}, a command-line program to create, edit, compose, or convert bitmap images.
+The script developed to apply the transformations was \texttt{preprocessImages.sh}.
 
 \begin{figure}[H]
   \centering
@@ -209,30 +211,33 @@ known to be really difficult to find.
 
 \subsection{Tested Compressors} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Zip is a compression and file packaging utility for many operating systems, like Unix, VMS, MSDOS, etc..  It is analogous to a combination of the Unix commands 
-tar and compress and is compatible with PKZIP (Phil Katz's ZIP for MSDOS systems). It performs a lossless compression that can achieve 3:1/2:1 ratios in text files. 
+In this section we offer a small description of each of the validated standard compressors used in our experiment, chosen for their popularity and/or potential for our intentions.
+
+Starting with \textbf{\texttt{zip}}, this command is a compression and file packaging utility for many OS, like Unix, VMS and MSDOS. 
+It is analogous to a combination of the Unix commands \texttt{tar} and \texttt{compress} and it performs a lossless compression that can achieve 3:1/2:1 ratios. 
 The standard compression method is \texttt{deflate}, which uses a combination of LZSS and Huffman coding.
 
-Gzip is a single-file/stream lossless data compression utility. This compression algorithm uses Lempel-Ziv coding (LZ77) to achieve its reduction factors. 
-Gzip will only attempt to compress regular files. In particular, it will ignore symbolic links. Typically, text such as source code or English is reduced by 60-70\%. 
+Next we have \textbf{\texttt{gzip}}, a single-file/stream lossless data compression utility. 
+This compression algorithm uses Lempel-Ziv coding (LZ77) to achieve its reduction factors. 
+Gzip will only attempt to compress regular files and it will ignore symbolic links. 
+Typically, text such as source code or English can be reduced by 60-70\%. 
 Compression is generally much better than that achieved by LZW, Huffman coding, or adaptive Huffman coding.
 
-The Lempel–Ziv–Markov chain algorithm, aslo known as LZMA, is an algorithm used to perform lossless data compression. 
-Developed by Igor Pavlov, was first used in the 7z format of the 7-Zip archiver. 
-This algorithm uses a dictionary compression scheme somewhat similar to the LZ77 algorithm published by Abraham Lempel and Jacob Ziv in 1977 and features a high 
-compression ratio (generally higher than bzip2).
-
-Bzip2 is a free and open-source file compression program that uses the Burrows–Wheeler algorithm. 
+\textbf{\texttt{bzip2}} is a free and open-source file compression program that uses the Burrows–Wheeler algorithm. 
 It only compresses single files and is not a file archiver. 
 This algorithm compresses most files more effectively than the older LZW and Deflate compression algorithms, but is considerably slower. 
-LZMA is generally more space-efficient than bzip2 at the expense of even slower compression speed, while having much faster decompression.
 
-ZPAQ is an open source command line archiver for Windows and Linux. 
+The Lempel–Ziv–Markov chain algorithm, aslo known as \textbf{\texttt{lzma}}, is another algorithm used to perform lossless data compression. 
+Developed by Igor Pavlov, it was first used in the 7z format of the 7-Zip archiver. 
+This algorithm uses a dictionary compression scheme somewhat similar to the LZ77 algorithm.
+It features a high compression ratio, generally higher than \texttt{bzip2} but less space-efficient.
+
+\textbf{\texttt{zpaq}} is an open source command line archiver for Windows and Linux. 
 It uses an append-only format which can be rolled back to an earlier state to retrieve older versions. 
 It supports fast incremental update by adding only files whose last-modified date has changed since the previous update. 
 It compresses using deduplication and several algorithms (LZ77, BWT, and context mixing) depending on the data type and the selected compression level.
 
-Ppmd, or Prediction by partial matching is an adaptive statistical data compression technique based on context modeling and prediction. 
+Finally we have \textbf{\texttt{ppmd}}, Prediction by Partial Matching, an adaptive statistical data compression technique based on context modeling and prediction. 
 PPM models use a set of previous symbols in the uncompressed symbol stream to predict the next symbol in the stream. 
 PPM algorithms can also be used to cluster data into predicted groupings in cluster analysis.
 \newline
@@ -254,7 +259,7 @@ As the concatenation can be done in more than one way, we executed the experimen
 \vspace{-10pt}
 
 \newpage
-These image manipulations were also done with the help of ImageMagick.
+These image manipulations were also done with the help of ImageMagick and are defined for ease of access in \texttt{mergers.sh}.
 Examples of these operations can be seen in Figure \ref{fig:3}, where the first 2 faces correspond to the first images of subjects s01 and s02, and the 
 3 remaining images correspond to the concatenation using append, interlace and average respectively.
 Note that, to verify the condition discussed in section \ref{validation}, the concatenation is done for the same image, so using either the average or the 
@@ -292,12 +297,28 @@ to the script and \texttt{compress} corresponds to the compression action execut
 
 \newpage
 The output of each script execution was written to disk in different files.
-Then, to determine the accuracy of each compressor using each of the concatenation alternatives, we executed a second script \texttt{.........} that reads the 
-output files, computes the performance metrics and writes them on the console for analysis.
+Then, to determine the performance of each compressor using each of the concatenation alternatives, we developed and executed a second script 
+\texttt{calculateAccuracy.sh} that reads the output files, computes the accuracies and writes them on the console for analysis. 
 
 \section{Results \& Discussion} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Lorem ipsum ...
+The results of the first phase were quite promising, with some compressors achieving accuracy percentages of over 70\%.
+Table \ref{tab:1} presents the performance of NCD using each compressor and each of the concatenation techniques.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{@{}c|cccccc@{}}
+                   & \textbf{\texttt{zip}} & \textbf{\texttt{gzip}} & \textbf{\texttt{lzma}} & \textbf{\texttt{bzip2}} & \textbf{\texttt{zpaq}} & \textbf{\texttt{ppmd}}\\ \midrule
+\textbf{Append}    & 0.707     & 0.725     & 0.271     & 0.507     & 0.060     & 0.657 \\
+\textbf{Interlace} & 0.     & 0.     & 0.     & 0.     & 0.     & 0. \\ 
+\textbf{Average}   & 0.021     & 0.021     & 0.014     & 0.042     & 0.089     & 0.025 \\ 
+\end{tabular}
+\vspace{5pt}
+\caption{Accuracy for each compressor using different concatenation operations.}
+\label{tab:1}
+\end{table}
+
+.................................................
 
 \section{Conclusions} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
