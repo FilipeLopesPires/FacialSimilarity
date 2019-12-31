@@ -1,5 +1,3 @@
-# TAI
-Repositório TAI
 # TAI - Projects 1,2 and 3
 
 These projects were developed under the discipline of Algorithmic Information Theory.
