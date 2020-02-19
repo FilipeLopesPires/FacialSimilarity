@@ -13,3 +13,4 @@ Each project contains a report that states the work done, the characteristics of
 
 * **João Alegria** - joao.p@ua.pt
 * **Filipe Pires** - filipesnetopires@ua.pt
+* **André Pedrosa** - aspedrosa@ua.pt
