@@ -1,22 +1,33 @@
-# Directory description
+# Facial Similarity
+A Compression-Based Face Identifier through Image Similarity
 
- - **orl_faces:** original dataset ("The Database of Faces")
+## Description
 
- - **processedFaces:** dataset after preprocessing (size reduction and quantization)
+The programs implemented in Shell have the purpose of measuring similarity of images using a compression-based strategy and automatically identify human faces. 
 
- - **report:** written report explaining the work developed, presenting study results and conclusions
+Compressors tested: zip, gzip, lzma, bzip2, zpaq, ppmd.
 
- - **experiments:** face identification studies conducted and performance evaluation scripts
+Along with the description of the solutions, we also discuss the characteristics and the preprocessing done to the available dataset, the data compression algorithms used and the tests executed. 
 
- - **src:** source code (Shell scripts)
+## Repository Structure
 
- - **src_nccd:** source code of NCCD given for the assignment
+/bin            - binary files of the source code of the Normalized Conditional Compression Distance (NCCD) given as base code
 
- - **bin:** binary files of the source code of NCCD given for the assignment
+/examples       - example files (do not belong to us)
 
- - **examples:** example files and code for the content given for the assignment
+/experiments    - face identification studies conducted and performance evaluation scripts
 
-# Main programs description
+/orl_faces      - original dataset ("The Database of Faces")
+
+/processedFaces - pre-processed dataset (size reduction and quantization)
+
+/report         - written report explaining the work developed, presenting study results and conclusions
+
+/src            - source code (Shell scripts)
+
+/src_nccd       - source code of NCCD (does not belong to us)
+
+## Main Programs
 
  - **src/checkCompressors:** developed to help us manually verifying each compressor.
  For each candidate, we compressed an example image and the concatenation of itself, and then ran this script.
@@ -34,9 +45,7 @@
  - **experiments/nccdAccuracy:** calculates the accuracy using a conditional compressor accordingly to the output
  of the src/TEST123 script
 
-# How to run and build
-
-Some examples are :
+## Instructions to Build and Run 
 
 - **./src/preprocessing** while on the path of this README file, applies the some preprocessing transformations
 to the faces dataset present on the directory orl_faces/, outputting the result to the directory processedFaces/
@@ -51,3 +60,9 @@ faces of the dataset using the append merge method
 Some scripts have mandatory arguments. To have information about them call them without parameters, like:
 
 `$ ./build/<script_name>`
+
+## Authors
+
+The authors of this repository are André Pedrosa, Filipe Pires and João Alegria, and the project was developed for the Algorithmic Theory of Information Course of the Master's degree in Informatics Engineering of the University of Aveiro.
+
+For further information, please read our [report](https://github.com/FilipePires98/FacialSimilarity/blob/master/report/report.pdf).
