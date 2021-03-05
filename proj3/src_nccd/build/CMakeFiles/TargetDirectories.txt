@@ -1,3 +1,0 @@
-/home/joaoalegria/Desktop/TAI/proj3/src/build/CMakeFiles/rebuild_cache.dir
-/home/joaoalegria/Desktop/TAI/proj3/src/build/CMakeFiles/ImgCondComp.dir
-/home/joaoalegria/Desktop/TAI/proj3/src/build/CMakeFiles/edit_cache.dir
