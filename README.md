@@ -1,6 +1,11 @@
 # Facial Similarity
 A Compression-Based Face Identifier through Image Similarity
 
+![](https://img.shields.io/badge/Academical%20Project-Yes-success)
+![](https://img.shields.io/badge/Made%20With-C++-blue)
+![](https://img.shields.io/badge/License-Free%20To%20Use-green)
+![](https://img.shields.io/badge/Maintained-No-red)
+
 ## Description
 
 The programs implemented in Shell have the purpose of measuring similarity of images using a compression-based strategy and automatically identify human faces. 
